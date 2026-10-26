@@ -23,21 +23,21 @@ def line(spot, obs, fc, median=None, i=0):
 
 def log():
     lines = []
-    # manzanita: 45 lines; the station reads 4 kn over best match on most hours, 1 kn over ECMWF, NBM missing on every third line
+    # alameda: 45 lines; the station reads 4 kn over best match on most hours, 1 kn over ECMWF, NBM missing on every third line
     for i in range(45):
         bm = 10.0 + (i % 5)
         nbm = None if i % 3 == 0 else bm + 1.0
-        lines.append(line("manzanita", bm + 4.0 + (0.5 if i % 7 == 0 else 0), {"bm": bm, "ecmwf": bm + 3.0, "nbm": nbm, "gfs": bm - 2.0, "icon": None}, median=bm + 2.0, i=i))
-    # rockaway: 39 lines, one short of the threshold
+        lines.append(line("alameda", bm + 4.0 + (0.5 if i % 7 == 0 else 0), {"bm": bm, "ecmwf": bm + 3.0, "nbm": nbm, "gfs": bm - 2.0, "icon": None}, median=bm + 2.0, i=i))
+    # berkeley: 39 lines, one short of the threshold
     for i in range(39):
-        lines.append(line("rockaway", 12.0, {"bm": 8.0, "ecmwf": 8.0, "nbm": 8.0, "gfs": 8.0, "icon": 8.0}, median=8.0, i=i))
-    # rufus: 40 lines where the station reads under NBM (negative bias) and exactly matches best match
+        lines.append(line("berkeley", 12.0, {"bm": 8.0, "ecmwf": 8.0, "nbm": 8.0, "gfs": 8.0, "icon": 8.0}, median=8.0, i=i))
+    # sherman: 40 lines where the station reads under NBM (negative bias) and exactly matches best match
     for i in range(40):
-        lines.append(line("rufus", 15.0, {"bm": 15.0, "ecmwf": 12.0, "nbm": 18.0, "gfs": 11.0, "icon": 10.0}, median=15.0, i=i))
+        lines.append(line("sherman", 15.0, {"bm": 15.0, "ecmwf": 12.0, "nbm": 18.0, "gfs": 11.0, "icon": 10.0}, median=15.0, i=i))
     # junk: a kept spot, a line without a reading, a line without fc
     lines += [line("k-test", 10.0, {"bm": 5.0}) for _ in range(50)]
-    lines.append(line("manzanita", None, {"bm": 1.0}))
-    lines.append({"spot": "manzanita", "obs": 10.0})
+    lines.append(line("alameda", None, {"bm": 1.0}))
+    lines.append({"spot": "alameda", "obs": 10.0})
     return lines
 
 
@@ -53,18 +53,18 @@ class Bias(unittest.TestCase):
                 fh.write(json.dumps(ln) + "\n")
 
     def test_compute(self):
-        d = B.compute(log(), spots={"manzanita", "rockaway", "rufus"})
-        self.assertEqual(set(d), {"manzanita", "rufus"}, "rockaway has 39 pairs, one short; the kept spot is not curated")
-        m = d["manzanita"]
+        d = B.compute(log(), spots={"alameda", "berkeley", "sherman"})
+        self.assertEqual(set(d), {"alameda", "sherman"}, "berkeley has 39 pairs, one short; the kept spot is not curated")
+        m = d["alameda"]
         self.assertEqual(m["bm"], {"kn": 4.0, "n": 45}, "median(observed − best match): the station reads 4 kn high")
         self.assertEqual(m["ecmwf"], {"kn": 1.0, "n": 45})
         self.assertEqual(m["median"], {"kn": 2.0, "n": 45}, "the median series has its own bias")
         self.assertEqual(m["gfs"]["kn"], 6.0)
         self.assertNotIn("nbm", m, "NBM is missing on 15 of 45 lines: 30 pairs, under the threshold")
         self.assertNotIn("icon", m, "a model that never had a value has no entry")
-        r = d["rufus"]
+        r = d["sherman"]
         self.assertEqual((r["bm"], r["nbm"], r["ecmwf"]), ({"kn": 0.0, "n": 40}, {"kn": -3.0, "n": 40}, {"kn": 3.0, "n": 40}), "exactly 40 counts; negative when the station reads under the model")
-        self.assertEqual(B.compute(log(), spots={"manzanita", "rockaway", "rufus"}, min_n=39)["rockaway"]["bm"], {"kn": 4.0, "n": 39})
+        self.assertEqual(B.compute(log(), spots={"alameda", "berkeley", "sherman"}, min_n=39)["berkeley"]["bm"], {"kn": 4.0, "n": 39})
         self.assertIn("k-test", B.compute(log()), "without a spot filter every spot in the log is computed")
 
     def test_run_writes_file(self):
@@ -73,8 +73,8 @@ class Bias(unittest.TestCase):
         with open(self.out, encoding="utf-8") as fh:
             on_disk = json.load(fh)
         self.assertEqual(on_disk, d)
-        self.assertEqual(set(d), {"manzanita", "rufus"}, "spots.json's ids only")
-        self.assertEqual(on_disk["manzanita"]["bm"], {"kn": 4.0, "n": 45})
+        self.assertEqual(set(d), {"alameda", "sherman"}, "spots.json's ids only")
+        self.assertEqual(on_disk["alameda"]["bm"], {"kn": 4.0, "n": 45})
 
     def test_empty_and_missing_log(self):
         self.assertEqual(B.run(self.log, self.out), {}, "no log yet: an empty object, never a crash")

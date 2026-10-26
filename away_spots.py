@@ -39,7 +39,7 @@ MIRRORS = [
     "https://overpass.private.coffee/api/interpreter",
     "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ]
-USER_AGENT = "CoastalKiteboarding/1.0 (https://mikestoneapps.github.io/coastal-kiteboarding/; weekly away-spots job)"
+USER_AGENT = "WindwardMark/1.0 (https://mikestoneapps.github.io/windward-mark/; weekly away-spots job)"
 KEEP_TAGS = ("sport", "natural", "surface", "description", "access", "fee", "name:en")
 
 # The worldwide sport query: one request, minutes allowed (the live run took 66 s).

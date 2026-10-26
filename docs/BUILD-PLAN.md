@@ -1,5 +1,23 @@
 # Build plan
 
+## Bay edition (Windward Mark, Oct 2026)
+
+This repository started as a snapshot of Bistué Boarding (coastal-kiteboarding, the Oregon original) and was turned into **Windward Mark**, the Bay Area edition for Mark: new identity (name, icons, heading), new homes (Paradise Cay as `LO`, Candlestick Point as `BC`; internal keys unchanged so saved settings keep working), 16 Bay spots in `spots.json`/`SPOTS`, photos for six of them, regenerated `stations.json`, generated data reset to empty, region wording generalised (Delta / coast / Bay) and the Gorge NBM preference removed. Every feature and workflow of the original is kept; the phase history below is the original's and still describes how each piece works.
+
+- **stations.json is inferred, not resolved live**: the build container has no route to api.weather.gov or ndbc.noaa.gov, so the station list was written from a hand-curated catalogue of Bay METAR/C-MAN stations (KSFO, KOAK, KHAF, KSQL, KCCR, KSUU, KSTS, FTPC1, AAMC1, RCMC1, PCOC1, PRYC1 …) and the five Bay buoys (46026 SF, 46012 Half Moon Bay, 46013 Bodega, 46237 SF Bar, 46042 Monterey), with haversine distances. **Run `python3 stations.py --resolve` for all 16 ids once from a machine that can reach NWS** to confirm the picks and catch anything closer; then copy the rows into `STATIONS` in obs_standalone.py and `NWS_STATIONS` in index.html.
+- **Tide station ids need one live check**: each spot's `tideStation` (13 distinct NOAA CO-OPS ids) was chosen from the station list offline; a wrong id just leaves the curve off that spot's chart, so look once on the live page that each chart carries its tide band.
+- `obs.json`, `obs-recent.json`, `accuracy.jsonl` and `bias.json` start empty; the first hourly **Station observations** run on `main` fills them. `away-spots.json` is the worldwide catalogue and carried over unchanged.
+- The sync Worker is per-app: `sync/wrangler.toml` is named `windward-mark` with a placeholder KV id and an empty VAPID key; create the Worker and KV namespace per `docs/SETUP-SYNC.md` and fill both in.
+
+### Open questions (for Mark)
+- His quiver, weight, riding style and favourite spots (defaults: 185 lb; 7/9/12/14 m; freeride).
+- Rio Vista (Windy Cove / Sandy Beach) launch status: access has been contested over the years (RVWA-SIKO maintains the Delta launches) — check rvwa-siko.org before relying on it.
+- Candlestick Point suitability: the SF Bay Water Trail lists it as not suitable for kiting and the windsurf crowd owns the launch; it is in the list because Mark rides from there, but confirm he wants it scored (and whether its drive times should assume the Thu–Fri lot closure).
+- Whether any Bay or Delta spot should score on NBM (`model: "nbm"`) once the accuracy log has a month of data.
+
+---
+
+
 Phased so the live page never breaks and each phase ships something the rider notices. Each phase is one or two Claude Code sessions. Prompts to paste are at the end of each phase.
 
 ## Phase 0 — Land the handoff (done when this file is in the repo)

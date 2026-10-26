@@ -1,7 +1,7 @@
-// scoring.js — Gorge or Coast scoring model, extracted from the prototype (Oct 2026).
+// scoring.js — Windward Mark scoring model, extracted from the prototype (Oct 2026).
 // Pure functions, no DOM. See SPEC.md §3.
 // Docs from fetchForecasts() go through consensus(doc, spot.model) first: spd/gst are the per-hour median of best match, ECMWF and NBM,
-// or NBM itself where the spot says so (the Gorge: gap wind that the 9–13 km global models cannot see).
+// or NBM itself where the spot says so (none of the Bay spots yet; the accuracy log will say if one should).
 // Usage: const r = dayScore(spot, forecastDoc, "2026-10-17", "freeride", {speed:1,dir:1,gust:1,wave:1,wx:1}, limits);
 //   limits = the rider's comfort profile merged with the spot override: limitsFor(settings, spot.id).
 //   Omit it for the default comfort profile. Identical to the scoring in index.html; alerts/test.mjs checks that.
@@ -14,7 +14,7 @@ const DAY_START=7, DAY_END=19, NUKE=35;   // DAY_START..DAY_END: the candidate h
 const KG=0.4536;
 /* ---------- scoring ---------- */
 /* models: Open-Meteo returns several per hour. The score runs on the per-hour median of best match, ECMWF and NBM;
-   GFS and ICON only vote on confidence. Single models disagree by 5–10 kn at the Gorge and coast spots (SPEC §3). */
+   GFS and ICON only vote on confidence. Single models disagree by 5–10 kn at the Bay and coast spots (SPEC §3). */
 const MODELS=[["bm","Best match"],["ecmwf","ECMWF"],["nbm","NBM"],["gfs","GFS"],["icon","ICON"]];
 function median(xs){ const a=xs.filter(x=>x!=null).sort((x,y)=>x-y); if(!a.length) return null; const m=a.length>>1; return a.length%2? a[m] : (a[m-1]+a[m])/2; }
 /* bias (Phase 5, SPEC §3): bias.json, written hourly by bias.py from accuracy.jsonl, is {spotId: {model: {kn, n}}} with kn = median(observed − forecast)
@@ -38,7 +38,7 @@ function applyBias(spot, f){
 }
 function consensus(f, model){
   // f.spd / f.gst := per-hour median of f.m.bm, f.m.ecmwf, f.m.nbm (whichever have a value that hour); direction stays best match's.
-  // model "nbm" (spots.json `model`, the three Gorge spots): that hour's NBM value instead, the median where NBM has none (SPEC §3).
+  // model "nbm" (spots.json `model`; no Bay spot sets it yet): that hour's NBM value instead, the median where NBM has none (SPEC §3).
   // With fewer than two of those in the doc (an older cache, a point outside their domains) the doc comes back unchanged.
   // f.basis says which series the doc now carries: "nbm" or "median" (absent on an unchanged doc: best match alone).
   const M=f.m||{}; const src=["bm","ecmwf","nbm"].map(k=>M[k]).filter(x=>x&&x.spd);
@@ -154,7 +154,7 @@ function dayScore(spot, f, day, style, weights, limits){
   const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
   const nz=a=>a.filter(x=>x!=null);
   const spd=avg(nz(wi.map(i=>f.spd[i]))), gst=avg(nz(wi.map(i=>f.gst[i]))), dir=f.dir[wi[Math.floor(wi.length/2)]];
-  const models=modelSpread(f, wi, spd), agree=models? models.agree:null;   // all five models vote; the score itself ran on the median, or NBM at a Gorge spot (consensus())
+  const models=modelSpread(f, wi, spd), agree=models? models.agree:null;   // all five models vote; the score itself ran on the median, or NBM where the spot says so (consensus())
   if(models) models.swing=modelSwing(spot, f, wi, models, style, L);
   const wh=f.wh? avg(nz(wi.map(i=>m2ft(f.wh[i])))):null, wp=f.wp? avg(nz(wi.map(i=>f.wp[i]))):null;
   const temp=avg(nz(wi.map(i=>f.temp[i])));

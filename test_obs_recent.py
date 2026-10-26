@@ -35,10 +35,10 @@ class ObsRecent(unittest.TestCase):
         self.assertEqual(len(doc["runs"]), 1)
         run = doc["runs"][0]
         self.assertEqual(run["at"], ISO(NOW))
-        self.assertEqual(set(run["obs"]), {"manzanita", "fortstevens", "pacificcity"}, "stale rufus, empty stevenson and the kept spot are absent")
-        self.assertEqual(run["obs"]["manzanita"], {"id": "TMKO3", "name": "TILLAMOOK", "kind": "nws", "dist_mi": 19.3, "time": ISO(NOW - dt.timedelta(minutes=35)), "spd": 12.3, "gst": 15.1, "dir": 290})
-        self.assertEqual(run["obs"]["fortstevens"]["id"], "46029", "second station when the nearest has no wind")
-        self.assertNotIn("age_min", run["obs"]["pacificcity"], "only the listed fields, age is read off the timestamp later")
+        self.assertEqual(set(run["obs"]), {"alameda", "oceanbeach", "crissy"}, "stale sherman, empty candlestick and the kept spot are absent")
+        self.assertEqual(run["obs"]["alameda"], {"id": "AAMC1", "name": "ALAMEDA", "kind": "nws", "dist_mi": 1.8, "time": ISO(NOW - dt.timedelta(minutes=35)), "spd": 12.3, "gst": 15.1, "dir": 290})
+        self.assertEqual(run["obs"]["oceanbeach"]["id"], "46237", "second station when the nearest has no wind")
+        self.assertNotIn("age_min", run["obs"]["crissy"], "only the listed fields, age is read off the timestamp later")
         self.assertEqual(self.read(), doc)
 
     def test_rolling_history(self):
@@ -57,7 +57,7 @@ class ObsRecent(unittest.TestCase):
         runs = self.read()["runs"]
         self.assertEqual(len(runs), R.KEEP_RUNS)
         self.assertEqual([r["at"] for r in runs], [ISO(NOW + dt.timedelta(hours=h)) for h in range(9 - R.KEEP_RUNS, 9)], "the last KEEP_RUNS runs, oldest first")
-        self.assertIn("rufus", runs[-1]["obs"], "rufus's reading is fresh in the later runs")
+        self.assertIn("sherman", runs[-1]["obs"], "sherman's reading is fresh in the later runs")
 
     def test_unreadable_old_file_is_replaced(self):
         with open(self.out, "w") as fh:

@@ -6,11 +6,11 @@ There is no login. The first device makes a long random sync key; "Link another 
 
 ## 1. Create the Worker (about 10 minutes)
 1. Sign up or sign in at https://dash.cloudflare.com (free plan).
-2. Left menu → **Workers & Pages** → **Create** → **Create Worker**. Name it `coastal-kiteboarding-sync` → **Deploy** (it deploys a hello-world first).
+2. Left menu → **Workers & Pages** → **Create** → **Create Worker**. Name it `windward-mark` → **Deploy** (it deploys a hello-world first).
 3. Click **Edit code**. Select everything in the editor, delete it, and paste the contents of `sync/worker.js` from this repo. Click **Deploy**.
 4. Make the store: left menu → **Storage & Databases** → **KV** → **Create a namespace** → name `SETTINGS` → **Add**.
 5. Bind it: back in **Workers & Pages** → your Worker → **Settings** → **Bindings** → **Add** → **KV namespace**. Variable name `SETTINGS` (exactly), namespace `SETTINGS` → **Deploy**.
-6. On the Worker's overview page copy its address. It looks like `https://coastal-kiteboarding-sync.<your-name>.workers.dev`. Open it in a browser; it should answer `{"ok":true,...}`.
+6. On the Worker's overview page copy its address. It looks like `https://windward-mark.<your-name>.workers.dev`. Open it in a browser; it should answer `{"ok":true,...}`.
 
 If the page ever moves to a custom domain, add that origin under **Settings → Variables** as `ALLOWED_ORIGINS` (comma-separated); the default allows `https://mikestoneapps.github.io` and localhost.
 

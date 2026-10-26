@@ -5,7 +5,7 @@ self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 
 // A push with no payload, or one we can't read, still shows a notification: Safari drops the subscription of an app that
 // receives pushes without showing anything, so the generic line below is better than silence.
-const TITLE = "Bistué Boarding", GENERIC = "Bistué Boarding: open the app for today's outlook";
+const TITLE = "Windward Mark", GENERIC = "Windward Mark: open the app for today's outlook";
 function parsePush(data) {
   if (!data) return {};
   try { const d = data.json(); return d && typeof d === "object" ? d : { body: String(d) }; }
@@ -15,7 +15,7 @@ self.addEventListener("push", e => {
   const d = parsePush(e.data);
   let url; try { url = new URL(d.url || "./", self.registration.scope).href; } catch (_) { url = self.registration.scope; }
   e.waitUntil(self.registration.showNotification(d.title || TITLE, {
-    body: d.body || GENERIC, icon: "icon-192.png", badge: "icon-192.png", tag: d.tag || "bb", renotify: true, data: { url }
+    body: d.body || GENERIC, icon: "icon-192.png", badge: "icon-192.png", tag: d.tag || "wm", renotify: true, data: { url }
   }));
 });
 

@@ -47,7 +47,7 @@ export default {
 
     const url = new URL(request.url);
     const path = url.pathname;
-    if (path === "/" || path === "/v1/health") return json({ ok: true, service: "coastal-kiteboarding-sync" }, 200, cors);
+    if (path === "/" || path === "/v1/health") return json({ ok: true, service: "windward-mark-sync" }, 200, cors);
     if (origin && !allowed.includes(origin)) return json({ error: "origin not allowed" }, 403, cors);
 
     if (path === "/v1/push/vapid") {

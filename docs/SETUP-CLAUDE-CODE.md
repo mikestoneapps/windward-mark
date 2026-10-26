@@ -5,7 +5,7 @@ You'll run Claude Code **in the cloud** from the Code tab of the Claude desktop 
 ## 1. Connect GitHub to Claude (one time, ~3 minutes)
 1. Go to https://claude.ai/code (or open the **Code** tab in the Claude desktop app and choose **Cloud**).
 2. The first time, it asks to connect GitHub. Click through to **install the Claude GitHub App**. Sign in to GitHub as `mikestoneapps` if asked.
-3. On the install screen choose **Only select repositories** → pick `coastal-kiteboarding` → **Install**.
+3. On the install screen choose **Only select repositories** → pick `windward-mark` → **Install**.
 4. Back in Claude, the repo appears in the repository picker. If it doesn't, reload the page once.
 
 ## 2. Get the handoff files into the repo
@@ -17,7 +17,7 @@ Check: the repo should show `CLAUDE.md`, `README.md`, `SPEC.md`, `scoring.js`, `
 
 ## 3. Start the first session
 1. At claude.ai/code click **New session** (or in the desktop Code tab, Environment **Cloud**).
-2. Repository: `mikestoneapps/coastal-kiteboarding`. Branch: `main`.
+2. Repository: `mikestoneapps/windward-mark`. Branch: `main`.
 3. Permission mode: **Default** (asks before risky actions) is fine for the first session.
 4. Paste this as the first message:
 
@@ -36,5 +36,5 @@ One phase per session, in a **new** session each time. Start each with "Read CLA
 
 ## If something goes wrong
 - **Live page broken after a merge**: on GitHub, open the merged PR → **Revert** → merge the revert. Pages redeploys the previous version.
-- **Claude can't see the repo**: GitHub → Settings → Applications → Claude → Configure → make sure `coastal-kiteboarding` is selected.
+- **Claude can't see the repo**: GitHub → Settings → Applications → Claude → Configure → make sure `windward-mark` is selected.
 - **Actions job fails**: open the Actions tab, click the failed run, copy the red error into a Claude Code session and ask it to fix it.
