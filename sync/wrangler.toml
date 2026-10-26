@@ -1,20 +1,20 @@
 # Cloudflare Worker config for the settings sync service. See docs/SETUP-SYNC.md.
 # Deploy from this folder with `npx wrangler deploy`, or paste worker.js into the dashboard.
-name = "windward-mark"   # the Worker for this app; create it in the dashboard, deploys update it in place
+name = "windward-mark"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 
 # Create the namespace once (`npx wrangler kv namespace create SETTINGS`) and paste its id here.
 [[kv_namespaces]]
 binding = "SETTINGS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "732e41e84bd347dca6f1cab129c34bdd"
 
 [vars]
 # Page origins allowed to call the Worker. Add a custom domain here if the page moves.
 ALLOWED_ORIGINS = "https://mikestoneapps.github.io,http://localhost:8000,http://127.0.0.1:8000"
 # Push alerts (optional): the VAPID public key from `npx web-push generate-vapid-keys`. The private key
 # goes in the GitHub secret VAPID_PRIVATE_KEY, never here. Leave empty to keep push off.
-VAPID_PUBLIC_KEY = ""
+VAPID_PUBLIC_KEY = "BGNcW0LTt8mB3U9Oz7OPjENuX18zoHbQWQhxGN049UtnzoSBE4Uss2R4UICGxphiH0szoT7HX87qqJuFFtXHoq0"
 
 # Secret, not a var: ADMIN_TOKEN (a long random string) lets the hourly alerts job read riders and write
 # back alert state. Set it with `npx wrangler secret put ADMIN_TOKEN` or in the dashboard, and store the
