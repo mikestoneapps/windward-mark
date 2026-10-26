@@ -14,7 +14,7 @@ id = "732e41e84bd347dca6f1cab129c34bdd"
 ALLOWED_ORIGINS = "https://mikestoneapps.github.io,http://localhost:8000,http://127.0.0.1:8000"
 # Push alerts (optional): the VAPID public key from `npx web-push generate-vapid-keys`. The private key
 # goes in the GitHub secret VAPID_PRIVATE_KEY, never here. Leave empty to keep push off.
-VAPID_PUBLIC_KEY = "BGNcW0LTt8mB3U9Oz7OPjENuX18zoHbQWQhxGN049UtnzoSBE4Uss2R4UICGxphiH0szoT7HX87qqJuFFtXHoq0"
+VAPID_PUBLIC_KEY = "BOXWdNp2xx-koqNVSSwkkGhOfBlWaq8WPNCz7FAVNlJ5i8kvytDDrRgc6zCh0y0b-QCyeVLIdz-oRgc8VlYSex8"
 
 # Secret, not a var: ADMIN_TOKEN (a long random string) lets the hourly alerts job read riders and write
 # back alert state. Set it with `npx wrangler secret put ADMIN_TOKEN` or in the dashboard, and store the
