@@ -19,7 +19,7 @@ const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
 const a = html.indexOf("/* ---------- kept spots ---------- */"), b = html.indexOf("/* ---------- settings sync");
 assert(a > 0 && b > a && html.slice(a, b).includes("/* ---------- away from home (SPEC §5) ---------- */"), "found the page's kept-spots + away block");
 const hav = html.match(/function haversineMi\(.*\n/)[0];
-const HOMES = { LO: { name: "Lake Oswego", lat: 45.4207, lon: -122.6706, key: "driveLO" }, BC: { name: "Pacific City", lat: 45.2020, lon: -123.9627, key: "driveBC" } };
+const HOMES = { LO: { name: "Paradise Cay", lat: 37.9180, lon: -122.4820, key: "driveLO" }, BC: { name: "Candlestick Point", lat: 37.7107, lon: -122.3850, key: "driveBC" } };
 function sandbox(net = {}) {
   const store = {};
   const S = {
@@ -51,15 +51,15 @@ function sandbox(net = {}) {
 {
   const S = sandbox();
   assert(S.awayMode() === true, "San Diego (home = Elsewhere) is away mode");
-  assert(Math.round(S.milesFromHomes(F.HERE.lat, F.HERE.lon)) > 800, "San Diego is 800+ mi from both houses");
-  S.settings.custom = { name: "Seaside", lat: 45.9932, lon: -123.9226 };
-  assert(S.awayMode() === false, "Seaside is not away mode (within 150 mi of a house)");
-  S.settings.custom = { name: "Bend", lat: 44.0582, lon: -121.3153 };
-  assert(S.awayMode() === false, "Bend (≈130 mi from Lake Oswego) is not away mode");
-  S.settings.custom = { name: "Boise", lat: 43.615, lon: -116.2 };
-  assert(S.awayMode() === true, "Boise (≈340 mi) is away mode");
+  assert(Math.round(S.milesFromHomes(F.HERE.lat, F.HERE.lon)) > 400, "San Diego is 400+ mi from both houses");
+  S.settings.custom = { name: "Santa Cruz", lat: 36.9741, lon: -122.0308 };
+  assert(S.awayMode() === false, "Santa Cruz is not away mode (within 150 mi of a house)");
+  S.settings.custom = { name: "Mendocino", lat: 39.3077, lon: -123.7995 };
+  assert(S.awayMode() === false, "Mendocino (≈120 mi from Paradise Cay) is not away mode");
+  S.settings.custom = { name: "Los Angeles", lat: 34.0522, lon: -118.2437 };
+  assert(S.awayMode() === true, "Los Angeles (≈350 mi) is away mode");
   S.settings.home = "LO";
-  assert(S.awayMode() === false && S.awaySpots().length === 0, "home base Lake Oswego is never away mode; awaySpots() is empty");
+  assert(S.awayMode() === false && S.awaySpots().length === 0, "home base Paradise Cay is never away mode; awaySpots() is empty");
   S.settings.home = "X"; S.settings.custom = { ...F.HERE }; S.settings.radius = 90;
   assert(S.searchMiles() === 52, "drive radius 1h30 -> 52 straight-line miles (47 mph, 1.35 road factor)");
   S.settings.radius = 360; assert(S.searchMiles() === 120, "search radius caps at 120 mi");

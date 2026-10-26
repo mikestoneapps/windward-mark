@@ -17,7 +17,7 @@ const readJSON = name => { try { return JSON.parse(fs.readFileSync(path.join(ROO
 
 const DRY = process.argv.includes("--dry-run");
 const URL_ = (process.env.SYNC_URL || "").replace(/\/+$/, ""), TOKEN = process.env.SYNC_ADMIN_TOKEN || "", PRIV = process.env.VAPID_PRIVATE_KEY || "";
-const SUBJECT = process.env.VAPID_SUBJECT || "https://mikestoneapps.github.io/coastal-kiteboarding/";
+const SUBJECT = process.env.VAPID_SUBJECT || "https://mikestoneapps.github.io/windward-mark/";
 if (!URL_ || !TOKEN || !PRIV) { console.log("Push alerts not configured (need SYNC_URL, SYNC_ADMIN_TOKEN, VAPID_PRIVATE_KEY); nothing to do."); process.exit(0); }
 
 async function api(path, method = "GET", body) {

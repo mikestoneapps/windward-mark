@@ -10,7 +10,7 @@ reading falls in, and one JSON line is appended per spot:
   {"spot": id, "time": "YYYY-MM-DDTHH:00" (Pacific hour of the reading), "run": fetchedAt, "station": id, "dist_mi": n,
    "obs": knots, "obs_gst": knots|null, "obs_dir": deg|null,
    "fc": {"bm","ecmwf","nbm","gfs","icon"} (knots per model, null where a model has no value),
-   "fc_gst": {...same...}, "fc_dir": best-match degrees, "median": the median of bm/ecmwf/nbm, the knots the score ran on (the Gorge spots score on fc.nbm since Oct 2026)}
+   "fc_gst": {...same...}, "fc_dir": best-match degrees, "median": the median of bm/ecmwf/nbm, the knots the score ran on (a spot with model "nbm" scores on fc.nbm)}
 
 Lines whose run is older than 90 days are dropped, and a reading already logged (same spot, station and hour) is not
 logged twice when a station hasn't updated between runs. Nothing here can fail the job: any error is printed and the
@@ -26,7 +26,7 @@ import urllib.request
 import zoneinfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-UA = {"User-Agent": "CoastalKiteboarding/1.0 (github.com/mikestoneapps/coastal-kiteboarding)", "Accept": "application/json"}
+UA = {"User-Agent": "WindwardMark/1.0 (github.com/mikestoneapps/windward-mark)", "Accept": "application/json"}
 LA = zoneinfo.ZoneInfo("America/Los_Angeles")
 MODEL_IDS = {"bm": "best_match", "ecmwf": "ecmwf_ifs025", "nbm": "ncep_nbm_conus", "gfs": "gfs_seamless", "icon": "icon_seamless"}
 SCORE_MODELS = ("bm", "ecmwf", "nbm")   # the median of these is what the page and the alert job score (scoring.js consensus())

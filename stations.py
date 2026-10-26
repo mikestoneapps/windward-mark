@@ -3,7 +3,7 @@
 into out/obs.json: {spotId: [{id,name,kind,dist_mi,time,spd,gst,dir,wvht,age_min}, ...]}.
 Sources: NWS/METAR via api.weather.gov (nearest 2 land stations), NOAA NDBC realtime2 (hand-mapped buoys).
 Search radius: NWS_RADIUS_MI miles for land stations, NDBC_RADIUS_MI for buoys, or the spot's own `stationRadiusMi`
-(spots.json; Florence has 35 because nothing reports within 25 mi of the south jetty) when that is larger.
+(spots.json) when that is larger.
 `python3 stations.py --resolve florence [id ...]` re-resolves just those spots into stations.json; after that, copy the
 new rows into STATIONS in obs_standalone.py and NWS_STATIONS in index.html (both embed the file so the page and the
 hourly job need no extra fetch)."""
@@ -11,15 +11,15 @@ import json, os, sys, time, math, urllib.request, datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out"); os.makedirs(OUT, exist_ok=True)
-UA = {"User-Agent": "GorgeOrCoast/1.0 (prototype kite app; claude.ai)", "Accept": "application/geo+json, application/json"}
+UA = {"User-Agent": "WindwardMark/1.0 (kite app; claude.ai)", "Accept": "application/geo+json, application/json"}
 spots = json.load(open(os.path.join(HERE, "spots.json")))
 CACHE = os.path.join(HERE, "stations.json")
 
-# NDBC buoys / C-MAN near the Oregon coast and Gorge (id: name). Distance computed from spot.
-NDBC = {"46029": "Columbia River Bar buoy", "46050": "Stilwell Bank buoy (Newport)", "46089": "Tillamook offshore buoy",
-        "46015": "Port Orford buoy", "46229": "Umpqua offshore buoy", "46248": "Astoria Canyon buoy"}
-NDBC_LL = {"46029": (46.159, -124.514), "46050": (44.669, -124.546), "46089": (45.925, -125.771),
-           "46015": (42.764, -124.832), "46229": (43.772, -124.549), "46248": (46.133, -124.640)}
+# NDBC buoys / C-MAN near the Bay Area coast (id: name). Distance computed from spot.
+NDBC = {"46026": "San Francisco buoy", "46012": "Half Moon Bay buoy", "46013": "Bodega Bay buoy",
+        "46237": "San Francisco Bar buoy", "46042": "Monterey buoy"}
+NDBC_LL = {"46026": (37.754, -122.839), "46012": (37.356, -122.881), "46013": (38.235, -123.307),
+           "46237": (37.786, -122.634), "46042": (36.785, -122.396)}
 
 def get(url, tries=4):
     for i in range(tries):

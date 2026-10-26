@@ -14,7 +14,7 @@ export const SPOTS = require(path.join(ROOT, "spots.json"));
 
 export const TZ = "America/Los_Angeles", DAYS = 7;   // seven forecast days, like the page
 export const ALERT_DAYS = 5;   // alerts only ever cover the first five forecast days: days 6–7 are a trend (the page labels them so and applies the same cap to its preview)
-export const HOMES = { LO: { name: "Lake Oswego", key: "driveLO" }, BC: { name: "Pacific City", key: "driveBC" } };
+export const HOMES = { LO: { name: "Paradise Cay", key: "driveLO" }, BC: { name: "Candlestick Point", key: "driveBC" } };
 export const DEFAULT_WEIGHTS = scoring.DEFAULT_WEIGHTS;
 export const DEFAULT_ALERTS = { minScore: 8, maxDrive: 180, days: [0, 1, 2, 3, 4, 5, 6], hour: 19, lead: 3, cap: 1, confidence: true, sameDay: true, quietFrom: 21, quietTo: 7, email: true, blowing: true };
 const RESCORE = 2;        // a repeat alert needs the score to move this much
@@ -53,7 +53,7 @@ async function getJSON(url, tries = 4) {
     catch (e) { if (i >= tries - 1) throw e; await new Promise(res => setTimeout(res, 2000 * (i + 1))); }
   }
 }
-// Open-Meteo model ids -> f.m keys, as in the page. best match, ECMWF and NBM feed the score (hourly median, scoring.consensus; NBM alone at the Gorge spots); GFS and ICON only vote on confidence.
+// Open-Meteo model ids -> f.m keys, as in the page. best match, ECMWF and NBM feed the score (hourly median, scoring.consensus; NBM alone where a spot says so); GFS and ICON only vote on confidence.
 export const MODEL_IDS = { bm: "best_match", ecmwf: "ecmwf_ifs025", nbm: "ncep_nbm_conus", gfs: "gfs_seamless", icon: "icon_seamless" };
 // daily sunrise/sunset -> f.sun = {"YYYY-MM-DD":[riseISO,setISO]}: the hours the score looks at (scoring.daylightIdx). With several models the API may suffix the daily keys; any copy will do.
 export function sunOf(d) { const D = d && d.daily; if (!D || !Array.isArray(D.time)) return undefined; const pick = n => D[n] || D[n + "_best_match"] || D[Object.keys(D).find(k => k.startsWith(n + "_")) || ""]; const R = pick("sunrise"), S = pick("sunset"); if (!R || !S) return undefined; const o = {}; D.time.forEach((day, i) => { if (R[i] && S[i]) o[day] = [R[i], S[i]]; }); return Object.keys(o).length ? o : undefined; }
@@ -70,7 +70,7 @@ export async function fetchForecasts(spots, fetchJSON = getJSON) {
     const d = arr[i]; if (!d || !d.hourly) return; const h = d.hourly;
     const col = (n, m = "best_match") => h[`${n}_${m}`] || h[n] || new Array(h.time.length).fill(null);
     const m = {}; for (const [k, id] of Object.entries(MODEL_IDS)) { if (k !== "bm" && !h[`wind_speed_10m_${id}`]) continue; m[k] = { spd: rnd(col("wind_speed_10m", id)), gst: rnd(col("wind_gusts_10m", id)), dir: rnd(col("wind_direction_10m", id), 0) }; }
-    docs[s.id] = scoring.consensus({ spotId: s.id, fetchedAt: now, time: h.time, spd: rnd(col("wind_speed_10m")), gst: rnd(col("wind_gusts_10m")), dir: rnd(col("wind_direction_10m"), 0), temp: rnd(col("temperature_2m"), 0), pop: rnd(col("precipitation_probability"), 0), code: col("weather_code"), vis: rnd(col("visibility"), 0), m, sun: sunOf(d) }, s.model);   // a Gorge spot scores on NBM (spots.json `model`), the rest on the median
+    docs[s.id] = scoring.consensus({ spotId: s.id, fetchedAt: now, time: h.time, spd: rnd(col("wind_speed_10m")), gst: rnd(col("wind_gusts_10m")), dir: rnd(col("wind_direction_10m"), 0), temp: rnd(col("temperature_2m"), 0), pop: rnd(col("precipitation_probability"), 0), code: col("weather_code"), vis: rnd(col("visibility"), 0), m, sun: sunOf(d) }, s.model);   // a spot with model "nbm" scores on NBM (spots.json `model`), the rest on the median
   });
   const wave = spots.filter(s => s.waves && docs[s.id]);
   if (wave.length) {
@@ -199,7 +199,7 @@ export function evaluate(rider, forecasts, now, recent) {
   for (const f of fell) delete state.alerted[f.spot.id + "|" + f.d];
   for (const x of blowNew) state.blowing[x.spot.id] = { spd: x.o.spd, station: x.o.id, at };
   state.sent[now.date] = (state.sent[now.date] || 0) + 1;
-  out.notification = { title: "Bistué Boarding", body: parts.join(" "), url: "./#day=" + firstDay, tag: "bb-" + now.date };
+  out.notification = { title: "Windward Mark", body: parts.join(" "), url: "./#day=" + firstDay, tag: "wm-" + now.date };
   return out;
 }
 

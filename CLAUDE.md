@@ -1,12 +1,12 @@
-# Coastal Kiteboarding — project instructions for Claude Code
+# Windward Mark — project instructions for Claude Code
 
 Read `SPEC.md` before any work. It is the product spec and the source of truth for scope and scoring. `docs/BUILD-PLAN.md` is the phased plan; work one phase at a time.
 
 ## What this is
-A kiteboarding spot-finder for one rider in Portland, OR (gift for his 50th). The app, tab and home-screen name is **"Bistué Boarding"** (manifest + title); the repo and URL stay `coastal-kiteboarding`. One screen: spots ranked by a 0–10 score for the selected day, with drive time from his two houses (Lake Oswego and Pacific City on the coast; the coast house moved from Bay City in Oct 2026 and keeps the internal key `BC`/`driveBC` so saved settings still work) or his current location.
+A kiteboarding spot-finder for one rider in the San Francisco Bay Area (derived from Bistué Boarding, the Oregon original in `coastal-kiteboarding`; that app lives in its own repository and is not affected by anything here). The app, tab and home-screen name is **"Windward Mark"** (manifest + title); the repo and URL are `windward-mark`. One screen: spots ranked by a 0–10 score for the selected day, with drive time from Mark's two bases (Paradise Cay in Tiburon, and Candlestick Point in San Francisco where he often rides from; the internal keys stay `LO`/`driveLO` and `BC`/`driveBC` so saved settings keep working) or his current location.
 
 ## Hard rules
-- **`index.html` is live at https://mikestoneapps.github.io/coastal-kiteboarding/ and installed on a phone. It must keep working after every change.** Never break the GitHub Pages deploy (branch `main`, root folder). Test the page in a browser before committing; never commit a page that throws on load.
+- **`index.html` is live at https://mikestoneapps.github.io/windward-mark/ and installed on a phone. It must keep working after every change.** Never break the GitHub Pages deploy (branch `main`, root folder). Test the page in a browser before committing; never commit a page that throws on load.
 - **Scores never wait for enrichment.** Photos, webcams and station readings load in the background; the ranked list renders from forecasts alone.
 - **No AI calls at runtime.** The narrative line is rule-based. Claude is used to write the code, not inside the product.
 - **Everything free-tier.** Open-Meteo, NOAA (NDBC, NWS), OpenStreetMap, Wikimedia Commons, GitHub Actions/Pages. Google Maps only behind a server-side key and only on user action. No paid services without asking.
@@ -18,16 +18,16 @@ A kiteboarding spot-finder for one rider in Portland, OR (gift for his 50th). Th
 - `index.html` — the whole app (single file; CSS, markup and JS inline). Fetches Open-Meteo and NWS stations in the browser.
 - `img/` — spot photos (480×320 JPEG, CC-licensed; credits in `img/credits.json`). Missing photo ⇒ neutral tile, by design.
 - `manifest.webmanifest`, `icon-*.png` — home-screen install.
-- `spots.json` — the 15 curated spots (schema in SPEC.md §4). `index.html` currently embeds a copy as `const SPOTS`; keep them in sync, or make the page load the JSON (preferred once there is a build step).
+- `spots.json` — the 16 curated spots (schema in SPEC.md §4). `index.html` currently embeds a copy as `const SPOTS`; keep them in sync, or make the page load the JSON (preferred once there is a build step).
 - `scoring.js` — the scoring model as a standalone module, identical logic to the page (including comfort limits, per-spot overrides and `consensus()`, the hourly median of best match / ECMWF / NBM that the score runs on). If you change scoring, change both; `node alerts/test.mjs` fails if they differ.
-- `stations.json` — nearest public wind stations per spot (NWS ids and NDBC buoy ids with distances).
+- `stations.json` — nearest public wind stations per spot (NWS ids and NDBC buoy ids with distances). The Bay list was written from a hand-curated station catalogue because the build container cannot reach NOAA; re-resolve it live once (`python3 stations.py --resolve <id ...>`, see docs/BUILD-PLAN.md "Bay edition").
 - `stations.py`, `obs_standalone.py` — fetch station observations (NWS via api.weather.gov; NDBC via realtime2 text feed). NDBC has no CORS, so buoys must be fetched server-side.
 - `fetch_forecast.py` — reference Open-Meteo fetch (5 models + marine).
-- `accuracy.py`, `accuracy.jsonl` — the forecast-accuracy log: the hourly observations job appends one line per spot with a fresh station reading (observed knots beside each model's forecast for that hour), 90-day window, committed with `obs.json`. `python3 test_accuracy.py` tests it offline.
+- `accuracy.py`, `accuracy.jsonl` — the forecast-accuracy log: the hourly observations job appends one line per spot with a fresh station reading (observed knots beside each model's forecast for that hour), 90-day window, committed with `obs.json`. `python3 test_accuracy.py` tests it offline. The log starts empty in this edition; the first hourly runs fill it.
 - `bias.py`, `bias.json` — Phase 5: per-spot, per-model bias from the log (median of observed − forecast, only at 40+ paired samples), `{spotId: {model: {kn, n}}}`, committed hourly. The page and `scoring.js` add the chosen model's bias to the hourly wind before scoring when n ≥ 40 and |kn| ≥ 2 (`applyBias()`, parity-tested); without the file nothing changes. `python3 test_bias.py`.
 - `obs_recent.py`, `obs-recent.json` — the last six hourly runs' nearest fresh station reading per spot, for the "Blowing now" alert (two consecutive runs inside the rider's wind band from a working sector, `blowingNow()` in `alerts/lib.mjs`). `python3 test_obs_recent.py`.
 - `checklist-defaults.json` — default checklist items.
-- `sync/` — settings-sync + push Cloudflare Worker (`worker.js`, `wrangler.toml`, `test.mjs`). Optional; the page runs on localStorage alone until a Worker URL is entered in the Rider sheet. Also stores push subscriptions and the per-rider "already alerted" state. Setup in `docs/SETUP-SYNC.md`.
+- `sync/` — settings-sync + push Cloudflare Worker (`worker.js`, `wrangler.toml`, `test.mjs`). Optional; the page runs on localStorage alone until a Worker URL is entered in the Rider sheet. Also stores push subscriptions and the per-rider "already alerted" state. Setup in `docs/SETUP-SYNC.md`. The KV id and VAPID key in `wrangler.toml` are placeholders until the Worker is created.
 - `alerts/` — hourly push-alert job (`run.mjs` sends, `lib.mjs` decides, `test.mjs` checks the rules and that the page's inline scoring still matches `scoring.js`). Runs in `.github/workflows/observations.yml` after the observations job, on the branch tip so it sees `obs-recent.json` and `bias.json`; skips itself until the secrets exist.
 - `away_spots.py`, `away-spots.json` — the away-mode spot catalogue: OpenStreetMap kitesurf/kiteboard/windsurf features worldwide plus named beaches in the US, Canada and Mexico, fetched weekly from Overpass by `.github/workflows/away-spots.yml` and committed. The page filters this file by drive radius; it never queries Overpass for the list (public mirrors are too slow from a browser). Overpass is only used in the background for shoreline facing and webcams.
 - `away/` — tests for the page's away-from-home mode (Phase 4; the code itself is inline in `index.html` under "away from home"). `test.mjs` runs that block under Node with the mock catalogue and OpenStreetMap / Open-Meteo / Commons answers in `fixtures.mjs`; `browser-test.mjs` drives the page in headless Chromium with every external host intercepted (`--live` lets them through) and checks home mode against a baseline copy of the page (`BASELINE_DIR=<dir with main's index.html>`).
@@ -42,4 +42,4 @@ A kiteboarding spot-finder for one rider in Portland, OR (gift for his 50th). Th
 - Commit messages: imperative, one line of what and why. Small PRs, one phase step each.
 
 ## When unsure
-Prefer the simplest thing that keeps the live page working, and leave a note in `docs/BUILD-PLAN.md` under "Open questions" rather than guessing at the rider's preferences (we don't know his quiver, weight or favorite spots yet).
+Prefer the simplest thing that keeps the live page working, and leave a note in `docs/BUILD-PLAN.md` under "Open questions" rather than guessing at the rider's preferences (we don't know Mark's quiver, weight or favorite spots yet).

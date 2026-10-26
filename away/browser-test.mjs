@@ -95,13 +95,13 @@ try {
     await page.waitForSelector(".row", { timeout: 20000 });
     await page.waitForTimeout(800);
     const rows = await scored(page);
-    assert(rows > 0 && rows <= 15, `home: ${rows} curated rows within 1h30 of Lake Oswego`);
+    assert(rows > 0 && rows <= 16, `home: ${rows} curated rows within 1h30 of Paradise Cay`);
     assert((await page.locator("#away").count()) === 0 && (await page.locator(".row.pending").count()) === 0, "home: no away banner, no pending rows");
     assert(!log.some(l => /overpass|nominatim|commons|away-spots/.test(l)), "home: no OpenStreetMap, Nominatim or Commons calls, no catalogue fetch");
     assert(errors.length === 0, "home: no page errors (" + errors.join(" | ") + ")");
     const mine = { list: await text(page, "#list"), hero: await text(page, "#hero"), narr: await text(page, "#narr"), sub: await text(page, "#sub") };
     await page.click("#homeBC"); await page.waitForTimeout(200); mine.bc = await text(page, "#list");
-    assert((await text(page, "#homeBC")) === "Pacific City" && /Pacific CityCentral Coast\n[^\n]*\n5 min/.test(mine.bc) && /Cape LookoutTillamook Bay\n[^\n]*\n20 min/.test(mine.bc), "coast house is Pacific City: its own spot is 5 min, Cape Lookout 20 min");
+    assert((await text(page, "#homeBC")) === "Candlestick Point" && /Candlestick PointSF Bay\n[^\n]*\n5 min/.test(mine.bc) && /Coyote PointPeninsula\n[^\n]*\n20 min/.test(mine.bc), "city house is Candlestick Point: its own spot is 5 min, Coyote Point 20 min");
     await page.click(".row .head"); await page.waitForTimeout(200); mine.detail = await text(page, ".row .detail");
     if (base) {
       const b = await newPage(browser, base.url);
@@ -140,21 +140,21 @@ try {
     kept = await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).kept);
     assert(kept.length === 0 && (await page.locator("#riderKept").count()) === 0, "removed from the Rider sheet");
     await page.click("#closeSheet");
-    // Elsewhere within Oregon: still home behaviour (no discovery), just estimated drives
+    // Elsewhere within the Bay Area: still home behaviour (no discovery), just estimated drives
     await page.click("#homeX"); await page.waitForSelector("#plFind");
     assert((await page.locator("#plq").count()) === 1, "Elsewhere sheet has the place-name search");
-    await page.click('#places button[data-p="Newport"]'); await page.click("#plSave"); await page.waitForTimeout(300);
-    assert((await page.locator("#away").count()) === 0 && !log.some(l => /overpass|away-spots/.test(l)), "Elsewhere = Newport (within 150 mi): no discovery, curated list as before");
+    await page.click('#places button[data-p="Monterey"]'); await page.click("#plSave"); await page.waitForTimeout(300);
+    assert((await page.locator("#away").count()) === 0 && !log.some(l => /overpass|away-spots/.test(l)), "Elsewhere = Monterey (within 150 mi): no discovery, curated list as before");
     assert(errors.length === 0, "still no page errors");
     await ctx.close();
   }
 
   /* ---------- 1b. narrow phone (390 px): tile layout, "This spot is killer", the rider's own photos ---------- */
   {
-    const longKept = () => { if (localStorage.getItem("goc.settings")) return; localStorage.setItem("goc.settings", JSON.stringify({ home: "LO", radius: 150, sort: "score", kept: [{ id: "k-long", name: "Mission Bay South Shores launch beach", region: "Kept", lat: 45.60, lon: -122.40, plat: 45.60, plon: -122.40, facing: 270, dir: { best: [[240, 300]], work: [[190, 350]], off: [[40, 140]] }, waves: true, pass: false, photo: false, notes: "", parking: "", driveLO: 45, driveBC: 120, kept: true, photoChecked: "2026-10-16T00:00:00Z", addedAt: "2026-10-16T00:00:00Z" }] })); };
+    const longKept = () => { if (localStorage.getItem("goc.settings")) return; localStorage.setItem("goc.settings", JSON.stringify({ home: "LO", radius: 150, sort: "score", kept: [{ id: "k-long", name: "Mission Bay South Shores launch beach", region: "Kept", lat: 37.60, lon: -122.50, plat: 37.60, plon: -122.50, facing: 270, dir: { best: [[240, 300]], work: [[190, 350]], off: [[40, 140]] }, waves: true, pass: false, photo: false, notes: "", parking: "", driveLO: 45, driveBC: 120, kept: true, photoChecked: "2026-10-16T00:00:00Z", addedAt: "2026-10-16T00:00:00Z" }] })); };
     const sync = syncStore();
     const gusty = n => F.openMeteo(n, (i, h) => ({ spd: 12 + (i % 3), gst: 22 + (i % 5), dir: 280 }));   // light and gusty: every row carries a reason chip
-    const { page, errors, log, ctx } = await newPage(browser, url, { width: 390, geo: { latitude: 45.61, longitude: -122.41 }, init: longKept, sync, forecast: gusty });
+    const { page, errors, log, ctx } = await newPage(browser, url, { width: 390, geo: { latitude: 37.61, longitude: -122.51 }, init: longKept, sync, forecast: gusty });
     await page.waitForSelector(".row", { timeout: 20000 }); await page.waitForTimeout(800);
     const tiles = await page.evaluate(() => [...document.querySelectorAll(".row")].map(r => { const h = r.querySelector(".head").getBoundingClientRect(), p = r.querySelector(".pic").getBoundingClientRect(), n = r.querySelector(".name").getBoundingClientRect(), chips = [...r.querySelectorAll(".wind .chip")], last = chips.length ? chips[chips.length - 1].getBoundingClientRect() : null; return { id: r.id, head: h.height, pic: p.height, nameLines: Math.round(n.height / 18), clear: last ? h.bottom - last.bottom : null, picTop: p.top - h.top, picBottom: h.bottom - p.bottom }; }));
     const wrapped = tiles.filter(t => t.nameLines > 1), chipped = tiles.filter(t => t.clear != null);
@@ -167,12 +167,12 @@ try {
 
     // "This spot is killer" with location allowed: coordinates land by themselves, cursor in the name
     await page.click("#openHere"); await page.waitForSelector("#ksKeep");
-    await page.waitForFunction(() => document.getElementById("ksll")?.value === "45.61, -122.41", null, { timeout: 10000 });
+    await page.waitForFunction(() => document.getElementById("ksll")?.value === "37.61, -122.51", null, { timeout: 10000 });
     assert((await page.locator("#ksFindBox").isHidden()) && (await page.locator("#ksMap").isVisible()) && (await page.evaluate(() => document.activeElement && document.activeElement.id)) === "ksname" && /Your location now/.test(await text(page, "#ksLLNote")), "'This spot is killer': phone location filled in, Check on map ready, name field focused, no place search");
     await page.keyboard.type("Killer Beach"); await page.click('#ksface button[data-deg="315"]'); await page.click("#ksKeep");
     await page.waitForSelector("#row-k-killer-beach", { timeout: 10000 });
     let kb = await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).kept.find(k => k.id === "k-killer-beach"));
-    assert(kb && kb.lat === 45.61 && kb.lon === -122.41 && kb.facing === 315 && kb.kept === true, "saved at the phone's coordinates with the chosen facing, scored like any other spot");
+    assert(kb && kb.lat === 37.61 && kb.lon === -122.51 && kb.facing === 315 && kb.kept === true, "saved at the phone's coordinates with the chosen facing, scored like any other spot");
     await page.waitForFunction(() => document.querySelector('#row-k-killer-beach .pic img[src*="kites.jpg"]'), null, { timeout: 10000 }).catch(() => {});
     assert((await page.locator('#row-k-killer-beach .pic img[src*="kites.jpg"]').count()) === 1, "its Commons photo lands in the tile in the background, no re-sort");
 
@@ -184,24 +184,24 @@ try {
     const pngOf = async seed => Buffer.from((await page.evaluate(s => { const c = document.createElement("canvas"); c.width = 1600; c.height = 1200; const g = c.getContext("2d"); const gr = g.createLinearGradient(0, 0, 1600, 1200); gr.addColorStop(0, "#1b6ca8"); gr.addColorStop(1, "#f2d388"); g.fillStyle = gr; g.fillRect(0, 0, 1600, 1200); let x = s; for (let i = 0; i < 4000; i++) { x = (x * 48271) % 2147483647; g.fillStyle = `hsl(${x % 360} 70% ${30 + x % 50}%)`; g.fillRect(x % 1600, (x >> 8) % 1200, 20 + x % 60, 20 + (x >> 4) % 60); } return c.toDataURL("image/png"); }, seed)).split(",")[1], "base64");   // a busy "camera" picture: compresses like a real one
     const png = await pngOf(1);
     const stored = (pg, id) => pg.evaluate(async id => { const db = await new Promise((res, rej) => { const r = indexedDB.open("goc.photos", 1); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); const rec = await new Promise((res, rej) => { const rq = db.transaction("photos").objectStore("photos").get(id); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); db.close(); if (!rec) return null; const bmp = await createImageBitmap(rec.blob); return { size: rec.blob.size, type: rec.blob.type, w: bmp.width, h: bmp.height, updatedAt: rec.updatedAt, photos: JSON.parse(localStorage.getItem("goc.settings")).photos || {} }; }, id);   // the IndexedDB record for a spot
-    await page.click('button[data-open="stevenson"]'); await page.waitForSelector("#detail-stevenson .actions");
-    assert((await page.locator('#detail-stevenson [data-photo]').count()) === 1 && (await page.locator('#detail-stevenson [data-unphoto]').count()) === 0, "a curated spot's detail offers Use my photo (and no Remove photo yet)");
-    const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.click('#detail-stevenson [data-photo]')]);
+    await page.click('button[data-open="crissy"]'); await page.waitForSelector("#detail-crissy .actions");
+    assert((await page.locator('#detail-crissy [data-photo]').count()) === 1 && (await page.locator('#detail-crissy [data-unphoto]').count()) === 0, "a curated spot's detail offers Use my photo (and no Remove photo yet)");
+    const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.click('#detail-crissy [data-photo]')]);
     assert(!chooser.isMultiple() && (await page.getAttribute("#photoFile", "accept")) === "image/*", "Use my photo opens the phone's camera / photo picker (one image)");
     await chooser.setFiles({ name: "beach.png", mimeType: "image/png", buffer: png });
-    await page.waitForFunction(() => document.querySelector('#row-stevenson .pic img')?.src.startsWith("blob:"), null, { timeout: 15000 });
-    const mine = await stored(page, "stevenson");
-    assert(mine && mine.type === "image/jpeg" && mine.w === 480 && mine.h === 320 && mine.size > 8 * 1024 && mine.size <= 48 * 1024 && mine.photos.stevenson, `shrunk to a 480×320 JPEG of ${mine && Math.round(mine.size / 1024)} KB, cached in IndexedDB, listed in settings.photos`);
-    assert((await page.locator('#row-stevenson .pic img').getAttribute("src")).startsWith("blob:") && (await page.locator('#detail-stevenson [data-unphoto]').count()) === 1, "the tile shows his photo instead of the built-in one; Remove photo appears");
-    await page.waitForFunction(() => document.querySelector('#hero .hpic img')?.src.startsWith("blob:") || !document.querySelector('#hero .hpic[data-spot="stevenson"]'), null, { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector('#row-crissy .pic img')?.src.startsWith("blob:"), null, { timeout: 15000 });
+    const mine = await stored(page, "crissy");
+    assert(mine && mine.type === "image/jpeg" && mine.w === 480 && mine.h === 320 && mine.size > 8 * 1024 && mine.size <= 48 * 1024 && mine.photos.crissy, `shrunk to a 480×320 JPEG of ${mine && Math.round(mine.size / 1024)} KB, cached in IndexedDB, listed in settings.photos`);
+    assert((await page.locator('#row-crissy .pic img').getAttribute("src")).startsWith("blob:") && (await page.locator('#detail-crissy [data-unphoto]').count()) === 1, "the tile shows his photo instead of the built-in one; Remove photo appears");
+    await page.waitForFunction(() => document.querySelector('#hero .hpic img')?.src.startsWith("blob:") || !document.querySelector('#hero .hpic[data-spot="crissy"]'), null, { timeout: 5000 });
     await page.waitForTimeout(1500);
-    const up = sync.log.filter(l => /^PUT \/v1\/photo\/stevenson/.test(l)), bytes = sync.log.find(l => /^photo bytes/.test(l));
-    assert(up.length === 1 && bytes && +bytes.split(" ")[2] === mine.size && /image\/jpeg/.test(bytes) && sync.doc.settings.photos.stevenson, "uploaded once to the Worker as image/jpeg, and the settings copy lists it");
+    const up = sync.log.filter(l => /^PUT \/v1\/photo\/crissy/.test(l)), bytes = sync.log.find(l => /^photo bytes/.test(l));
+    assert(up.length === 1 && bytes && +bytes.split(" ")[2] === mine.size && /image\/jpeg/.test(bytes) && sync.doc.settings.photos.crissy, "uploaded once to the Worker as image/jpeg, and the settings copy lists it");
     assert(errors.length === 0, "own photo: no page errors (" + errors.join(" | ") + ")");
 
     // "This spot is killer" with a photo: picked in the sheet (same picker and resize), previewed, saved with the spot on Save
     await page.click("#openHere"); await page.waitForSelector("#ksKeep");
-    await page.waitForFunction(() => document.getElementById("ksll")?.value === "45.61, -122.41", null, { timeout: 10000 });
+    await page.waitForFunction(() => document.getElementById("ksll")?.value === "37.61, -122.51", null, { timeout: 10000 });
     assert((await page.locator("#ksThumb").isHidden()) && (await text(page, "#ksPhoto")) === "Add a photo" && (await page.locator("#ksUnphoto").isHidden()), "the add-spot sheet offers Add a photo (optional): no thumbnail, no Remove yet");
     await page.fill("#ksname", "Photo Beach"); await page.click('#ksface button[data-deg="270"]');
     let [ch2] = await Promise.all([page.waitForEvent("filechooser"), page.click("#ksPhoto")]);
@@ -238,19 +238,19 @@ try {
     // a second linked device fetches the missing photo in the background
     const two = await newPage(browser, url, { width: 390, sync, init: () => { localStorage.setItem("goc.sync", JSON.stringify({ url: "https://sync.test.workers.dev", key: "k".repeat(40), remoteUpdatedAt: null })); } });
     await two.page.waitForSelector(".row", { timeout: 20000 });
-    await two.page.waitForFunction(() => document.querySelector('#row-stevenson .pic img')?.src.startsWith("blob:"), null, { timeout: 15000 }).catch(() => {});
-    assert((await two.page.locator('#row-stevenson .pic img').getAttribute("src") || "").startsWith("blob:") && sync.log.filter(l => /^GET \/v1\/photo\/stevenson/.test(l)).length >= 1, "another linked device pulls the settings, sees the photo listed, fetches it in the background and shows it");
+    await two.page.waitForFunction(() => document.querySelector('#row-crissy .pic img')?.src.startsWith("blob:"), null, { timeout: 15000 }).catch(() => {});
+    assert((await two.page.locator('#row-crissy .pic img').getAttribute("src") || "").startsWith("blob:") && sync.log.filter(l => /^GET \/v1\/photo\/crissy/.test(l)).length >= 1, "another linked device pulls the settings, sees the photo listed, fetches it in the background and shows it");
     await two.page.waitForSelector("#row-k-killer-beach", { timeout: 10000 }).catch(() => {});
     assert((await two.page.locator("#row-k-killer-beach").count()) === 1 && (await two.page.locator('#row-k-killer-beach .pic img[src*="kites.jpg"]').count()) === 1, "the kept spot and its Commons photo came along in the settings");
     await two.page.waitForFunction(() => document.querySelector('#row-k-photo-beach .pic img')?.src.startsWith("blob:"), null, { timeout: 15000 }).catch(() => {});
     assert((await two.page.locator('#row-k-photo-beach .pic img').getAttribute("src") || "").startsWith("blob:") && sync.log.filter(l => /^GET \/v1\/photo\/k-photo-beach/.test(l)).length >= 1, "the spot added with a photo shows that photo on the other device too");
     // Remove photo on the second device: gone from the Worker, and the first device drops it on its next sync
-    await two.page.click('button[data-open="stevenson"]'); await two.page.waitForSelector('#detail-stevenson [data-unphoto]');
-    await two.page.click('#detail-stevenson [data-unphoto]'); await two.page.waitForTimeout(2500);
-    assert(!sync.photos.stevenson && sync.log.some(l => /^DELETE \/v1\/photo\/stevenson/.test(l)) && !(sync.doc.settings.photos || {}).stevenson && (await two.page.locator('#row-stevenson .pic img').getAttribute("src")).endsWith("img/stevenson.jpg"), "Remove photo: deleted from the Worker, dropped from the settings list, built-in photo back");
+    await two.page.click('button[data-open="crissy"]'); await two.page.waitForSelector('#detail-crissy [data-unphoto]');
+    await two.page.click('#detail-crissy [data-unphoto]'); await two.page.waitForTimeout(2500);
+    assert(!sync.photos.crissy && sync.log.some(l => /^DELETE \/v1\/photo\/crissy/.test(l)) && !(sync.doc.settings.photos || {}).crissy && (await two.page.locator('#row-crissy .pic img').getAttribute("src")).endsWith("img/crissy.jpg"), "Remove photo: deleted from the Worker, dropped from the settings list, built-in photo back");
     await page.evaluate(() => syncPull());
-    await page.waitForFunction(() => (document.querySelector('#row-stevenson .pic img')?.src || "").endsWith("img/stevenson.jpg"), null, { timeout: 15000 }).catch(() => {});
-    assert((await page.locator('#row-stevenson .pic img').getAttribute("src")).endsWith("img/stevenson.jpg") && (await page.evaluate(() => Object.keys(riderPhotos).sort().join())) === "k-photo-beach", "the first device drops it too on its next sync and restores the default; the added spot's photo stays");
+    await page.waitForFunction(() => (document.querySelector('#row-crissy .pic img')?.src || "").endsWith("img/crissy.jpg"), null, { timeout: 15000 }).catch(() => {});
+    assert((await page.locator('#row-crissy .pic img').getAttribute("src")).endsWith("img/crissy.jpg") && (await page.evaluate(() => Object.keys(riderPhotos).sort().join())) === "k-photo-beach", "the first device drops it too on its next sync and restores the default; the added spot's photo stays");
     assert(errors.length === 0 && two.errors.length === 0, "two devices: no page errors (" + errors.concat(two.errors).join(" | ") + ")");
     await two.ctx.close(); await ctx.close();
   }
@@ -270,7 +270,7 @@ try {
     await page.click(".row .head"); await page.waitForTimeout(200);
     let det = await text(page, "#" + firstId.replace("row-", "detail-"));
     assert(/Models\nModels say 8–30 kn; the score uses (NBM|the middle)$/im.test(det) && /Confidence\nModels disagree/i.test(det), "detail shows the five-model spread in one line and the Confidence verdict: " + (det.match(/Models\n[^\n]*/i) || [""])[0]);
-    assert((/^hoodriver|stevenson|rufus$/.test(firstId.replace("row-", "")) ? /NBM, for/ : /3-model median, for/).test(det) && /in 16 kn/.test(det), "the next-hour tiles say what they are (NBM at a Gorge spot, else 3-model median) and the kite tile has its unit");
+    assert(/3-model median, for/.test(det) && /in 16 kn/.test(det), "the next-hour tiles say what they are (the 3-model median; no Bay spot scores on NBM) and the kite tile has its unit");
     assert(/Station reads|Wind measured now\n/i.test(det), "station rows still render");
     // Rider -> mph: display only, everything else unchanged
     await page.click("#openSettings"); await page.waitForSelector("#units button");
@@ -328,11 +328,11 @@ try {
     const short = d => new Date(key(d) + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
     const long = d => new Date(key(d) + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
     const dayOf = day => Math.round((Date.parse(day + "T12:00:00Z") - Date.parse(today + "T12:00:00Z")) / 864e5);
-    // Within 1h30 of Lake Oswego only Stevenson (point 0) and Hood River (point 1) qualify. Today Stevenson blows (20g24, the freeride peak), Hood River is light (12);
-    // tomorrow the reverse; the day after Stevenson again; the last two days both 18. W all week.
+    // Point 0 is Crissy Field, point 1 Candlestick Point (SPOTS order). Today Crissy blows (20g24, the freeride peak), Candlestick is light (12);
+    // tomorrow the reverse; the day after Crissy again; the last two days both 18. W all week.
     const byDay = n => F.openMeteo(n, (i, h, day) => { const d = dayOf(day); const s = i === 0 ? [20, 12, 20, 18, 18, 18, 18][d] : i === 1 ? [12, 20, 12, 18, 18, 18, 18][d] : 18; return { spd: s, gst: s + 4, dir: 270 }; });
-    // A fresh, trusted station 1.8 mi from Stevenson reading 5 kn against the 20 kn forecast: a disagreement, today only.
-    const obs = { fetchedAt: new Date().toISOString(), obs: { stevenson: [{ id: "TEST1", name: "Test station", kind: "nws", dist_mi: 1.8, time: new Date(Date.now() - 10 * 60000).toISOString(), spd: 5, gst: 7, dir: 270 }] } };
+    // A fresh, trusted station 1.8 mi from Crissy Field reading 5 kn against the 20 kn forecast: a disagreement, today only.
+    const obs = { fetchedAt: new Date().toISOString(), obs: { crissy: [{ id: "TEST1", name: "Test station", kind: "nws", dist_mi: 1.8, time: new Date(Date.now() - 10 * 60000).toISOString(), spd: 5, gst: 7, dir: 270 }] } };
     const { page, errors, ctx } = await newPage(browser, url, { forecast: byDay, obs });
     await page.waitForSelector(".row", { timeout: 20000 }); await page.waitForTimeout(800);
     const sortBtn = k => page.locator(`[data-sort="${k}"]`);
@@ -344,10 +344,10 @@ try {
     assert((await sortBtn("score").innerText()) === short(0) && (await sortBtn("tomorrow").innerText()) === short(1) && (await sortBtn("tomorrow").isVisible()) && (await sortBtn("distance").innerText()) === "Distance", `sort buttons read ${short(0)} / ${short(1)} / Distance with today selected`);
     assert((await sortBtn("score").getAttribute("aria-pressed")) === "true", "the day sort is pressed by default");
     const hero0 = await text(page, "#hero");
-    assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(0)} · within 1h30\nStevenson\n`, "i").test(hero0), "hero: score, then 'BEST BET · " + short(0).toUpperCase() + " · WITHIN 1H30', then Stevenson on top today: " + hero0.split("\n").slice(0, 3).join(" | "));
-    assert((await page.getAttribute(".row", "id")) === "row-stevenson" && /Station reads 5 kn/.test(await first(page, ".row .wind")), "today's list: Stevenson first, with the 'Station reads 5 kn' chip (station 5 kn vs the 20 kn forecast hour): " + JSON.stringify(await first(page, ".row .wind")));
+    assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(0)} · within 1h30\nCrissy Field\n`, "i").test(hero0), "hero: score, then 'BEST BET · " + short(0).toUpperCase() + " · WITHIN 1H30', then Crissy Field on top today: " + hero0.split("\n").slice(0, 3).join(" | "));
+    assert((await page.getAttribute(".row", "id")) === "row-crissy" && /Station reads 5 kn/.test(await first(page, ".row .wind")), "today's list: Crissy Field first, with the 'Station reads 5 kn' chip (station 5 kn vs the 20 kn forecast hour): " + JSON.stringify(await first(page, ".row .wind")));
     await openFirst(); let det = await detailOf();
-    assert(new RegExp(`^${long(0)}, hour by hour\n`, "i").test(det), `the chart is titled '${long(0)}, hour by hour': ` + det.split("\n")[0]);
+    assert(new RegExp(`^${long(0)}, hour by hour`, "i").test(det), `the chart is titled '${long(0)}, hour by hour' (a tide suffix may follow): ` + det.split("\n")[0]);
     assert(/Wind measured now\n5 kn gusting 7 from the W/i.test(det) && /Wind forecast · next hour/i.test(det) && /Wind forecast · in 3 hours/i.test(det) && /Wind forecast · in 5 hours/i.test(det), "today's detail keeps 'Wind measured now' and the next-hour / 3-hour / 5-hour rows");
     assert(!/morning ·|midday ·|afternoon ·|Lead time/i.test(det), "and has no morning / midday / afternoon rows or lead-time line");
     assert(/Station disagrees:/.test(det) && /Today's score uses the station/.test(det) && /the best 3-hour stretch today;/.test(det), "'Station disagrees' is shown and says today's score uses the station");
@@ -356,10 +356,10 @@ try {
     await page.click("#days button >> nth=1"); await page.waitForTimeout(300);
     assert((await sortBtn("score").innerText()) === short(1) && (await sortBtn("tomorrow").innerText()) === short(2) && (await sortBtn("tomorrow").isVisible()), `tomorrow selected: sort buttons read ${short(1)} / ${short(2)}`);
     const hero1 = await text(page, "#hero");
-    assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(1)} · within 1h30\nHood River`, "i").test(hero1), "hero keeps the one format and names tomorrow's best (Hood River): " + hero1.split("\n").slice(0, 3).join(" | "));
-    assert((await page.getAttribute(".row", "id")) === "row-hoodriver" && !/Station reads/.test(await text(page, "#list")), "tomorrow's list: Hood River first; no 'Station reads' chip on any row");
+    assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(1)} · within 1h30\nCandlestick`, "i").test(hero1), "hero keeps the one format and names tomorrow's best (Candlestick Point): " + hero1.split("\n").slice(0, 3).join(" | "));
+    assert((await page.getAttribute(".row", "id")) === "row-candlestick" && !/Station reads/.test(await text(page, "#list")), "tomorrow's list: Candlestick Point first; no 'Station reads' chip on any row");
     await openFirst(); det = await detailOf();
-    assert(new RegExp(`^${long(1)}, hour by hour\n`, "i").test(det), `chart titled '${long(1)}, hour by hour'`);
+    assert(new RegExp(`^${long(1)}, hour by hour`, "i").test(det), `chart titled '${long(1)}, hour by hour' (a tide suffix may follow)`);
     assert(!/Wind measured|next hour|in 3 hours|in 5 hours|Station disagrees/i.test(det), "tomorrow's detail has no station row, no next-hour rows, no 'Station disagrees'");
     const block = new RegExp(`${short(1)} morning · 7a–10a\n20 kn gusting 24 from the W ?\n(?:3-model median|NBM), ${long(1)} 7a–10a average\n${short(1)} midday · 11a–2p\n20 kn gusting 24 from the W ?\n[^\n]*\n${short(1)} afternoon · 3p–6p\n20 kn gusting 24 from the W`, "i");
     assert(block.test(det), `morning / midday / afternoon rows for ${long(1)} (median model, gusts, direction): ` + (det.match(new RegExp(`${short(1)} morning[^]*?average`, "i")) || [""])[0].replace(/\n/g, " | "));
@@ -369,8 +369,8 @@ try {
     // the second sort button: the day after the selected one
     await sortBtn("tomorrow").click(); await page.waitForTimeout(300);
     { const id = await page.getAttribute(".row", "id"), w = await first(page, ".row .wind"), sk = await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).sort);
-      assert(id === "row-stevenson" && new RegExp(`${short(2)} \\d+\\.\\d`).test(w) && sk === "tomorrow", `'${short(2)}' sorts by ${long(2)}'s score (Stevenson first) and shows that day's score chip; stored key still 'tomorrow' (${id}, ${JSON.stringify(w)}, ${sk})`); }
-    assert((await page.locator(".row .score").first().innerText()) === (await page.evaluate(() => { const r = computeAll().find(x => x.spot.id === "stevenson"); return r.r.score.toFixed(1); })), "the tile's main score is still the selected day's");
+      assert(id === "row-crissy" && new RegExp(`${short(2)} \\d+\\.\\d`).test(w) && sk === "tomorrow", `'${short(2)}' sorts by ${long(2)}'s score (Crissy first) and shows that day's score chip; stored key still 'tomorrow' (${id}, ${JSON.stringify(w)}, ${sk})`); }
+    assert((await page.locator(".row .score").first().innerText()) === (await page.evaluate(() => { const r = computeAll().find(x => x.spot.id === "crissy"); return r.r.score.toFixed(1); })), "the tile's main score is still the selected day's");
 
     // two and three days out
     await page.click("#days button >> nth=2"); await page.waitForTimeout(300); await openFirst(); det = await detailOf();
@@ -391,13 +391,13 @@ try {
     await openFirst(); det = await detailOf();
     assert(/Lead time\n5–6 days out: a trend, not a forecast\./i.test(det) && new RegExp(`^${long(6)}, hour by hour`, "i").test(det), "last day: the trend lead line, chart titled with the day");
     assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(6)} · within 1h30\n`, "i").test(await text(page, "#hero")), "hero format holds on the last day");
-    // nothing qualifies: same hero layout
-    await page.evaluate(() => { settings.radius = 30; render(); }); await page.waitForTimeout(200);
-    const heroN = await text(page, "#hero");
-    assert(new RegExp(`^–\nBest bet · ${short(6)} · within 30 min\nNothing worth the drive\n(Further out: Stevenson scores \\d+\\.\\d at 1h05\\.|No spot in the forecast scores above 4 on ${long(6)}\\.)`, "i").test(heroN), "nothing in range: same layout (score slot, label, name, line), 'Nothing worth the drive': " + heroN.split("\n").slice(0, 4).join(" | "));
-    // a dead selected day never points the hero at a trend day: today dead, Rufus 6+ only on day 6
+    // nothing qualifies: same hero layout (the Bay spots sit close, and a score of 8+ stretches the radius to 2×, so only
+    // Davenport — 2h00 out, past even the stretched 1h00 — keeps its wind for this check)
+    const heroN = await page.evaluate(() => { const keep = { ...forecasts }; for (const id of Object.keys(forecasts)) { if (id === "davenport") continue; const f = forecasts[id]; forecasts[id] = { ...f, spd: f.spd.map(() => 3), gst: f.gst.map(() => 4) }; } settings.radius = 30; render(); const h = document.getElementById("hero").innerText; Object.assign(forecasts, keep); return h; });
+    assert(new RegExp(`^(–|0\\.0)\nBest bet · ${short(6)} · within 30 min\nNothing worth the drive\n(Further out: Davenport[^\n]* scores \\d+\\.\\d at 2h00\\.|No spot in the forecast scores above 4 on ${long(6)}\\.)`, "i").test(heroN), "nothing in range: same layout (score slot, label, name, line), 'Nothing worth the drive': " + heroN.split("\n").slice(0, 4).join(" | "));
+    // a dead selected day never points the hero at a trend day: today dead, Sherman 6+ only on day 6
     await page.evaluate(() => { settings.radius = 90; render(); });
-    const trendOnly = await page.evaluate(() => { const T = forecasts.rufus.time; const keep = { ...forecasts }; for (const id of Object.keys(forecasts)) { const f = forecasts[id]; forecasts[id] = { ...f, spd: f.spd.map(() => 3), gst: f.gst.map(() => 4) }; } forecasts.rufus = { ...forecasts.rufus, spd: T.map(t => t.startsWith(dayKeys[5]) ? 20 : 3), gst: T.map(t => t.startsWith(dayKeys[5]) ? 24 : 4) }; selDay = dayKeys[0]; render(); const h = document.getElementById("hero").textContent; Object.assign(forecasts, keep); return h; });
+    const trendOnly = await page.evaluate(() => { const T = forecasts.sherman.time; const keep = { ...forecasts }; for (const id of Object.keys(forecasts)) { const f = forecasts[id]; forecasts[id] = { ...f, spd: f.spd.map(() => 3), gst: f.gst.map(() => 4) }; } forecasts.sherman = { ...forecasts.sherman, spd: T.map(t => t.startsWith(dayKeys[5]) ? 20 : 3), gst: T.map(t => t.startsWith(dayKeys[5]) ? 24 : 4) }; selDay = dayKeys[0]; render(); const h = document.getElementById("hero").textContent; Object.assign(forecasts, keep); return h; });
     assert(/Nothing worth the drive/.test(trendOnly) && !/looks like the day/.test(trendOnly), "a 6+ on a trend day alone does not become the 'looks like the day' card");
     await page.evaluate(() => { selDay = dayKeys[6]; settings.radius = 30; render(); }); await page.waitForTimeout(100);
     await page.click("#days button >> nth=0"); await page.waitForTimeout(300);
@@ -406,39 +406,38 @@ try {
     await ctx.close();
   }
 
-  /* ---------- 1e. tides and daylight at 390 px: a coast spot (Pacific City) and a Gorge spot (Stevenson) open ---------- */
+  /* ---------- 1e. tides and daylight at 390 px: a Delta spot (Sherman Island) and an Ocean spot (Ocean Beach) open ---------- */
   {
     const SHOT = process.env.SHOT_DIR || "";
-    const { page, errors, log, ctx } = await newPage(browser, url, { width: 390, init: () => { localStorage.setItem("goc.settings", JSON.stringify({ home: "BC", radius: 60, v: 2 })); } });
+    const { page, errors, log, ctx } = await newPage(browser, url, { width: 390, init: () => { localStorage.setItem("goc.settings", JSON.stringify({ home: "BC", radius: 120, v: 2 })); } });
     await page.waitForSelector(".row", { timeout: 20000 });
     await page.waitForFunction(() => { try { return !!JSON.parse(localStorage.getItem("goc.tides") || "null"); } catch (e) { return false; } }, null, { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(300);
     const tideCalls = log.filter(l => /tidesandcurrents/.test(l));
     const stations = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem("goc.tides")).stations).sort());
-    assert(tideCalls.length === 6 && JSON.stringify(stations) === JSON.stringify(["9435380", "9437540", "9439011"]) && (await page.evaluate(() => JSON.parse(localStorage.getItem("goc.tides")).day)) === new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }), `the eleven coast spots share three tide stations: one hourly + one hilo call each (${tideCalls.length} calls), cached under goc.tides for today`);
+    assert(tideCalls.length === 26 && JSON.stringify(stations) === JSON.stringify(["9413745", "9414131", "9414290", "9414358", "9414458", "9414750", "9414816", "9414843", "9415020", "9415064", "9415112", "9415316", "9415625"]) && (await page.evaluate(() => JSON.parse(localStorage.getItem("goc.tides")).day)) === new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }), `the sixteen spots share thirteen tide stations: one hourly + one hilo call each (${tideCalls.length} calls), cached under goc.tides for today`);
     assert(log.findIndex(l => /tidesandcurrents/.test(l)) > log.findIndex(l => /api\.open-meteo/.test(l)), "tides are fetched after the forecast, never before it");
-    await page.click('button[data-open="pacificcity"]'); await page.waitForSelector("#detail-pacificcity svg");
-    const coast = await text(page, "#detail-pacificcity");
-    const svgC = await page.evaluate(() => document.querySelector("#detail-pacificcity svg").outerHTML);
-    assert(/hour by hour · tide at Garibaldi/i.test(coast), "coast detail: the chart is titled with its tide station: " + coast.split("\n")[0]);
+    await page.click('button[data-open="sherman"]'); await page.waitForSelector("#detail-sherman svg");
+    const coast = await text(page, "#detail-sherman");
+    const svgC = await page.evaluate(() => document.querySelector("#detail-sherman svg").outerHTML);
+    assert(/hour by hour · tide at Antioch/i.test(coast), "Delta detail: the chart is titled with its tide station: " + coast.split("\n")[0]);
     const labels = (svgC.match(/>(High|Low) \d{1,2}:\d\d[ap] · \d+\.\d ft</g) || []);
     assert(labels.length >= 2 && labels.some(l => /^>High/.test(l)) && labels.some(l => /^>Low/.test(l)), "high and low tide labelled with time and height: " + labels.join(" "));
-    const legend = await text(page, "#detail-pacificcity .legend");
-    assert((svgC.match(/fill="url\(#night-pacificcity\)"/g) || []).length === 2 && /<pattern id="night-pacificcity"/.test(svgC) && /\u2600\uFE0E<\/tspan> 7:33a</.test(svgC) && /\u263E<\/tspan> 6:20p</.test(svgC) && /fill="var\(--good\)" fill-opacity="\.14" rx="3">/.test(svgC) && legend.replace(/\s+/g, " ") === "night · best window", "night hatched before 7:33a and after 6:20p with sun / moon markers and the times on the hour axis, the best window a green tint, a legend under the chart");
+    const legend = await text(page, "#detail-sherman .legend");
+    assert((svgC.match(/fill="url\(#night-sherman\)"/g) || []).length === 2 && /<pattern id="night-sherman"/.test(svgC) && /\u2600\uFE0E<\/tspan> 7:33a</.test(svgC) && /\u263E<\/tspan> 6:20p</.test(svgC) && /fill="var\(--good\)" fill-opacity="\.14" rx="3">/.test(svgC) && legend.replace(/\s+/g, " ") === "night · best window", "night hatched before 7:33a and after 6:20p with sun / moon markers and the times on the hour axis, the best window a green tint, a legend under the chart");
     assert(/viewBox="0 0 400 193"/.test(svgC) && (svgC.match(/stroke-dasharray/g) || []).length === 2, "the chart grew a 48-unit tide band; sunrise and sunset lines");
-    const bars = await page.evaluate(() => [...document.querySelectorAll("#detail-pacificcity svg.strip rect[rx='2']")].length);
+    const bars = await page.evaluate(() => [...document.querySelectorAll("#detail-sherman svg.strip rect[rx='2']")].length);
     assert(bars === 12, `12 bars: the scored 8a–5p slots plus one shaded hour each side (${bars})`);
-    const hours = await page.evaluate(() => { const r = computeAll().find(x => x.spot.id === "pacificcity").r; return [r.from, r.to, r.idx.length]; });
+    const hours = await page.evaluate(() => { const r = computeAll().find(x => x.spot.id === "sherman").r; return [r.from, r.to, r.idx.length]; });
     assert(hours[2] === 10 && hours[0] >= 8 && hours[1] <= 18, `scored hours follow the sun: 10 slots, window ${hours[0]}–${hours[1]} (never before 8a, never past the 5p slot)`);
     assert(!/Tide/.test(coast.split("\n").slice(1).join("\n")) || !/kv/.test(coast), "tide is drawn, not scored: no tide tile, no tide reason");
-    if (SHOT) await page.screenshot({ path: SHOT + "/coast-390.png", fullPage: true });
-    // the Gorge spot: no tide station, same chart otherwise
-    await page.click("#homeLO"); await page.waitForTimeout(300);
-    await page.click('button[data-open="stevenson"]'); await page.waitForSelector("#detail-stevenson svg");
-    const gorge = await text(page, "#detail-stevenson"), svgG = await page.evaluate(() => document.querySelector("#detail-stevenson svg").outerHTML);
-    assert(!/tide at/i.test(gorge) && !/(High|Low) \d/.test(svgG) && /viewBox="0 0 400 145"/.test(svgG) && (svgG.match(/fill="url\(#night-stevenson\)"/g) || []).length === 2, "Gorge detail: no tide band or labels, chart at its usual height, night still hatched");
-    assert((await page.locator("#detail-stevenson").boundingBox()).width <= 390 && (await page.evaluate(() => document.documentElement.scrollWidth)) <= 390, "390 px: the open details fit the viewport, no horizontal scroll");
-    if (SHOT) await page.screenshot({ path: SHOT + "/gorge-390.png", fullPage: true });
+    if (SHOT) await page.screenshot({ path: SHOT + "/delta-390.png", fullPage: true });
+    // the Ocean spot: its own tide station, same chart
+    await page.click('button[data-open="oceanbeach"]'); await page.waitForSelector("#detail-oceanbeach svg");
+    const ocean = await text(page, "#detail-oceanbeach"), svgG = await page.evaluate(() => document.querySelector("#detail-oceanbeach svg").outerHTML);
+    assert(/hour by hour · tide at San Francisco/i.test(ocean) && /viewBox="0 0 400 193"/.test(svgG) && (svgG.match(/fill="url\(#night-oceanbeach\)"/g) || []).length === 2, "Ocean detail: tide band on the San Francisco station, night still hatched");
+    assert((await page.locator("#detail-oceanbeach").boundingBox()).width <= 390 && (await page.evaluate(() => document.documentElement.scrollWidth)) <= 390, "390 px: the open details fit the viewport, no horizontal scroll");
+    if (SHOT) await page.screenshot({ path: SHOT + "/ocean-390.png", fullPage: true });
     assert(errors.length === 0, "tides: no page errors (" + errors.join(" | ") + ")");
     // reload: the cached predictions are used, no new NOAA call
     const n0 = log.filter(l => /tidesandcurrents/.test(l)).length;
@@ -446,11 +445,11 @@ try {
     assert(log.filter(l => /tidesandcurrents/.test(l)).length === n0, "reload: today's tide predictions come from localStorage, no new NOAA call");
     await ctx.close();
     // NOAA down: scores and chart as before, no errors
-    const down = await newPage(browser, url, { width: 390, tides: "down", init: () => { localStorage.setItem("goc.settings", JSON.stringify({ home: "BC", radius: 60, v: 2 })); } });
+    const down = await newPage(browser, url, { width: 390, tides: "down", init: () => { localStorage.setItem("goc.settings", JSON.stringify({ home: "BC", radius: 120, v: 2 })); } });
     await down.page.waitForSelector(".row", { timeout: 20000 }); await down.page.waitForTimeout(800);
-    await down.page.click('button[data-open="pacificcity"]'); await down.page.waitForSelector("#detail-pacificcity svg");
-    const svgD = await down.page.evaluate(() => document.querySelector("#detail-pacificcity svg").outerHTML);
-    assert(!/tide at/i.test(await text(down.page, "#detail-pacificcity")) && /viewBox="0 0 400 145"/.test(svgD) && (await down.page.evaluate(() => localStorage.getItem("goc.tides"))) === null, "NOAA down: the detail renders without the tide band and nothing is cached");
+    await down.page.click('button[data-open="sherman"]'); await down.page.waitForSelector("#detail-sherman svg");
+    const svgD = await down.page.evaluate(() => document.querySelector("#detail-sherman svg").outerHTML);
+    assert(!/tide at/i.test(await text(down.page, "#detail-sherman")) && /viewBox="0 0 400 145"/.test(svgD) && (await down.page.evaluate(() => localStorage.getItem("goc.tides"))) === null, "NOAA down: the detail renders without the tide band and nothing is cached");
     assert(down.errors.length === 0, "NOAA down: no page errors (" + down.errors.join(" | ") + ")");
     await down.ctx.close();
   }
@@ -475,8 +474,8 @@ try {
     await page.waitForFunction(() => /faces W/.test(document.querySelector("#detail-a-n101")?.textContent || "") || !document.querySelector("#detail-a-n101"), null, { timeout: 100 }).catch(() => {});
     assert(log.filter(l => /overpass/.test(l) && /coastline/.test(l)).length === 1, "shoreline lookup went to Overpass in the background");
     assert((await page.evaluate(() => { const c = JSON.parse(localStorage.getItem("goc.awayspots") || "null"); return c && c.spots.length; })) === 9, "catalogue cached in localStorage with a date");
-    assert(!names.some(n => /Manzanita|Rufus/.test(n)), "curated Oregon spots are beyond the radius, not in the list");
-    assert(/15 more spots beyond|more spots beyond/.test(await text(page, "#beyond")), "the curated spots are counted as 'beyond'");
+    assert(!names.some(n => /Crissy|Candlestick/.test(n)), "curated Bay spots are beyond the radius, not in the list");
+    assert(/16 more spots beyond|more spots beyond/.test(await text(page, "#beyond")), "the curated spots are counted as 'beyond'");
     assert(/Best bet|Nothing worth the drive/i.test(await text(page, "#hero")), "hero renders in away mode");
     // open Sandy Cove: auto paragraph, Keep button, cam link
     await page.click('button[data-open="a-n101"]'); await page.waitForSelector("#detail-a-n101 .actions");
@@ -504,7 +503,7 @@ try {
     // back home: exactly as before
     await page.click("#homeLO"); await page.waitForTimeout(300);
     const home = await page.locator(".row .name").allInnerTexts();
-    assert((await page.locator("#away").count()) === 0 && !home.some(n => /auto/.test(n)) && home.some(n => /Stevenson|Hood River/.test(n)), "back to Lake Oswego: no banner, no auto rows, curated list");
+    assert((await page.locator("#away").count()) === 0 && !home.some(n => /auto/.test(n)) && home.some(n => /Crissy|Candlestick/.test(n)), "back to Paradise Cay: no banner, no auto rows, curated list");
     assert(!home.some(n => /Sandy Cove Kite Beach/.test(n)) && /more spots beyond/.test(await text(page, "#beyond")), "kept San Diego spots sit beyond the radius at home");
     // reopen: cached, instant
     await page.click("#homeX"); await page.waitForTimeout(300); await page.click("#closeSheet");
@@ -586,36 +585,36 @@ try {
   }
   /* ---------- per-spot forecast bias (bias.json) and the "Blowing now" toggle ---------- */
   {
-    // The fixture forecast is 18g22 W everywhere (25g30 at point 1). Pacific City: +4 kn on the median (applied); Stevenson: −3 on NBM (applied, the Gorge scores on NBM);
-    // Rockaway: +5 but only 20 readings (shown, not applied); Oceanside: +1.5 over 80 readings (shown, under 2 kn); Cape Lookout: an entry for a series it does not score on.
-    const bias = { pacificcity: { median: { kn: 4, n: 61 } }, stevenson: { nbm: { kn: -3, n: 45 }, median: { kn: 9, n: 99 } }, rockaway: { median: { kn: 5, n: 20 } }, oceanside: { median: { kn: 1.5, n: 80 } }, capelookout: { bm: { kn: 6, n: 70 } } };
-    const obs = { fetchedAt: new Date().toISOString(), obs: { pacificcity: [{ id: "AT297", name: "PACCTY-2 Pacific City", kind: "nws", dist_mi: 0.3, time: new Date(Date.now() - 12 * 60000).toISOString(), spd: 18, gst: 22, dir: 300 }] } };
+    // The fixture forecast is 18g22 W everywhere (25g30 at point 1, Candlestick). Third Ave: +4 kn on the median (applied); Crissy: −3 on the median (applied, negative);
+    // Berkeley: +5 but only 20 readings (shown, not applied); Alameda: +1.5 over 80 readings (shown, under 2 kn); Coyote: an entry for a series it does not score on.
+    const bias = { thirdave: { median: { kn: 4, n: 61 } }, crissy: { median: { kn: -3, n: 45 } }, berkeley: { median: { kn: 5, n: 20 } }, alameda: { median: { kn: 1.5, n: 80 } }, coyote: { bm: { kn: 6, n: 70 } } };
+    const obs = { fetchedAt: new Date().toISOString(), obs: { candlestick: [{ id: "KSFO", name: "San Francisco Intl", kind: "nws", dist_mi: 5.9, time: new Date(Date.now() - 12 * 60000).toISOString(), spd: 18, gst: 22, dir: 280 }] } };
     const { page, errors, ctx } = await newPage(browser, url, { bias, obs });
     await page.waitForSelector(".row", { timeout: 20000 }); await page.waitForTimeout(800);
     await page.click("#homeBC"); await page.waitForTimeout(300);
     const wind = async id => (await text(page, `#row-${id} .wind`)).split(" · ")[0];
-    assert((await wind("pacificcity")) === "22g26 kn WNW", `Pacific City's tile shows the corrected wind, 18g22 + 4: ${await wind("pacificcity")}`);
-    assert((await wind("rockaway")) === "18g22 kn WNW" && (await wind("oceanside")) === "18g22 kn WNW" && (await wind("capelookout")) === "18g22 kn WNW", "20 readings, 1.5 kn, or a series the spot does not score on: the wind is as forecast");
+    assert((await wind("thirdave")) === "22g26 kn WNW", `Third Ave's tile shows the corrected wind, 18g22 + 4: ${await wind("thirdave")}`);
+    assert((await wind("berkeley")).startsWith("18g22 kn W") && (await wind("alameda")).startsWith("18g22 kn W") && (await wind("coyote")).startsWith("18g22 kn W"), "20 readings, 1.5 kn, or a series the spot does not score on: the wind is as forecast");
     const open = async id => { await page.click(`button[data-open="${id}"]`); await page.waitForSelector(`#detail-${id} .kv`); return text(page, `#detail-${id}`); };
-    let d = await open("pacificcity");
-    assert(/FORECAST BIAS\s*Pacific City has been running \+4 kn vs forecast \(n=61\)\s*· the score uses 4 kn more than the 3-model median forecast/i.test(d), "the detail says what the station has been reading and that the score uses it");
-    d = await open("rockaway");
-    assert(/Rockaway Beach has been running \+5 kn vs forecast \(n=20\)\s*· fewer than 40 readings, so the score leaves it/.test(d), "20 readings: shown, not applied");
-    d = await open("oceanside");
-    assert(/Oceanside has been running \+1\.5 kn vs forecast \(n=80\)\s*· under 2 kn, so the score leaves it/.test(d), "1.5 kn: shown with its decimal, not applied");
-    d = await open("capelookout");
+    let d = await open("thirdave");
+    assert(/FORECAST BIAS\s*Third Avenue has been running \+4 kn vs forecast \(n=61\)\s*· the score uses 4 kn more than the 3-model median forecast/i.test(d), "the detail says what the station has been reading and that the score uses it");
+    d = await open("berkeley");
+    assert(/Berkeley Marina has been running \+5 kn vs forecast \(n=20\)\s*· fewer than 40 readings, so the score leaves it/.test(d), "20 readings: shown, not applied");
+    d = await open("alameda");
+    assert(/Alameda has been running \+1\.5 kn vs forecast \(n=80\)\s*· under 2 kn, so the score leaves it/.test(d), "1.5 kn: shown with its decimal, not applied");
+    d = await open("coyote");
     assert(!/forecast bias|has been running/i.test(d), "an entry only for a series the spot does not score on: no row");
     await page.click("#homeLO"); await page.waitForTimeout(300);
-    assert((await wind("stevenson")) === "15g19 kn W", `Stevenson scores on NBM: 18g22 − 3, not the median's +9: ${await wind("stevenson")}`);
-    d = await open("stevenson");
-    assert(/Stevenson has been running −3 kn vs forecast \(n=45\)\s*· the score uses 3 kn less than the NBM forecast/.test(d), "a negative bias reads as 'less than the NBM forecast'");
+    assert((await wind("crissy")).startsWith("15g19 kn W"), `Crissy's wind is corrected down: 18g22 − 3: ${await wind("crissy")}`);
+    d = await open("crissy");
+    assert(/Crissy Field has been running −3 kn vs forecast \(n=45\)\s*· the score uses 3 kn less than the 3-model median forecast/.test(d), "a negative bias reads as 'less than the 3-model median forecast'");
     const cached = await page.evaluate(() => JSON.parse(localStorage.getItem("goc.cache")).bias);
-    assert(cached && cached.pacificcity && cached.pacificcity.median.n === 61, "bias.json is kept in goc.cache for the next cold start");
+    assert(cached && cached.thirdave && cached.thirdave.median.n === 61, "bias.json is kept in goc.cache for the next cold start");
     // the Alerts sheet: the toggle, on by default, with what the stations read this minute
     await page.click("#openAlerts"); await page.waitForSelector("#al-blowing");
     assert(await page.isChecked("#al-blowing"), "'Tell me when it's already blowing' is on by default");
     const label = await text(page, 'label[for="al-blowing"]');
-    assert(/two hourly checks in a row/.test(label) && /Reading in your range now: Pacific City 18g22 kn WNW at PACCTY-2 Pacific City\./.test(label), "the toggle explains the rule and lists the station reading in range now: " + label.replace(/\s+/g, " ").slice(0, 160));
+    assert(/two hourly checks in a row/.test(label) && /Reading in your range now: Candlestick Point 18g22 kn W at San Francisco Intl\./.test(label), "the toggle explains the rule and lists the station reading in range now: " + label.replace(/\s+/g, " ").slice(0, 160));
     await page.click("#al-blowing"); await page.waitForTimeout(200);
     assert((await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).alerts.blowing)) === false && !(await page.isChecked("#al-blowing")), "turning it off is saved in the alert settings (synced like the rest)");
     assert(errors.length === 0, "bias + blowing: no page errors (" + errors.join(" | ") + ")");
@@ -627,9 +626,9 @@ try {
       const { page, errors, ctx } = await newPage(browser, url, bias ? { bias } : {});
       await page.waitForSelector(".row", { timeout: 20000 }); await page.waitForTimeout(600);
       await page.click("#homeBC"); await page.waitForTimeout(300);
-      assert((await text(page, "#row-pacificcity .wind")).startsWith("18g22 kn W"), `bias.json ${bias ? "empty" : "missing"}: the wind is as forecast`);
-      await page.click('button[data-open="pacificcity"]'); await page.waitForSelector("#detail-pacificcity .kv");
-      assert(!/forecast bias|has been running/i.test(await text(page, "#detail-pacificcity")) && errors.length === 0, `bias.json ${bias ? "empty" : "missing"}: no bias row, no page errors (` + errors.join(" | ") + ")");
+      assert((await text(page, "#row-thirdave .wind")).startsWith("18g22 kn W"), `bias.json ${bias ? "empty" : "missing"}: the wind is as forecast`);
+      await page.click('button[data-open="thirdave"]'); await page.waitForSelector("#detail-thirdave .kv");
+      assert(!/forecast bias|has been running/i.test(await text(page, "#detail-thirdave")) && errors.length === 0, `bias.json ${bias ? "empty" : "missing"}: no bias row, no page errors (` + errors.join(" | ") + ")");
       await ctx.close();
     }
   }
