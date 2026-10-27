@@ -71,14 +71,17 @@ class TestParsers(unittest.TestCase):
         self.assertIsNone(O.parse_caltrans(payload, ["sr 12", "brannan"], NOW), "a site that doesn't match the words is not picked")
 
     def test_jpl(self):
-        html = ("<table><tr><th>Measurement</th><th>TB1</th><th>TB2</th><th>TB3</th><th>TB4</th></tr>"
-                "<tr><td>Wind Speed (m/s)</td><td>2.0:4.0:6.0</td><td>-99</td><td>1:2:3</td><td>3.0:5.0:8.0</td></tr>"
-                "<tr><td>Wind Direction (deg)</td><td>200:210:220</td><td>-99</td><td>0:0:0</td><td>190:205:220</td></tr></table>")
-        o = O.parse_jpl(html, "TB1", NOW)
-        self.assertEqual((o["spd"], o["gst"], o["dir"]), (7.8, 11.7, 210), '"min:avg:max" m/s: avg is the wind, max the gust')
-        o4 = O.parse_jpl(html, "TB4", NOW)
-        self.assertEqual((o4["spd"], o4["gst"]), (9.7, 15.6), "each buoy reads its own column")
-        self.assertIsNone(O.parse_jpl(html, "TB2", NOW), "-99 = missing")
+        table = lambda unit: ("<table><tr><th>Measurement</th><th>TB1</th><th>TB2</th><th>TB3</th><th>TB4</th></tr>"
+                              f"<tr><td>Wind Speed ({unit})</td><td>2.0:4.0:6.0</td><td>-99</td><td>1:2:3</td><td>3.0:5.0:8.0</td></tr>"
+                              "<tr><td>Wind Direction (deg)</td><td>200:210:220</td><td>-99</td><td>0:0:0</td><td>190:205:220</td></tr></table>")
+        o = O.parse_jpl(table("m/s"), "TB1", NOW)
+        self.assertEqual((o["spd"], o["gst"], o["dir"]), (7.8, 11.7, 210), 'a metric page: "min:avg:max" m/s, avg is the wind, max the gust')
+        om = O.parse_jpl(table("mph"), "TB1", NOW)
+        self.assertEqual((om["spd"], om["gst"]), (3.5, 5.2), "the default imperial page converts mph -> knots (the toggle reads 'Switch to Metric')")
+        self.assertEqual(O.parse_jpl(table(""), "TB1", NOW)["spd"], 3.5, "no unit on the label: assume mph (and say so in the log)")
+        o4 = O.parse_jpl(table("mph"), "TB4", NOW)
+        self.assertEqual((o4["spd"], o4["gst"]), (4.3, 7.0), "each buoy reads its own column")
+        self.assertIsNone(O.parse_jpl(table("mph"), "TB2", NOW), "-99 = missing")
         self.assertEqual(o["time"], "2026-10-26T23:00:00Z", "stamped at the top of the previous hour (what the page shows)")
 
     def test_cdip_wave_only(self):
@@ -86,6 +89,17 @@ class TestParsers(unittest.TestCase):
         o = O.parse_cdip(txt, NOW)
         self.assertEqual((o["wvht_ft"], o["dpd"], o["mwd"]), (5.0, 11.76, 285))
         self.assertTrue(o["spd"] is None and o["gst"] is None and o["dir"] is None, "a CDIP row is never a wind sample")
+        self.assertEqual(O.parse_cdip("Hs = 1.52 m  Tp: 11.76  Dp: 285", NOW)["wvht_ft"], 5.0, "label spellings vary; 'Hs = 1.52 m' parses too")
+        self.assertEqual(O.parse_cdip("Hs: 5.0 ft", NOW)["wvht_ft"], 5.0, "an Hs already in feet is not converted")
+        self.assertIsNone(O.parse_cdip("maintenance page, no data", NOW), "no Hs: None, so the fetch loop falls back to the NDBC mirror")
+
+    def test_ndbc_wave_only_mirror(self):
+        txt = ("#YY  MM DD hh mm WDIR WSPD GST  WVHT   DPD   APD MWD   PRES  ATMP  WTMP  DEWP  VIS PTDY  TIDE\n"
+               "#hdr\n"
+               "2026 10 27 00 10 MM   MM   MM   1.5    11   9.1 285     MM    MM  13.5    MM  MM   MM    MM\n")
+        self.assertIsNone(O.parse_ndbc(txt, NOW), "without wave_ok a windless line is skipped, as before")
+        o = O.parse_ndbc(txt, NOW, wave_ok=True)
+        self.assertEqual((o["spd"], o["wvht_ft"]), (None, 4.9), "a CDIP mirror line (no anemometer) still yields the wave height")
 
 
 class TestFetchLoop(unittest.TestCase):
@@ -121,6 +135,24 @@ class TestFetchLoop(unittest.TestCase):
         wave = out["oceanbeach"][1]
         self.assertTrue(wave["wave_only"] and wave["spd"] is None and wave["wvht_ft"] == 5.0, "wave-only row: swell line only, never wind")
         self.assertEqual(doc["obs"]["crissy"][0]["spd"], 9.7, "obs.json carries the same rows")
+
+    def test_cdip_falls_back_to_the_ndbc_mirror(self):
+        stations = {"oceanbeach": [{"id": "46237", "name": "SF Bar CDIP 142", "kind": "cdip", "dist_mi": 6.7, "cdip": "142", "wave_only": True}]}
+        calls = []
+
+        def getter(url):
+            calls.append(url)
+            if "justdar" in url:
+                return "unexpected page with no wave parameters"
+            if "realtime2/46237" in url:
+                return ("#hdr\n#hdr\n2026 10 27 00 10 MM   MM   MM   1.5    11   9.1 285     MM    MM  13.5    MM  MM   MM    MM\n")
+            raise AssertionError("unexpected url " + url)
+
+        with tempfile.TemporaryDirectory() as td:
+            out = O.fetch_obs(stations, now=NOW, getter=getter, out_file=os.path.join(td, "obs.json"))
+        self.assertEqual(len(calls), 2, "justdar first, then the NDBC mirror")
+        row = out["oceanbeach"][0]
+        self.assertTrue(row["wave_only"] and row["spd"] is None and row["wvht_ft"] == 4.9, "the mirror's wave height lands as the same wave-only row")
 
     def test_a_failing_kind_is_skipped_never_fatal(self):
         stations = {"crissy": [{"id": "FTPC1", "name": "Fort Point", "kind": "coops", "dist_mi": 0.6, "nos": "9414290"},
