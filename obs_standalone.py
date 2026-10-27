@@ -225,25 +225,20 @@ def _find_key(node, key):
 
 
 def parse_caltrans(text, match, now):
-    """One district RWIS file; pick the site whose location text carries every word of `match`.
+    """One district RWIS file; pick the SITE RECORD whose text carries every word of `match`. A site
+    record is an element of the file's top-level "data" list: the 2026-10-27 run's dump showed the dict
+    that holds windData is a bare sensor record with no location fields at all — the site name lives on
+    the record around it, so match over the whole record, never the sensor dict.
     NTCIP ESS wind units: tenths of m/s, 65535 = missing; directions in degrees, >360 = missing."""
     doc = json.loads(text)
-    site, misses = None, []
-    for d in _walk(doc):
-        if "windData" not in d:
-            continue
-        hay = re.sub(r"[^a-z0-9]+", " ", json.dumps(d).lower())
-        if all(m in hay for m in match):
-            site = d
-            break
-        misses.append(d)
-    if not site:
-        # Show a sample site verbatim (the 2026-10-27 run proved these dicts carry no locationName where
-        # we looked), so the log settles what the location fields are called and where the station lives.
-        head = json.dumps(misses[0], separators=(",", ":"))[:300] if misses else "none"
-        print(f"obs caltrans: no site matching {match} among {len(misses)} wind site(s); first site: {head}", file=sys.stderr)
+    data = doc.get("data") if isinstance(doc, dict) else None
+    sites = [c for c in (data if isinstance(data, list) else [doc]) if any(isinstance(d.get("windData"), dict) for d in _walk(c))]
+    site = next((c for c in sites if all(m in re.sub(r"[^a-z0-9]+", " ", json.dumps(c).lower()) for m in match)), None)
+    if site is None:
+        head = json.dumps(sites[0], separators=(",", ":"))[:300] if sites else "none"
+        print(f"obs caltrans: no site matching {match} among {len(sites)} wind site(s); first site: {head}", file=sys.stderr)
         return None
-    w = site["windData"] if isinstance(site["windData"], dict) else {}
+    w = next((d["windData"] for d in _walk(site) if isinstance(d.get("windData"), dict)), {})
     def ess(k):
         v = w.get(k)
         try:
@@ -422,11 +417,24 @@ def fetch_obs(stations, now=None, getter=get, out_file=None):
 
     def iem(st):
         net = st.get("network", "CA_DCP")
+        best, counts = None, []
         for day in (now.astimezone(LA).date(), now.astimezone(LA).date() - datetime.timedelta(days=1)):
-            o = parse_iem(getter(f"{IEM_API}?station={st['id']}&network={net}&date={day.isoformat()}"), now)
-            if o:
-                return o
-        return None
+            text = getter(f"{IEM_API}?station={st['id']}&network={net}&date={day.isoformat()}")
+            try:
+                counts.append(len(json.loads(text).get("data") or []))
+            except Exception:
+                counts.append(-1)
+            o = parse_iem(text, now)
+            if o and (best is None or o["age_min"] < best["age_min"]):
+                best = o
+            if best and best["age_min"] <= 240:
+                break
+        if best and best["age_min"] > 240:
+            # Every RAWS/IEM station came back ~18 h stale on 2026-10-27 17:50Z after being fresh at
+            # 03:37Z: say what the two day pages held, so the log shows whether IEM's decode is behind
+            # or the date parameter reads differently than we assume.
+            print(f"obs iem {st['id']}: freshest decode is {best['age_min']} min old from {best['time']} (rows today/yesterday: {counts})", file=sys.stderr)
+        return best
 
     def reader(st):
         kind = st["kind"]
