@@ -11,7 +11,10 @@
    "reports_dir": true,
    "how_to_read": "Weather Underground PWS: view at https://www.wunderground.com/dashboard/pws/KCABELVE30; scripted reads need a WU PWS API key (free only for station owners). View-only for this project.",
    "notes": "Ambient Weather WS-2902 at 3 ft elevation on the Paradise Cay waterfront (coords as WU shows, ~3 decimals); reported 13.2 gust 13.6 from 291 at 17:27 PDT 2026-10-26 (WU does not label units; PWS default is mph). Best proxy for the home dock. Sensor height unknown.",
-   "dist_mi": 0.1
+   "dist_mi": 0.1,
+   "feed": "WU dashboard, view-only",
+   "cadence": "~1-5 min",
+   "live_check": "live 2026-10-26 17:2x PDT"
   },
   {
    "id": "KCATIBUR4",
@@ -24,7 +27,10 @@
    "reports_dir": true,
    "how_to_read": "Weather Underground PWS: view at https://www.wunderground.com/dashboard/pws/KCATIBUR4; scripted reads need a WU PWS API key (free only for station owners). View-only for this project.",
    "notes": "Davis Vantage Pro2 at 565 ft on the Tiburon ridge; live 2026-10-26. Ridge-top, overreads the water on some days; view-only.",
-   "dist_mi": 2.3
+   "dist_mi": 2.3,
+   "feed": "WU dashboard, view-only",
+   "cadence": "~1-5 min",
+   "live_check": "live 2026-10-26 17:2x PDT"
   },
   {
    "id": "WB6TTB",
@@ -37,7 +43,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/WB6TTB (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=WB6TTB ; also via api.weather.gov/stations/AU915/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "Hillside home station at ~172 m elevation on the Tiburon peninsula; live (00:18 UTC 2026-10-27, W 3.1 m/s gust 4.9). Terrain-sheltered; use for direction/trend only.",
-   "dist_mi": 2.4
+   "dist_mi": 2.4,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "TIBC1",
@@ -50,7 +59,10 @@
    "reports_dir": true,
    "how_to_read": "ERDDAP CSV/JSON, free, no key: https://erddap.operational.sensors.axds.co/erddap/tabledap/tiburon-weather-tibc1.csv?time,wind_speed,wind_speed_of_gust,wind_from_direction&time>=now-3hours ; NDBC page https://www.ndbc.noaa.gov/station_page.php?station=tibc1",
    "notes": "Pier-mounted station on Richardson/Raccoon Strait shore of Tiburon, anemometer 10 m. STALE: ERDDAP time coverage ends 2026-09-24 and TIBC1 was absent from NDBC latest_obs on 2026-10-26. Check before relying on it.",
-   "dist_mi": 2.5
+   "dist_mi": 2.5,
+   "feed": "Axiom ERDDAP CSV/JSON (free)",
+   "cadence": "~10 min when running",
+   "live_check": "STALE: last data 2026-09-24"
   },
   {
    "id": "RCMC1",
@@ -63,7 +75,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414863&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RCMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RCMC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "On the Richmond Long Wharf across the channel from Paradise Cay; open-water exposure to W/SW. Best free scriptable sensor for this launch.",
-   "dist_mi": 4.4
+   "dist_mi": 4.4,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "crissy": [
@@ -78,7 +93,10 @@
    "reports_dir": true,
    "how_to_read": "iKitesurf / WeatherFlow Tempest network: view at https://wx.ikitesurf.com/spot/<unknown> (free account shows current reading; graphs/history need paid membership). No free API. View-only.",
    "notes": "COORDS APPROXIMATE (placed at Anita Rock off the beach; exact mount and spot id not found). Per Mike Godsey (WeatherFlow) it is accurate in NW ocean wind but reads well above the beach in WSW/eddy/marine-surge flow because it sits just above the Presidio wind shadow. View-only.",
-   "dist_mi": 0.1
+   "dist_mi": 0.1,
+   "feed": "WeatherFlow/iKitesurf, view-only (free account = current reading; paid for history)",
+   "cadence": "~5 min (per WeatherFlow)",
+   "live_check": "unverified (not fetchable from this container)"
   },
   {
    "id": "FTPC1",
@@ -91,7 +109,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414290&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/FTPC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/FTPC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "On the Fort Point / Crissy Field seawall at the Golden Gate, 0.6 mi W of the launch; the station Windfinder labels \"Crissy Field\". Reads the ocean-wind side of the beach; the beach itself sits in the Presidio wind shadow on WSW/eddy days.",
-   "dist_mi": 0.6
+   "dist_mi": 0.6,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "GGBC1",
@@ -104,7 +125,10 @@
    "reports_dir": true,
    "how_to_read": "https://api.weather.gov/stations/GGBC1/observations/latest (MADIS feed, lagged 4 days on 2026-10-26) or Synoptic stid=GGBC1. Free.",
    "notes": "Bridge-mounted anemometer (NWS lists 82 m elevation); reports wind and gust at 15-min cadence. High above the water, so it overreads surface wind; good for gradient/eddy direction.",
-   "dist_mi": 1.7
+   "dist_mi": 1.7,
+   "feed": "MADIS via api.weather.gov (lagged) or Synoptic",
+   "cadence": "15-min",
+   "live_check": "last seen 2026-10-22 in NWS feed"
   },
   {
    "id": "PXOC1",
@@ -117,7 +141,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414311&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PXOC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PXOC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "Ferry Building waterfront, 3.3 mi E; 16 m anemometer, city-side wind. Secondary.",
-   "dist_mi": 3.3
+   "dist_mi": 3.3,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "46026",
@@ -130,7 +157,10 @@
    "reports_dir": true,
    "how_to_read": "https://www.ndbc.noaa.gov/data/realtime2/46026.txt (hourly, m/s) or api.weather.gov/stations/46026/observations/latest. Free.",
    "notes": "Offshore ocean reference 21 mi W; shows the NW ocean wind feeding the Gate, not the beach. Note 46237 (SF Bar) reports waves only, no wind.",
-   "dist_mi": 21.3
+   "dist_mi": 21.3,
+   "feed": "NDBC realtime2 (free)",
+   "cadence": "hourly",
+   "live_check": "live 2026-10-26 23:30Z"
   }
  ],
  "candlestick": [
@@ -145,7 +175,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/GW3010 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=GW3010 ; also via api.weather.gov/stations/G3010/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "Ambient-Weather home station at ~53 m elevation 1.7 mi NW, inland of the point; readings near zero while PORTS stations showed 10-15 kn, so sheltered. Trend only.",
-   "dist_mi": 1.7
+   "dist_mi": 1.7,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "K6POO-1",
@@ -158,7 +191,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/K6POO-1 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=K6POO-1 ; also via api.weather.gov/stations/AW038/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "2.0 mi S in Brisbane at ~37 m; sheltered (near-zero readings on a windy afternoon). Trend only.",
-   "dist_mi": 2.0
+   "dist_mi": 2.0,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "KSFO",
@@ -171,7 +207,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSFO/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSFO. Free, scriptable, no key.",
    "notes": "Bayside airport 6 mi S; standard 10 m ASOS (height assumed per ASOS siting, not confirmed). Hourly METAR; gust only in strong wind. Closest well-exposed free sensor; Candlestick is usually windier than SFO in the W-NW gap flow.",
-   "dist_mi": 6.1
+   "dist_mi": 6.1,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   },
   {
    "id": "PXOC1",
@@ -184,7 +223,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414311&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PXOC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PXOC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "6.3 mi N on the Embarcadero; 6-min with gusts. Different exposure (city waterfront).",
-   "dist_mi": 6.3
+   "dist_mi": 6.3,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "AAMC1",
@@ -197,7 +239,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "Across the bay 6.5 mi NE; same W sea-breeze regime. 6-min with gusts.",
-   "dist_mi": 6.5
+   "dist_mi": 6.5,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "thirdave": [
@@ -212,7 +257,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/N6OL (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=N6OL ; also via api.weather.gov/stations/AU221/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "Davis/Cumulus home station at 4 m elevation on the San Mateo bayfront between Coyote Point and 3rd Ave, 1.7 mi W; live with gusts. Reads lower than open water (2.7 m/s when SFO had ~10 kn).",
-   "dist_mi": 1.7
+   "dist_mi": 1.7,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "DW3499",
@@ -225,7 +273,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/DW3499 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=DW3499 ; also via api.weather.gov/stations/D3499/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "Davis VP2 at 2 m elevation in residential Foster City 2.6 mi S; reported 0 wind during a windy afternoon, so badly sheltered. Not useful for wind; listed for completeness.",
-   "dist_mi": 2.6
+   "dist_mi": 2.6,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "KSQL",
@@ -238,7 +289,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSQL/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSQL. Free, scriptable, no key.",
    "notes": "Bayside airport 4.8 mi SE; hourly METAR (gust only when reported); NW channel wind reaches it. Height assumed 10 m.",
-   "dist_mi": 4.8
+   "dist_mi": 4.8,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   },
   {
    "id": "KSFO",
@@ -251,7 +305,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSFO/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSFO. Free, scriptable, no key.",
    "notes": "5.2 mi NW; the upwind airport for the 3rd Ave/Coyote W-NW sea breeze.",
-   "dist_mi": 5.2
+   "dist_mi": 5.2,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   },
   {
    "id": "RTYC1",
@@ -264,7 +321,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414523&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RTYC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RTYC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "Only on-the-water PORTS sensor in the South Bay, 6.4 mi SE at the port; 6-min with gusts. NOTE: RTYC1 is Redwood City, not Richmond YC. Locals read the paid iKitesurf \"3rd Ave\" (beach) and \"3rd Ave Channel\" sensors; the channel reads well above the launch in W wind.",
-   "dist_mi": 6.5
+   "dist_mi": 6.5,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "coyote": [
@@ -279,7 +339,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/N6OL (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=N6OL ; also via api.weather.gov/stations/AU221/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "0.6 mi SE of the Coyote Point launch at 4 m elevation; live with gusts. Closest sensor of any network; sheltered relative to the water.",
-   "dist_mi": 0.6
+   "dist_mi": 0.6,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "KM6RDV",
@@ -292,7 +355,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/KM6RDV (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=KM6RDV ; also via api.weather.gov/stations/AX472/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "1.8 mi S at ~10 m; near-zero readings on a windy afternoon, sheltered. Trend only.",
-   "dist_mi": 1.8
+   "dist_mi": 1.8,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "KSFO",
@@ -305,7 +371,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSFO/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSFO. Free, scriptable, no key.",
    "notes": "3.3 mi NW, directly upwind in the NW sea breeze; best free scriptable proxy for Coyote Point.",
-   "dist_mi": 3.3
+   "dist_mi": 3.3,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   },
   {
    "id": "KSQL",
@@ -318,7 +387,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSQL/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSQL. Free, scriptable, no key.",
    "notes": "6.6 mi SE, downwind airport.",
-   "dist_mi": 6.3
+   "dist_mi": 6.3,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   },
   {
    "id": "RTYC1",
@@ -331,7 +403,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414523&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RTYC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RTYC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "8.2 mi SE on the water; 6-min with gusts. Paid iKitesurf \"Coyote Point\" sensor exists (location/id not found).",
-   "dist_mi": 8.3
+   "dist_mi": 8.3,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "alameda": [
@@ -346,7 +421,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "1.8 mi NW of Crown Beach on the old Navy pier; open W exposure; 6-min with gusts. Best free sensor for Crown Beach.",
-   "dist_mi": 1.8
+   "dist_mi": 1.8,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "DW9579",
@@ -359,7 +437,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/DW9579 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=DW9579 ; also via api.weather.gov/stations/D9579/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "Davis station at 4 m elevation on Alameda Point 2.0 mi NW; live (W 5.8 m/s gust 8.0 at 00:19 UTC 2026-10-27, vs AAMC1 12 kn). Reads ~0.5x the pier.",
-   "dist_mi": 2.0
+   "dist_mi": 2.0,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "LNDC1",
@@ -372,7 +453,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414763&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/LNDC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/LNDC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "Inner-harbor berth 2.6 mi N; sheltered by port cranes. NOTE: LNDC1 is Oakland Berth 67, not Mare Island.",
-   "dist_mi": 2.6
+   "dist_mi": 2.6,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "KOAK",
@@ -385,7 +469,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KOAK/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KOAK. Free, scriptable, no key.",
    "notes": "3.7 mi SE on the bay shore; hourly METAR. Paid iKitesurf \"Alameda\" sensor exists (location/id not found).",
-   "dist_mi": 3.7
+   "dist_mi": 3.7,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   }
  ],
  "berkeley": [
@@ -400,7 +487,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/KJ6WEG (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=KJ6WEG ; also via api.weather.gov/stations/AV737/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "Residential station 1.7 mi E at ~32 m; near-zero readings while the bay blew 10-15 kn, so sheltered. Direction/trend only.",
-   "dist_mi": 1.7
+   "dist_mi": 1.7,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "IKITESURF_BERKELEY_REEF",
@@ -413,7 +503,10 @@
    "reports_dir": true,
    "how_to_read": "iKitesurf / WeatherFlow Tempest network: view at https://wx.ikitesurf.com/spot/175511 (free account shows current reading; graphs/history need paid membership). No free API. View-only.",
    "notes": "COORDS APPROXIMATE (on a metal marker over the rocky reef off the Berkeley Marina; exact position not published). WeatherFlow says it is often the best reading for the Olympic Circle; repairs need a boat and USCG permission so outages last. View-only.",
-   "dist_mi": 1.9
+   "dist_mi": 1.9,
+   "feed": "WeatherFlow/iKitesurf, view-only (free account = current reading; paid for history)",
+   "cadence": "~5 min (per WeatherFlow)",
+   "live_check": "unverified (not fetchable from this container)"
   },
   {
    "id": "OKXC1",
@@ -426,7 +519,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "Outer-harbor berth 3.8 mi S, open to the W through the Gate gap; 6-min with gusts. Best free scriptable sensor for the Berkeley/Emeryville shore.",
-   "dist_mi": 3.8
+   "dist_mi": 3.8,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "PPXC1",
@@ -439,7 +535,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414847&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PPXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PPXC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "4.0 mi NW on the Richmond harbor entrance; 6-min with gusts; anemometer height not published. On NDBC/CO-OPS only (not on api.weather.gov).",
-   "dist_mi": 4.0
+   "dist_mi": 4.0,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "RCMC1",
@@ -452,7 +551,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414863&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RCMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RCMC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "6.6 mi NW; upwind of the Berkeley flats in NW flow.",
-   "dist_mi": 6.5
+   "dist_mi": 6.5,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "pointisabel": [
@@ -467,7 +569,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/GW5483 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=GW5483 ; also via api.weather.gov/stations/G5483/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "1.1 mi NE at 7 m, inland of the shoreline; near-zero readings on a windy afternoon, sheltered. Trend only.",
-   "dist_mi": 1.1
+   "dist_mi": 1.1,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "DW7213",
@@ -480,7 +585,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/DW7213 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=DW7213 ; also via api.weather.gov/stations/D7213/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "Davis station at 0 m elevation on the Richmond Marina Bay shoreline 1.7 mi W; live with gusts (W 256 5.4 m/s gust 7.6 at 00:15 UTC 2026-10-27) and tracks the PORTS stations, so apparently well exposed. Closest useful free sensor.",
-   "dist_mi": 2.0
+   "dist_mi": 2.0,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "PPXC1",
@@ -493,7 +601,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414847&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PPXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PPXC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "2.3 mi W at the Richmond harbor mouth; 6-min with gusts; best free scriptable sensor. Height not published.",
-   "dist_mi": 2.3
+   "dist_mi": 2.3,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "KCACALIF93",
@@ -506,7 +617,10 @@
    "reports_dir": true,
    "how_to_read": "Weather Underground PWS: view at https://www.wunderground.com/dashboard/pws/KCACALIF93; scripted reads need a WU PWS API key (free only for station owners). View-only for this project.",
    "notes": "Davis VP2 run by the yacht club at Brickyard Cove 3.3 mi W; live with gusts (12 g14 from 248 at 17:25 PDT 2026-10-26). View-only.",
-   "dist_mi": 3.2
+   "dist_mi": 3.2,
+   "feed": "WU dashboard, view-only",
+   "cadence": "~1-5 min",
+   "live_check": "live 2026-10-26 17:2x PDT"
   },
   {
    "id": "RCMC1",
@@ -519,7 +633,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414863&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RCMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RCMC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "4.6 mi W, upwind on the Long Wharf. Paid iKitesurf \"Pt. Isabel\" sensor exists (location/id not found).",
-   "dist_mi": 4.6
+   "dist_mi": 4.6,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "tollplaza": [
@@ -534,7 +651,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "1.7 mi S at the outer harbor, same W exposure as Radio Beach; 6-min with gusts. Best free sensor.",
-   "dist_mi": 1.7
+   "dist_mi": 1.7,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "OMHC1",
@@ -547,7 +667,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414769&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OMHC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OMHC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "2.2 mi S; met-only PORTS site, 6-min with gusts; also on api.weather.gov.",
-   "dist_mi": 2.2
+   "dist_mi": 2.2,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "LNDC1",
@@ -560,7 +683,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414763&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/LNDC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/LNDC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "2.7 mi SE in the inner harbor; more sheltered.",
-   "dist_mi": 2.7
+   "dist_mi": 2.7,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "AAMC1",
@@ -573,7 +699,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "3.9 mi S. Paid iKitesurf \"Treasure Island\" sensor is the local reference for this stretch (location/id not found). OBXC1 Berth 38 is visibility-only (no wind).",
-   "dist_mi": 3.9
+   "dist_mi": 3.9,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "racetrack": [
@@ -588,7 +717,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/GW5483 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=GW5483 ; also via api.weather.gov/stations/G5483/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "1.6 mi N, inland and sheltered; trend only.",
-   "dist_mi": 1.6
+   "dist_mi": 1.6,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "IKITESURF_BERKELEY_REEF",
@@ -601,7 +733,10 @@
    "reports_dir": true,
    "how_to_read": "iKitesurf / WeatherFlow Tempest network: view at https://wx.ikitesurf.com/spot/175511 (free account shows current reading; graphs/history need paid membership). No free API. View-only.",
    "notes": "COORDS APPROXIMATE. On-the-water reef marker; view-only.",
-   "dist_mi": 2.8
+   "dist_mi": 2.8,
+   "feed": "WeatherFlow/iKitesurf, view-only (free account = current reading; paid for history)",
+   "cadence": "~5 min (per WeatherFlow)",
+   "live_check": "unverified (not fetchable from this container)"
   },
   {
    "id": "DW7213",
@@ -614,7 +749,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/DW7213 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=DW7213 ; also via api.weather.gov/stations/D7213/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "2.7 mi NW on the shoreline, live with gusts; closest exposed free sensor.",
-   "dist_mi": 2.9
+   "dist_mi": 2.9,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "PPXC1",
@@ -627,7 +765,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414847&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PPXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PPXC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "3.2 mi NW; 6-min with gusts; best free scriptable sensor.",
-   "dist_mi": 3.2
+   "dist_mi": 3.2,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "OKXC1",
@@ -640,7 +781,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "5.4 mi S; 6-min with gusts.",
-   "dist_mi": 5.4
+   "dist_mi": 5.4,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "pointemery": [
@@ -655,7 +799,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/KJ6WEG (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=KJ6WEG ; also via api.weather.gov/stations/AV737/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "2.0 mi NE, residential and sheltered; trend only. A4539 \"Berkeley Aquatic Park\" (37.8648,-122.3027, 1.7 mi) is listed by NWS but returns no observations; unverified.",
-   "dist_mi": 2.0
+   "dist_mi": 2.0,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "OKXC1",
@@ -668,7 +815,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "2.6 mi S across the Emeryville flats; 6-min with gusts. Best free sensor.",
-   "dist_mi": 2.6
+   "dist_mi": 2.6,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "OMHC1",
@@ -681,7 +831,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414769&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OMHC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OMHC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "3.1 mi S; 6-min with gusts.",
-   "dist_mi": 3.1
+   "dist_mi": 3.1,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "LNDC1",
@@ -694,7 +847,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414763&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/LNDC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/LNDC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "3.3 mi S, inner harbor, more sheltered.",
-   "dist_mi": 3.3
+   "dist_mi": 3.3,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "AAMC1",
@@ -707,7 +863,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "4.7 mi S; 6-min with gusts.",
-   "dist_mi": 4.7
+   "dist_mi": 4.7,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "sherman": [
@@ -722,7 +881,10 @@
    "reports_dir": true,
    "how_to_read": "iKitesurf / WeatherFlow Tempest network: view at https://wx.ikitesurf.com/spot/<unknown> (free account shows current reading; graphs/history need paid membership). No free API. View-only.",
    "notes": "COORDS = launch (sensor positions not published). Two WeatherFlow sensors on the river; forum users say #12 is nearer the main kiting area, and the sensors can read WSW when kiters feel SW. The sensor locals actually use; view-only/paid.",
-   "dist_mi": 0.0
+   "dist_mi": 0.0,
+   "feed": "WeatherFlow/iKitesurf, view-only (free account = current reading; paid for history)",
+   "cadence": "~5 min (per WeatherFlow)",
+   "live_check": "unverified (not fetchable from this container)"
   },
   {
    "id": "519PG",
@@ -735,7 +897,10 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/519PG/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=519PG&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "3.6 mi SE near the Antioch Bridge approach at 12 m; 10-min wind/gust/dir. Land station; use with the PORTS reading.",
-   "dist_mi": 3.6
+   "dist_mi": 3.6,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
   },
   {
    "id": "606PG",
@@ -748,7 +913,10 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/606PG/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=606PG&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "4.0 mi W at 4 m elevation in Pittsburg; 10-min wind/gust.",
-   "dist_mi": 4.0
+   "dist_mi": 4.0,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
   },
   {
    "id": "IKITESURF_100721",
@@ -761,7 +929,10 @@
    "reports_dir": true,
    "how_to_read": "iKitesurf / WeatherFlow Tempest network: view at https://wx.ikitesurf.com/spot/100721 (free account shows current reading; graphs/history need paid membership). No free API. View-only.",
    "notes": "COORDS APPROXIMATE (Windfinder lists \"Pittsburg Marina\" 5.5 km from Antioch marina). Free iKitesurf account shows the current reading. Recommended on bayareakiteboarding.com for Bay Point; also upwind of Sherman. CDEC ANH (Antioch, 38.0178,-121.8030, 1.8 mi) lists a wind sensor but returned -9999 (no data) on 2026-10-26.",
-   "dist_mi": 4.3
+   "dist_mi": 4.3,
+   "feed": "WeatherFlow/iKitesurf, view-only (free account = current reading; paid for history)",
+   "cadence": "~5 min (per WeatherFlow)",
+   "live_check": "unverified (not fetchable from this container)"
   },
   {
    "id": "PSBC1",
@@ -774,7 +945,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9415115&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PSBC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PSBC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "4.4 mi W on the Pittsburg waterfront, upwind in the W-SW Delta flow; 6-min with gusts. Best free scriptable sensor for Sherman Island. NOTE: PSBC1 is Pittsburg, not San Mateo Bridge.",
-   "dist_mi": 4.4
+   "dist_mi": 4.4,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   }
  ],
  "windycove": [
@@ -789,7 +963,10 @@
    "reports_dir": true,
    "how_to_read": "https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet?Stations=RVB&SensorNums=9,10&dur_code=E&Start=<date>&End=<date> (mph). Free, no key.",
    "notes": "1.3 mi N at the bridge; CDEC lists wind speed (9) and direction (10) sensors but every 15-min and hourly value on 2026-10-26 was -9999 (no data). Same for ANH, MAL, GZL, FRK, MRZ, BDL. Treat DWR Delta wind as not live.",
-   "dist_mi": 1.3
+   "dist_mi": 1.3,
+   "feed": "CDEC JSONDataServlet (free, keyless)",
+   "cadence": "15-min",
+   "live_check": "NO DATA (-9999) on 2026-10-26"
   },
   {
    "id": "CF105",
@@ -802,7 +979,10 @@
    "reports_dir": true,
    "how_to_read": "Caltrans feed https://cwwp2.dot.ca.gov/data/d4/rwisStatusD04.json (returned HTTP 500 on 2026-10-26); also https://api.weather.gov/stations/CF105/observations (MADIS) and Synoptic stid=CF105. Windfinder \"Rio Vista / Delta\" report (38.1551,-121.6762) appears to be this station.",
    "notes": "1.4 mi NE at the Rio Vista bridge, right on the river. UNVERIFIED LIVE: wind fields were null in the NWS feed the week of 2026-10-22 and Windfinder showed \"no data\"; the Caltrans endpoint was down. Check before use.",
-   "dist_mi": 1.4
+   "dist_mi": 1.4,
+   "feed": "Caltrans cwwp2 JSON (HTTP 500 on 2026-10-26) / MADIS",
+   "cadence": "10-min",
+   "live_check": "CF106 reporting 2026-10-22; CF105 null wind fields - unverified"
   },
   {
    "id": "TCICA",
@@ -815,7 +995,10 @@
    "reports_dir": true,
    "how_to_read": "CIMIS API (free key): https://et.water.ca.gov/api/data?appKey=...&targets=140&dataItems=hly-wind-spd,hly-wind-dir ; or https://api.weather.gov/stations/TCICA/observations (MADIS, lagged).",
    "notes": "COORDS from NWS CI140 entry (CIMIS lists 140 Twitchell Island nearby). Agricultural station, 2 m anemometer, hourly mean, no gust. 2.6-3.8 mi S across the river; flat Delta exposure.",
-   "dist_mi": 2.6
+   "dist_mi": 2.6,
+   "feed": "CIMIS API (free key) / MADIS",
+   "cadence": "hourly",
+   "live_check": "reporting 2026-10-22 in NWS feed"
   },
   {
    "id": "CF106",
@@ -828,7 +1011,10 @@
    "reports_dir": true,
    "how_to_read": "https://api.weather.gov/stations/CF106/observations (MADIS; lagged) or Synoptic stid=CF106; Caltrans d4 JSON when up.",
    "notes": "6.0 mi E on SR-12 at Brannan Island Rd; reported wind + gust + dir at 10-min cadence (7.2 km/h g8.6 at 13:10Z 2026-10-22). Roadside, flat Delta exposure.",
-   "dist_mi": 6.0
+   "dist_mi": 6.0,
+   "feed": "Caltrans cwwp2 JSON (HTTP 500 on 2026-10-26) / MADIS",
+   "cadence": "10-min",
+   "live_check": "CF106 reporting 2026-10-22; CF105 null wind fields - unverified"
   },
   {
    "id": "493PG",
@@ -841,7 +1027,10 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/493PG/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=493PG&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "6.5 mi NE in the Delta islands at 6 m; 10-min wind/gust. Also 495PG Birds Landing Road (38.1381,-121.8341, 74 m, 7.6 mi W). A paid iKitesurf \"Rio Vista\" sensor is believed to exist but was not verified.",
-   "dist_mi": 6.5
+   "dist_mi": 6.5,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
   }
  ],
  "baypoint": [
@@ -856,7 +1045,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/EW9715 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=EW9715 ; also via api.weather.gov/stations/E9715/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "2.0 mi SE at 25 m in a residential area; near-zero readings while PORTS showed 13 kn; sheltered, trend only.",
-   "dist_mi": 2.0
+   "dist_mi": 2.0,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "PSBC1",
@@ -869,7 +1061,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9415115&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PSBC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PSBC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "4.1 mi E on the Pittsburg waterfront, downwind; 6-min with gusts.",
-   "dist_mi": 4.1
+   "dist_mi": 4.1,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "IKITESURF_100721",
@@ -882,7 +1077,10 @@
    "reports_dir": true,
    "how_to_read": "iKitesurf / WeatherFlow Tempest network: view at https://wx.ikitesurf.com/spot/100721 (free account shows current reading; graphs/history need paid membership). No free API. View-only.",
    "notes": "COORDS APPROXIMATE. The sensor bayareakiteboarding.com recommends for Bay Point/McAvoy; free account shows the current reading, no API.",
-   "dist_mi": 4.3
+   "dist_mi": 4.3,
+   "feed": "WeatherFlow/iKitesurf, view-only (free account = current reading; paid for history)",
+   "cadence": "~5 min (per WeatherFlow)",
+   "live_check": "unverified (not fetchable from this container)"
   },
   {
    "id": "PCOC1",
@@ -895,7 +1093,10 @@
    "reports_dir": true,
    "how_to_read": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9415144&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PCOC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PCOC1/observations/latest (km/h). Free, scriptable, no key.",
    "notes": "4.3 mi W on the Suisun Bay pier, upwind of McAvoy in W flow; 6-min with gusts; also on api.weather.gov. Best free sensor.",
-   "dist_mi": 4.3
+   "dist_mi": 4.3,
+   "feed": "NOS CO-OPS API (free, keyless)",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT"
   },
   {
    "id": "KCCR",
@@ -908,7 +1109,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KCCR/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KCCR. Free, scriptable, no key.",
    "notes": "6.3 mi SW inland; hourly METAR. CDEC MAL (Mallard Island, 38.0428,-121.9201, 2.3 mi) lists wind but returned -9999 on 2026-10-26.",
-   "dist_mi": 6.3
+   "dist_mi": 6.3,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   }
  ],
  "granitebay": [
@@ -923,7 +1127,10 @@
    "reports_dir": true,
    "how_to_read": "Weather Underground PWS: view at https://www.wunderground.com/dashboard/pws/KCAGRANI20; scripted reads need a WU PWS API key (free only for station owners). View-only for this project.",
    "notes": "0.4 mi W, Davis VP2 Plus at 390 ft, but OFFLINE on 2026-10-26 (no wind data). View-only when up.",
-   "dist_mi": 0.4
+   "dist_mi": 0.4,
+   "feed": "WU dashboard, view-only",
+   "cadence": "~1-5 min",
+   "live_check": "offline 2026-10-26"
   },
   {
    "id": "PG882",
@@ -936,7 +1143,10 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/PG882/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=PG882&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "2.9 mi N at 143 m; 10-min wind/gust/dir (9.3 km/h g18.5 at 13:10Z 2026-10-22). Land station in oak foothills.",
-   "dist_mi": 2.9
+   "dist_mi": 2.9,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
   },
   {
    "id": "FLD",
@@ -949,7 +1159,10 @@
    "reports_dir": true,
    "how_to_read": "https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet?Stations=FLD&SensorNums=9,10&dur_code=E&Start=<date>&End=<date> (15-min, mph; live: 8 mph/169 deg at 16:14 PDT 2026-10-26). Free, no key.",
    "notes": "On the dam dyke at the lake shore 3.9 mi S; the only live free wind sensor on Folsom Lake found. No gust. Elevation 350 ft; anemometer height not published.",
-   "dist_mi": 3.8
+   "dist_mi": 3.8,
+   "feed": "CDEC JSONDataServlet (free, keyless)",
+   "cadence": "15-min",
+   "live_check": "live 2026-10-26 16:14 PDT"
   },
   {
    "id": "144PG",
@@ -962,7 +1175,10 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/144PG/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=144PG&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "5.9 mi S at 109 m; 10-min wind/gust.",
-   "dist_mi": 5.9
+   "dist_mi": 5.9,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
   },
   {
    "id": "KMHR",
@@ -975,7 +1191,10 @@
    "reports_dir": true,
    "how_to_read": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KMHR/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KMHR. Free, scriptable, no key.",
    "notes": "13.9 mi SW on the valley floor; hourly METAR; gradient reference only. Locals use a paid iKitesurf \"Folsom Lake\" sensor (per bayareakiteboarding: fair in N wind until the 20s; add ~5 mph in S wind); its location/id was not found.",
-   "dist_mi": 13.9
+   "dist_mi": 13.9,
+   "feed": "NWS METAR via api.weather.gov / aviationweather.gov (free)",
+   "cadence": "hourly + SPECI",
+   "live_check": "live 2026-10-26 (api.weather.gov latest)"
   }
  ],
  "folsompoint": [
@@ -990,7 +1209,10 @@
    "reports_dir": true,
    "how_to_read": "https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet?Stations=FLD&SensorNums=9,10&dur_code=E&Start=<date>&End=<date> (15-min, mph). Free, no key.",
    "notes": "0.9 mi SW on Dyke 8 beside the Folsom Point launch; live 15-min wind and direction, no gust. Closest sensor of any network.",
-   "dist_mi": 0.8
+   "dist_mi": 0.8,
+   "feed": "CDEC JSONDataServlet (free, keyless)",
+   "cadence": "15-min",
+   "live_check": "live 2026-10-26 16:14 PDT"
   },
   {
    "id": "144PG",
@@ -1003,7 +1225,10 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/144PG/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=144PG&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "3.3 mi S at 109 m; 10-min wind/gust/dir.",
-   "dist_mi": 3.3
+   "dist_mi": 3.3,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
   },
   {
    "id": "GW6439",
@@ -1016,7 +1241,10 @@
    "reports_dir": true,
    "how_to_read": "CWOP/APRS: ~5-10 min reports with gust at https://aprs.fi/weather/a/GW6439 (view; aprs.fi API needs a free key) and http://www.findu.com/cgi-bin/wxpage.cgi?call=GW6439 ; also via api.weather.gov/stations/G6439/observations (MADIS feed, lagged 4 days on 2026-10-26) and Synoptic (free 'open access' token). Free.",
    "notes": "4.0 mi SE residential; near-zero readings; trend only.",
-   "dist_mi": 4.0
+   "dist_mi": 4.0,
+   "feed": "CWOP via aprs.fi / findu (free view; Synoptic token for API)",
+   "cadence": "5-10 min",
+   "live_check": "live 2026-10-27 00:1xZ on aprs.fi"
   },
   {
    "id": "PG111",
@@ -1029,7 +1257,10 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/PG111/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=PG111&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "4.3 mi E at 329 m on the El Dorado Hills ridge; 10-min wind/gust; hilltop overreads the lake.",
-   "dist_mi": 4.3
+   "dist_mi": 4.3,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
   },
   {
    "id": "PG882",
@@ -1042,7 +1273,152 @@
    "reports_dir": true,
    "how_to_read": "PG&E weather station (MADIS/Synoptic network): 10-min wind, gust & dir at https://api.weather.gov/stations/PG882/observations (MADIS feed; lagged 4 days on 2026-10-26) or Synoptic https://api.synopticdata.com/v2/stations/latest?stid=PG882&token=... (free open-access token). No direct PG&E endpoint found.",
    "notes": "5.9 mi NW; 10-min wind/gust.",
-   "dist_mi": 5.6
+   "dist_mi": 5.6,
+   "feed": "MADIS via api.weather.gov (lagged 4 days on 2026-10-26) or Synoptic token",
+   "cadence": "10-min",
+   "live_check": "last seen 2026-10-22 in NWS feed; live status unverified"
+  }
+ ],
+ "_regional_reference": [
+  {
+   "id": "46026",
+   "network": "NDBC buoy",
+   "name": "San Francisco 18NM W",
+   "lat": 37.75,
+   "lon": -122.838,
+   "height_m_or_null": 4.1,
+   "reports_gust": true,
+   "reports_dir": true,
+   "feed": "NDBC realtime2 (free)",
+   "cadence": "hourly",
+   "live_check": "live 2026-10-26 23:30Z (320/8 m/s g9)",
+   "notes": "Ocean reference for the whole Bay."
+  },
+  {
+   "id": "46013",
+   "network": "NDBC buoy",
+   "name": "Bodega Bay",
+   "lat": 38.235,
+   "lon": -123.317,
+   "height_m_or_null": null,
+   "reports_gust": true,
+   "reports_dir": true,
+   "feed": "NDBC realtime2",
+   "cadence": "hourly",
+   "live_check": "live 2026-10-26 23:30Z",
+   "notes": "NW-flow upstream reference; 50+ mi from all spots."
+  },
+  {
+   "id": "46237",
+   "network": "NDBC buoy",
+   "name": "San Francisco Bar",
+   "lat": 37.788,
+   "lon": -122.634,
+   "height_m_or_null": null,
+   "reports_gust": false,
+   "reports_dir": false,
+   "feed": "NDBC realtime2",
+   "cadence": "30-min",
+   "live_check": "live 2026-10-26 23:30Z, WAVES ONLY (no wind)",
+   "notes": "Do not use for wind."
+  },
+  {
+   "id": "46214",
+   "network": "NDBC buoy (CDIP)",
+   "name": "Point Reyes",
+   "lat": 37.944,
+   "lon": -123.466,
+   "height_m_or_null": null,
+   "reports_gust": false,
+   "reports_dir": false,
+   "feed": "NDBC realtime2",
+   "cadence": "30-min",
+   "live_check": "live 2026-10-26 23:56Z, WAVES ONLY (no wind)",
+   "notes": "Do not use for wind."
+  },
+  {
+   "id": "PRYC1",
+   "network": "NOAA C-MAN",
+   "name": "Point Reyes",
+   "lat": 37.996,
+   "lon": -122.977,
+   "height_m_or_null": null,
+   "reports_gust": true,
+   "reports_dir": true,
+   "feed": "NDBC realtime2",
+   "cadence": "hourly",
+   "live_check": "2026-10-26 23:30Z record had NO wind fields (pressure/water temp only) - wind sensor apparently down",
+   "notes": "Unverified whether wind will return."
+  },
+  {
+   "id": "PTGC1",
+   "network": "NOAA C-MAN",
+   "name": "Point Arguello (not Bay Area)",
+   "lat": null,
+   "lon": null,
+   "height_m_or_null": null,
+   "reports_gust": true,
+   "reports_dir": true,
+   "feed": "NDBC realtime2",
+   "cadence": "hourly",
+   "live_check": "not checked",
+   "notes": "Unverified; ~200 mi south, irrelevant to these spots."
+  },
+  {
+   "id": "UPBC1",
+   "network": "NOAA CO-OPS PORTS (9415118)",
+   "name": "Union Pacific Rail Road Bridge, Martinez",
+   "lat": 38.0383,
+   "lon": -122.1205,
+   "height_m_or_null": 100,
+   "reports_gust": true,
+   "reports_dir": true,
+   "feed": "NOS CO-OPS API",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT",
+   "notes": "Anemometer 100 m up on the rail bridge; Carquinez gradient reference, overreads surface. 8.7 mi from Bay Point."
+  },
+  {
+   "id": "MZXC1",
+   "network": "NOAA CO-OPS PORTS (9415102)",
+   "name": "Martinez-Amorco Pier",
+   "lat": 38.0346,
+   "lon": -122.1252,
+   "height_m_or_null": 6.4,
+   "reports_gust": true,
+   "reports_dir": true,
+   "feed": "NOS CO-OPS API",
+   "cadence": "6-min",
+   "live_check": "live 2026-10-26 17:12 PDT",
+   "notes": "8.9 mi W of Bay Point; nearest sensor to Benicia along with KAPC/KCCR. No CWOP/PWS at Benicia was checked (unverified)."
+  },
+  {
+   "id": "SFXC1",
+   "network": "NERRS (Rush Ranch)",
+   "name": "Rush Ranch, Suisun Marsh",
+   "lat": 38.2,
+   "lon": -122.026,
+   "height_m_or_null": 7.5,
+   "reports_gust": false,
+   "reports_dir": true,
+   "feed": "NDBC realtime2 / api.weather.gov",
+   "cadence": "15-min",
+   "live_check": "live 2026-10-26 22:45Z",
+   "notes": "11 mi N of Bay Point; marsh exposure."
+  },
+  {
+   "id": "RAWS",
+   "network": "RAWS (IEM obhistory)",
+   "name": "Marin/East Bay hill RAWS (MDEC1 Middle Peak, BBEC1 Barnaby, PIBC1 Black Diamond, LTRC1 Las Trampas, PLTC1 Pilot Hill)",
+   "lat": null,
+   "lon": null,
+   "height_m_or_null": 6,
+   "reports_gust": true,
+   "reports_dir": true,
+   "feed": "IEM https://mesonet.agron.iastate.edu/sites/obhistory.php?station=<id>&network=CA_RAWS (free) or api.weather.gov",
+   "cadence": "hourly",
+   "live_check": "seen only in the lagged NWS feed (2026-10-22); not checked on IEM - unverified",
+   "notes": "Ridge-top stations 700+ ft; gradient/eddy direction only, not launch wind."
   }
  ]
 }

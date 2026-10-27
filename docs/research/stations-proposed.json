@@ -1,0 +1,1136 @@
+{
+ "paradisecay": [
+  {
+   "id": "RCMC1",
+   "name": "Richmond (Chevron Long Wharf / Berth 5)",
+   "kind": "coops",
+   "lat": 37.9283,
+   "lon": -122.4,
+   "dist_mi": 4.4,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414863&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RCMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RCMC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "crissy": [
+  {
+   "id": "FTPC1",
+   "name": "San Francisco (Fort Point)",
+   "kind": "coops",
+   "lat": 37.8067,
+   "lon": -122.465,
+   "dist_mi": 0.6,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414290&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/FTPC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/FTPC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "GGBC1",
+   "name": "Golden Gate Bridge",
+   "kind": "iem",
+   "lat": 37.8197,
+   "lon": -122.479,
+   "dist_mi": 1.7,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/GGBC1/observations/latest (MADIS feed, lagged 4 days on 2026-10-26) or Synoptic stid=GGBC1. Free."
+  },
+  {
+   "id": "PXOC1",
+   "name": "San Francisco Pier 1",
+   "kind": "coops",
+   "lat": 37.798,
+   "lon": -122.393,
+   "dist_mi": 3.3,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414311&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PXOC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PXOC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco (18 NM W of SF)",
+   "kind": "ndbc",
+   "lat": 37.75,
+   "lon": -122.838,
+   "dist_mi": 21.3,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46026.txt (hourly, m/s) or api.weather.gov/stations/46026/observations/latest. Free."
+  }
+ ],
+ "candlestick": [
+  {
+   "id": "KSFO",
+   "name": "San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.6196,
+   "lon": -122.3656,
+   "dist_mi": 6.1,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSFO/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSFO. Free, scriptable, no key."
+  },
+  {
+   "id": "PXOC1",
+   "name": "San Francisco Pier 1",
+   "kind": "coops",
+   "lat": 37.798,
+   "lon": -122.393,
+   "dist_mi": 6.3,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414311&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PXOC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PXOC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "AAMC1",
+   "name": "Alameda (former NAS Alameda)",
+   "kind": "coops",
+   "lat": 37.7717,
+   "lon": -122.2983,
+   "dist_mi": 6.5,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "thirdave": [
+  {
+   "id": "KSQL",
+   "name": "San Carlos Airport",
+   "kind": "nws",
+   "lat": 37.5167,
+   "lon": -122.25,
+   "dist_mi": 4.8,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSQL/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSQL. Free, scriptable, no key."
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.6196,
+   "lon": -122.3656,
+   "dist_mi": 5.2,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSFO/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSFO. Free, scriptable, no key."
+  },
+  {
+   "id": "RTYC1",
+   "name": "Redwood City (Port of Redwood City)",
+   "kind": "coops",
+   "lat": 37.5067,
+   "lon": -122.21,
+   "dist_mi": 6.5,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414523&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RTYC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RTYC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "coyote": [
+  {
+   "id": "KSFO",
+   "name": "San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.6196,
+   "lon": -122.3656,
+   "dist_mi": 3.3,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSFO/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSFO. Free, scriptable, no key."
+  },
+  {
+   "id": "KSQL",
+   "name": "San Carlos Airport",
+   "kind": "nws",
+   "lat": 37.5167,
+   "lon": -122.25,
+   "dist_mi": 6.3,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KSQL/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KSQL. Free, scriptable, no key."
+  },
+  {
+   "id": "RTYC1",
+   "name": "Redwood City",
+   "kind": "coops",
+   "lat": 37.5067,
+   "lon": -122.21,
+   "dist_mi": 8.3,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414523&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RTYC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RTYC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "alameda": [
+  {
+   "id": "AAMC1",
+   "name": "Alameda (former NAS Alameda, Oakland estuary mouth)",
+   "kind": "coops",
+   "lat": 37.7717,
+   "lon": -122.2983,
+   "dist_mi": 1.8,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "LNDC1",
+   "name": "Oakland Berth 67",
+   "kind": "coops",
+   "lat": 37.795,
+   "lon": -122.283,
+   "dist_mi": 2.6,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414763&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/LNDC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/LNDC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "KOAK",
+   "name": "Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.7213,
+   "lon": -122.2211,
+   "dist_mi": 3.7,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KOAK/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KOAK. Free, scriptable, no key."
+  }
+ ],
+ "berkeley": [
+  {
+   "id": "OKXC1",
+   "name": "Oakland Berth 34",
+   "kind": "coops",
+   "lat": 37.8106,
+   "lon": -122.3331,
+   "dist_mi": 3.8,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "PPXC1",
+   "name": "Point Potrero, Richmond",
+   "kind": "coops",
+   "lat": 37.9058,
+   "lon": -122.365,
+   "dist_mi": 4.0,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414847&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PPXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PPXC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "RCMC1",
+   "name": "Richmond (Chevron Long Wharf)",
+   "kind": "coops",
+   "lat": 37.9283,
+   "lon": -122.4,
+   "dist_mi": 6.5,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414863&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RCMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RCMC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "pointisabel": [
+  {
+   "id": "PPXC1",
+   "name": "Point Potrero, Richmond",
+   "kind": "coops",
+   "lat": 37.9058,
+   "lon": -122.365,
+   "dist_mi": 2.3,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414847&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PPXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PPXC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "RCMC1",
+   "name": "Richmond (Chevron Long Wharf)",
+   "kind": "coops",
+   "lat": 37.9283,
+   "lon": -122.4,
+   "dist_mi": 4.6,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414863&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/RCMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/RCMC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "tollplaza": [
+  {
+   "id": "OKXC1",
+   "name": "Oakland Berth 34",
+   "kind": "coops",
+   "lat": 37.8106,
+   "lon": -122.3331,
+   "dist_mi": 1.7,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "OMHC1",
+   "name": "Oakland Middle Harbor Met",
+   "kind": "coops",
+   "lat": 37.8,
+   "lon": -122.33,
+   "dist_mi": 2.2,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414769&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OMHC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OMHC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "LNDC1",
+   "name": "Oakland Berth 67",
+   "kind": "coops",
+   "lat": 37.795,
+   "lon": -122.283,
+   "dist_mi": 2.7,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414763&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/LNDC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/LNDC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "AAMC1",
+   "name": "Alameda",
+   "kind": "coops",
+   "lat": 37.7717,
+   "lon": -122.2983,
+   "dist_mi": 3.9,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "racetrack": [
+  {
+   "id": "PPXC1",
+   "name": "Point Potrero, Richmond",
+   "kind": "coops",
+   "lat": 37.9058,
+   "lon": -122.365,
+   "dist_mi": 3.2,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414847&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PPXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PPXC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "OKXC1",
+   "name": "Oakland Berth 34",
+   "kind": "coops",
+   "lat": 37.8106,
+   "lon": -122.3331,
+   "dist_mi": 5.4,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "pointemery": [
+  {
+   "id": "OKXC1",
+   "name": "Oakland Berth 34",
+   "kind": "coops",
+   "lat": 37.8106,
+   "lon": -122.3331,
+   "dist_mi": 2.6,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414776&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OKXC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OKXC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "OMHC1",
+   "name": "Oakland Middle Harbor Met",
+   "kind": "coops",
+   "lat": 37.8,
+   "lon": -122.33,
+   "dist_mi": 3.1,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414769&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/OMHC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/OMHC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "LNDC1",
+   "name": "Oakland Berth 67",
+   "kind": "coops",
+   "lat": 37.795,
+   "lon": -122.283,
+   "dist_mi": 3.3,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414763&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/LNDC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/LNDC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "AAMC1",
+   "name": "Alameda",
+   "kind": "coops",
+   "lat": 37.7717,
+   "lon": -122.2983,
+   "dist_mi": 4.7,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9414750&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/AAMC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/AAMC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "sherman": [
+  {
+   "id": "PSBC1",
+   "name": "Pittsburg (Suisun Bay)",
+   "kind": "coops",
+   "lat": 38.0416,
+   "lon": -121.8867,
+   "dist_mi": 4.4,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9415115&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PSBC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PSBC1/observations/latest (km/h). Free, scriptable, no key."
+  }
+ ],
+ "windycove": [
+  {
+   "id": "RVB",
+   "name": "Sacramento River at Rio Vista Bridge",
+   "kind": "cdec",
+   "lat": 38.1597,
+   "lon": -121.6864,
+   "dist_mi": 1.3,
+   "wave_only": false,
+   "how": "https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet?Stations=RVB&SensorNums=9,10&dur_code=E&Start=<date>&End=<date> (mph). Free, no key."
+  },
+  {
+   "id": "CF105",
+   "name": "SR-12 - SR-160 (Rio Vista Bridge)",
+   "kind": "caltrans",
+   "lat": 38.1546,
+   "lon": -121.6755,
+   "dist_mi": 1.4,
+   "wave_only": false,
+   "how": "Caltrans feed https://cwwp2.dot.ca.gov/data/d4/rwisStatusD04.json (returned HTTP 500 on 2026-10-26); also https://api.weather.gov/stations/CF105/observations (MADIS) and Synoptic stid=CF105. Windfinder \"Rio Vista / Delta\" report (38.1551,-121.6762) appears to be this station."
+  },
+  {
+   "id": "CF106",
+   "name": "SR-12 - Brannan Island Road",
+   "kind": "caltrans",
+   "lat": 38.1282,
+   "lon": -121.5856,
+   "dist_mi": 6.0,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/CF106/observations (MADIS; lagged) or Synoptic stid=CF106; Caltrans d4 JSON when up."
+  }
+ ],
+ "baypoint": [
+  {
+   "id": "PSBC1",
+   "name": "Pittsburg (Suisun Bay)",
+   "kind": "coops",
+   "lat": 38.0416,
+   "lon": -121.8867,
+   "dist_mi": 4.1,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9415115&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PSBC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PSBC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "PCOC1",
+   "name": "Port Chicago",
+   "kind": "coops",
+   "lat": 38.056,
+   "lon": -122.0395,
+   "dist_mi": 4.3,
+   "wave_only": false,
+   "how": "NOAA CO-OPS PORTS: 6-min wind (knots, with gust & dir) at https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind&station=9415144&date=latest&units=english&time_zone=lst_ldt&format=json ; also NDBC realtime2 https://www.ndbc.noaa.gov/data/realtime2/PCOC1.txt (m/s) and, for some ids, https://api.weather.gov/stations/PCOC1/observations/latest (km/h). Free, scriptable, no key."
+  },
+  {
+   "id": "KCCR",
+   "name": "Concord, Buchanan Field",
+   "kind": "nws",
+   "lat": 37.9917,
+   "lon": -122.0519,
+   "dist_mi": 6.3,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KCCR/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KCCR. Free, scriptable, no key."
+  }
+ ],
+ "granitebay": [
+  {
+   "id": "FLD",
+   "name": "Folsom Dam - Folsom Point (Dyke 8)",
+   "kind": "cdec",
+   "lat": 38.6931,
+   "lon": -121.1297,
+   "dist_mi": 3.8,
+   "wave_only": false,
+   "how": "https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet?Stations=FLD&SensorNums=9,10&dur_code=E&Start=<date>&End=<date> (15-min, mph; live: 8 mph/169 deg at 16:14 PDT 2026-10-26). Free, no key."
+  },
+  {
+   "id": "KMHR",
+   "name": "Sacramento Mather Airport",
+   "kind": "nws",
+   "lat": 38.56,
+   "lon": -121.284,
+   "dist_mi": 13.9,
+   "wave_only": false,
+   "how": "NWS/FAA METAR: hourly (plus SPECI) at https://api.weather.gov/stations/KMHR/observations/latest (km/h; gust only when reported) or https://aviationweather.gov/api/data/metar?ids=KMHR. Free, scriptable, no key."
+  }
+ ],
+ "folsompoint": [
+  {
+   "id": "FLD",
+   "name": "Folsom Dam - Folsom Point (Dyke 8)",
+   "kind": "cdec",
+   "lat": 38.6931,
+   "lon": -121.1297,
+   "dist_mi": 0.8,
+   "wave_only": false,
+   "how": "https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet?Stations=FLD&SensorNums=9,10&dur_code=E&Start=<date>&End=<date> (15-min, mph). Free, no key."
+  }
+ ],
+ "stinson": [
+  {
+   "id": "MDEC1",
+   "name": "Middle Peak RAWS (Mt Tamalpais)",
+   "kind": "raws",
+   "lat": 37.9308,
+   "lon": -122.5908,
+   "dist_mi": 3.7,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=MDEC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/MDEC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "46237",
+   "name": "San Francisco Bar CDIP 142 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 37.788,
+   "lon": -122.634,
+   "dist_mi": 7.6,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?142+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/142p1_rt.nc; also mirrored at NDBC 46237"
+  },
+  {
+   "id": "BBEC1",
+   "name": "Barnaby RAWS (Bolinas Ridge / Olema)",
+   "kind": "raws",
+   "lat": 38.0281,
+   "lon": -122.7022,
+   "dist_mi": 9.6,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=BBEC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/BBEC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "GGBC1",
+   "name": "Golden Gate Bridge center span",
+   "kind": "iem",
+   "lat": 37.8187,
+   "lon": -122.4784,
+   "dist_mi": 10.5,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=GGBC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key)"
+  },
+  {
+   "id": "FTPC1",
+   "name": "Fort Point / Crissy Field, Golden Gate",
+   "kind": "coops",
+   "lat": 37.806,
+   "lon": -122.466,
+   "dist_mi": 11.6,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/FTPC1.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side) ; or https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=9414290&product=wind&date=latest&units=english&time_zone=lst_ldt&format=json (6-min, knots, dir, gust)"
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy, 18 NM W of SF",
+   "kind": "ndbc",
+   "lat": 37.75,
+   "lon": -122.838,
+   "dist_mi": 14.7,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46026.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "46214",
+   "name": "Point Reyes CDIP 029 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 37.944,
+   "lon": -123.466,
+   "dist_mi": 44.9,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?029+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/029p1_rt.nc; also mirrored at NDBC 46214"
+  }
+ ],
+ "oceanbeach": [
+  {
+   "id": "FTPC1",
+   "name": "Fort Point / Crissy Field, Golden Gate",
+   "kind": "coops",
+   "lat": 37.806,
+   "lon": -122.466,
+   "dist_mi": 3.4,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/FTPC1.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side) ; or https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=9414290&product=wind&date=latest&units=english&time_zone=lst_ldt&format=json (6-min, knots, dir, gust)"
+  },
+  {
+   "id": "GGBC1",
+   "name": "Golden Gate Bridge center span",
+   "kind": "iem",
+   "lat": 37.8187,
+   "lon": -122.4784,
+   "dist_mi": 3.6,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=GGBC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key)"
+  },
+  {
+   "id": "46237",
+   "name": "San Francisco Bar CDIP 142 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 37.788,
+   "lon": -122.634,
+   "dist_mi": 6.7,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?142+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/142p1_rt.nc; also mirrored at NDBC 46237"
+  },
+  {
+   "id": "MDEC1",
+   "name": "Middle Peak RAWS (Mt Tamalpais)",
+   "kind": "raws",
+   "lat": 37.9308,
+   "lon": -122.5908,
+   "dist_mi": 11.6,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=MDEC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/MDEC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco Intl Airport",
+   "kind": "nws",
+   "lat": 37.6196,
+   "lon": -122.3656,
+   "dist_mi": 13.4,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KSFO/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy, 18 NM W of SF",
+   "kind": "ndbc",
+   "lat": 37.75,
+   "lon": -122.838,
+   "dist_mi": 17.9,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46026.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  }
+ ],
+ "hmb": [
+  {
+   "id": "KHAF",
+   "name": "Half Moon Bay Airport",
+   "kind": "nws",
+   "lat": 37.5136,
+   "lon": -122.4996,
+   "dist_mi": 3.2,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KHAF/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "HSPC1",
+   "name": "Spring Valley RAWS (above Half Moon Bay)",
+   "kind": "raws",
+   "lat": 37.5625,
+   "lon": -122.4364,
+   "dist_mi": 5.2,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=HSPC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/HSPC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "46237",
+   "name": "San Francisco Bar CDIP 142 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 37.788,
+   "lon": -122.634,
+   "dist_mi": 23.0,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?142+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/142p1_rt.nc; also mirrored at NDBC 46237"
+  },
+  {
+   "id": "46012",
+   "name": "Half Moon Bay buoy (currently a Saildrone USV), 24 NM SSW of SF",
+   "kind": "ndbc",
+   "lat": 37.356,
+   "lon": -122.881,
+   "dist_mi": 25.2,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46012.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy, 18 NM W of SF",
+   "kind": "ndbc",
+   "lat": 37.75,
+   "lon": -122.838,
+   "dist_mi": 27.8,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46026.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  }
+ ],
+ "pillarpoint": [
+  {
+   "id": "KHAF",
+   "name": "Half Moon Bay Airport",
+   "kind": "nws",
+   "lat": 37.5136,
+   "lon": -122.4996,
+   "dist_mi": 0.9,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KHAF/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "HSPC1",
+   "name": "Spring Valley RAWS (above Half Moon Bay)",
+   "kind": "raws",
+   "lat": 37.5625,
+   "lon": -122.4364,
+   "dist_mi": 5.0,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=HSPC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/HSPC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "46237",
+   "name": "San Francisco Bar CDIP 142 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 37.788,
+   "lon": -122.634,
+   "dist_mi": 21.2,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?142+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/142p1_rt.nc; also mirrored at NDBC 46237"
+  },
+  {
+   "id": "46012",
+   "name": "Half Moon Bay buoy (currently a Saildrone USV), 24 NM SSW of SF",
+   "kind": "ndbc",
+   "lat": 37.356,
+   "lon": -122.881,
+   "dist_mi": 23.8,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46012.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy, 18 NM W of SF",
+   "kind": "ndbc",
+   "lat": 37.75,
+   "lon": -122.838,
+   "dist_mi": 25.6,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46026.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  }
+ ],
+ "gazos": [
+  {
+   "id": "BNDC1",
+   "name": "Ben Lomond RAWS",
+   "kind": "raws",
+   "lat": 37.131,
+   "lon": -122.1727,
+   "dist_mi": 10.9,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=BNDC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/BNDC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "LAHC1",
+   "name": "La Honda RAWS",
+   "kind": "raws",
+   "lat": 37.3052,
+   "lon": -122.2553,
+   "dist_mi": 11.0,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=LAHC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/LAHC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "XCDC1",
+   "name": "Coast Dairies RAWS (Davenport)",
+   "kind": "raws",
+   "lat": 37.0308,
+   "lon": -122.1878,
+   "dist_mi": 13.7,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=XCDC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/XCDC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "KHAF",
+   "name": "Half Moon Bay Airport",
+   "kind": "nws",
+   "lat": 37.5136,
+   "lon": -122.4996,
+   "dist_mi": 24.8,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KHAF/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "46042",
+   "name": "Monterey buoy, 27 NM WNW of Monterey",
+   "kind": "ndbc",
+   "lat": 36.787,
+   "lon": -122.408,
+   "dist_mi": 26.7,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46042.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "46012",
+   "name": "Half Moon Bay buoy (currently a Saildrone USV), 24 NM SSW of SF",
+   "kind": "ndbc",
+   "lat": 37.356,
+   "lon": -122.881,
+   "dist_mi": 31.2,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46012.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "46236",
+   "name": "Monterey Canyon Outer CDIP 156 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 36.759,
+   "lon": -121.95,
+   "dist_mi": 36.5,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?156+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/156p1_rt.nc; also mirrored at NDBC 46236"
+  }
+ ],
+ "waddell": [
+  {
+   "id": "BNDC1",
+   "name": "Ben Lomond RAWS",
+   "kind": "raws",
+   "lat": 37.131,
+   "lon": -122.1727,
+   "dist_mi": 6.2,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=BNDC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/BNDC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "XCDC1",
+   "name": "Coast Dairies RAWS (Davenport)",
+   "kind": "raws",
+   "lat": 37.0308,
+   "lon": -122.1878,
+   "dist_mi": 6.7,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=XCDC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/XCDC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "santa-cruz-wharf-weather-stat",
+   "name": "Santa Cruz Municipal Wharf weather station",
+   "kind": "cencoos",
+   "lat": 36.960278,
+   "lon": -122.020278,
+   "dist_mi": 17.0,
+   "wave_only": false,
+   "how": "https://erddap.cencoos.org/erddap/tabledap/santa-cruz-wharf-weather-stat.csv?time,wind_speed_cm_time__mean_over_pt1h,wind_from_direction_cm_time__mean_over_pt1h,wind_speed_of_gust&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "46042",
+   "name": "Monterey buoy, 27 NM WNW of Monterey",
+   "kind": "ndbc",
+   "lat": 36.787,
+   "lon": -122.408,
+   "dist_mi": 22.5,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46042.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "46092",
+   "name": "MBARI M1 mooring, central Monterey Bay",
+   "kind": "ndbc",
+   "lat": 36.751,
+   "lon": -122.029,
+   "dist_mi": 27.5,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46092.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side) ; or https://erddap.cencoos.org/erddap/tabledap/org_mbari_m1.csv?time,wind_speed_sonic,wind_from_direction_sonic&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "46236",
+   "name": "Monterey Canyon Outer CDIP 156 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 36.759,
+   "lon": -121.95,
+   "dist_mi": 29.5,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?156+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/156p1_rt.nc; also mirrored at NDBC 46236"
+  }
+ ],
+ "davenport": [
+  {
+   "id": "XCDC1",
+   "name": "Coast Dairies RAWS (Davenport)",
+   "kind": "raws",
+   "lat": 37.0308,
+   "lon": -122.1878,
+   "dist_mi": 2.4,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=XCDC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/XCDC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "BNDC1",
+   "name": "Ben Lomond RAWS",
+   "kind": "raws",
+   "lat": 37.131,
+   "lon": -122.1727,
+   "dist_mi": 7.0,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=BNDC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/BNDC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "santa-cruz-wharf-weather-stat",
+   "name": "Santa Cruz Municipal Wharf weather station",
+   "kind": "cencoos",
+   "lat": 36.960278,
+   "lon": -122.020278,
+   "dist_mi": 12.9,
+   "wave_only": false,
+   "how": "https://erddap.cencoos.org/erddap/tabledap/santa-cruz-wharf-weather-stat.csv?time,wind_speed_cm_time__mean_over_pt1h,wind_from_direction_cm_time__mean_over_pt1h,wind_speed_of_gust&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "46042",
+   "name": "Monterey buoy, 27 NM WNW of Monterey",
+   "kind": "ndbc",
+   "lat": 36.787,
+   "lon": -122.408,
+   "dist_mi": 20.1,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46042.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "46092",
+   "name": "MBARI M1 mooring, central Monterey Bay",
+   "kind": "ndbc",
+   "lat": 36.751,
+   "lon": -122.029,
+   "dist_mi": 22.9,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46092.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side) ; or https://erddap.cencoos.org/erddap/tabledap/org_mbari_m1.csv?time,wind_speed_sonic,wind_from_direction_sonic&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "46236",
+   "name": "Monterey Canyon Outer CDIP 156 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 36.759,
+   "lon": -121.95,
+   "dist_mi": 24.9,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?156+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/156p1_rt.nc; also mirrored at NDBC 46236"
+  }
+ ],
+ "marina": [
+  {
+   "id": "KOAR",
+   "name": "Marina Municipal Airport (ex Fort Ord Fritzsche AAF)",
+   "kind": "nws",
+   "lat": 36.6815,
+   "lon": -121.7574,
+   "dist_mi": 3.1,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KOAR/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "monterey-bay-aquarium-weather",
+   "name": "Monterey Bay Aquarium weather station (Cannery Row)",
+   "kind": "cencoos",
+   "lat": 36.618808,
+   "lon": -121.901489,
+   "dist_mi": 6.7,
+   "wave_only": false,
+   "how": "https://erddap.cencoos.org/erddap/tabledap/monterey-bay-aquarium-weather.csv?time,wind_speed,wind_from_direction,wind_speed_of_gust__m_s&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "KMRY",
+   "name": "Monterey Regional Airport",
+   "kind": "nws",
+   "lat": 36.5905,
+   "lon": -121.8487,
+   "dist_mi": 6.8,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KMRY/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "MLSC1",
+   "name": "Moss Landing Marine Labs weather station",
+   "kind": "cencoos",
+   "lat": 36.8004,
+   "lon": -121.78842,
+   "dist_mi": 8.2,
+   "wave_only": false,
+   "how": "https://erddap.cencoos.org/erddap/tabledap/mlml_mlml_met.csv?time,wind_speed,wind_from_direction,wind_speed_of_gust&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "46236",
+   "name": "Monterey Canyon Outer CDIP 156 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 36.759,
+   "lon": -121.95,
+   "dist_mi": 9.2,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?156+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/156p1_rt.nc; also mirrored at NDBC 46236"
+  },
+  {
+   "id": "46092",
+   "name": "MBARI M1 mooring, central Monterey Bay",
+   "kind": "ndbc",
+   "lat": 36.751,
+   "lon": -122.029,
+   "dist_mi": 12.8,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46092.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side) ; or https://erddap.cencoos.org/erddap/tabledap/org_mbari_m1.csv?time,wind_speed_sonic,wind_from_direction_sonic&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "46042",
+   "name": "Monterey buoy, 27 NM WNW of Monterey",
+   "kind": "ndbc",
+   "lat": 36.787,
+   "lon": -122.408,
+   "dist_mi": 33.7,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46042.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  }
+ ],
+ "dillon": [
+  {
+   "id": "bodega-marine-laboratory-weather",
+   "name": "UC Davis Bodega Marine Laboratory weather station",
+   "kind": "cencoos",
+   "lat": 38.31652,
+   "lon": -123.0709,
+   "dist_mi": 7.3,
+   "wave_only": false,
+   "how": "https://erddap.cencoos.org/erddap/tabledap/bodega-marine-laboratory-weather.csv?time,wind_speed,wind_from_direction&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "PRWC1",
+   "name": "Point Reyes RCA station (near Point Reyes Station/Inverness)",
+   "kind": "iem",
+   "lat": 38.0942,
+   "lon": -122.95,
+   "dist_mi": 10.8,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=PRWC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key) (keys USIRGZZ speed, UDIRGZZ dir, UPVRGZZ peak)"
+  },
+  {
+   "id": "46013",
+   "name": "Bodega Bay buoy, 48 NM NNW of SF",
+   "kind": "ndbc",
+   "lat": 38.235,
+   "lon": -123.317,
+   "dist_mi": 19.1,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46013.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "KSTS",
+   "name": "Santa Rosa / Sonoma County Airport",
+   "kind": "nws",
+   "lat": 38.5,
+   "lon": -122.8167,
+   "dist_mi": 19.1,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KSTS/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "46214",
+   "name": "Point Reyes CDIP 029 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 37.944,
+   "lon": -123.466,
+   "dist_mi": 34.4,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?029+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/029p1_rt.nc; also mirrored at NDBC 46214"
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy, 18 NM W of SF",
+   "kind": "ndbc",
+   "lat": 37.75,
+   "lon": -122.838,
+   "dist_mi": 35.2,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46026.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  }
+ ],
+ "bodega": [
+  {
+   "id": "bodega-marine-laboratory-weather",
+   "name": "UC Davis Bodega Marine Laboratory weather station",
+   "kind": "cencoos",
+   "lat": 38.31652,
+   "lon": -123.0709,
+   "dist_mi": 1.7,
+   "wave_only": false,
+   "how": "https://erddap.cencoos.org/erddap/tabledap/bodega-marine-laboratory-weather.csv?time,wind_speed,wind_from_direction&orderByMax(%22time%22) (CSV; m/s and degrees; free, no key, CORS OK)"
+  },
+  {
+   "id": "46013",
+   "name": "Bodega Bay buoy, 48 NM NNW of SF",
+   "kind": "ndbc",
+   "lat": 38.235,
+   "lon": -123.317,
+   "dist_mi": 16.2,
+   "wave_only": false,
+   "how": "https://www.ndbc.noaa.gov/data/realtime2/46013.txt (hourly-ish text; WSPD/GST m/s, WDIR deg true; 'MM' = missing; no CORS, fetch server-side)"
+  },
+  {
+   "id": "PRWC1",
+   "name": "Point Reyes RCA station (near Point Reyes Station/Inverness)",
+   "kind": "iem",
+   "lat": 38.0942,
+   "lon": -122.95,
+   "dist_mi": 16.5,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=PRWC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key) (keys USIRGZZ speed, UDIRGZZ dir, UPVRGZZ peak)"
+  },
+  {
+   "id": "KSTS",
+   "name": "Santa Rosa / Sonoma County Airport",
+   "kind": "nws",
+   "lat": 38.5,
+   "lon": -122.8167,
+   "dist_mi": 17.2,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KSTS/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "46214",
+   "name": "Point Reyes CDIP 029 (Datawell directional)",
+   "kind": "cdip",
+   "lat": 37.944,
+   "lon": -123.466,
+   "dist_mi": 34.9,
+   "wave_only": true,
+   "how": "https://cdip.ucsd.edu/data_access/justdar.cdip?029+pm (30-min text: Hs m, Tp s, Dp deg, Ta s) or THREDDS https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/029p1_rt.nc; also mirrored at NDBC 46214"
+  }
+ ],
+ "kingsbeach": [
+  {
+   "id": "KNXN2",
+   "name": "Knox 2 RAWS (Incline Village)",
+   "kind": "raws",
+   "lat": 39.2728,
+   "lon": -119.963,
+   "dist_mi": 4.2,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=KNXN2&network=NV_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/KNXN2/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "TB1",
+   "name": "Lake Tahoe buoy TB1 (NE lake, off Incline/Kings Beach)",
+   "kind": "jpl",
+   "lat": 39.155111,
+   "lon": -120.004128,
+   "dist_mi": 5.7,
+   "wave_only": false,
+   "how": "https://laketahoe.jpl.nasa.gov/getweather (HTML table, hourly at :30 past; each cell is min:avg:max over the last 30 min of the previous hour; wind in mph (or m/s with 'Switch to Metric'); 2-min samples; raw, unchecked). No JSON API; scrape the table. UC Davis TERC mirrors the buoys at https://tahoe.ucdavis.edu/real-time-data"
+  },
+  {
+   "id": "TB4",
+   "name": "Lake Tahoe buoy TB4 (NW lake, off Tahoe City/Dollar Point)",
+   "kind": "jpl",
+   "lat": 39.155481,
+   "lon": -120.07074,
+   "dist_mi": 6.1,
+   "wave_only": false,
+   "how": "Same JPL table as TB1 (column TB4)"
+  },
+  {
+   "id": "LVYN2",
+   "name": "Little Valley RAWS",
+   "kind": "raws",
+   "lat": 39.2444,
+   "lon": -119.8808,
+   "dist_mi": 7.8,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=LVYN2&network=NV_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/LVYN2/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  },
+  {
+   "id": "KTRK",
+   "name": "Truckee-Tahoe Airport",
+   "kind": "nws",
+   "lat": 39.3167,
+   "lon": -120.1333,
+   "dist_mi": 8.0,
+   "wave_only": false,
+   "how": "https://api.weather.gov/stations/KTRK/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required)"
+  },
+  {
+   "id": "HMDC1",
+   "name": "Homewood RAWS (west shore)",
+   "kind": "raws",
+   "lat": 39.0841,
+   "lon": -120.1707,
+   "dist_mi": 13.1,
+   "wave_only": false,
+   "how": "https://mesonet.agron.iastate.edu/api/1/obhistory.json?station=HMDC1&network=CA_DCP&date=YYYY-MM-DD (hourly GOES/HADS decode; SHEF keys USIRGZZ=speed, UDIRGZZ=direction, UPHRGZZ=hourly peak gust; RAWS values are mph; free, no key); also https://api.weather.gov/stations/HMDC1/observations/latest (JSON; windSpeed/windGust in km/h, windDirection deg; CORS OK; free; User-Agent header required) but NWS"
+  }
+ ]
+}
