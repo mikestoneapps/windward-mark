@@ -71,6 +71,15 @@ class TestParsers(unittest.TestCase):
         bad = json.dumps({"data": [{"rwis": {**site, "windData": {"essAvgWindSpeed": "65535"}}}]})
         self.assertIsNone(O.parse_caltrans(bad, ["sr 12", "sr 160"], NOW), "65535 is the ESS missing sentinel")
         self.assertIsNone(O.parse_caltrans(payload, ["sr 12", "brannan"], NOW), "a site that doesn't match the words is not picked")
+        # The real D3 shape (2026-10-27 dump): the dict holding windData is a bare sensor record; the
+        # location lives on the site record around it, so the match must run over the whole record.
+        parent = json.dumps({"data": [
+            {"location": {"locationName": "US-50 - Echo Summit"}, "rwis": {"recordTimestamp": {"recordDate": "2026-10-26", "recordTime": "17:14:00"},
+             "stationData": {"essAtmosphericPressure": "65535"}, "windData": {"essAvgWindSpeed": "4", "essMaxWindGustSpeed": "18", "essAvgWindDirection": "4"}}},
+            {"location": {"locationName": "SR-12 - SR-160 (Rio Vista Bridge)"}, "rwis": {"recordTimestamp": {"recordDate": "2026-10-26", "recordTime": "17:14:00"},
+             "stationData": {}, "windData": {"essAvgWindSpeed": "109", "essMaxWindGustSpeed": "164", "essAvgWindDirection": "250"}}}]})
+        op = O.parse_caltrans(parent, ["sr 12", "sr 160"], NOW)
+        self.assertEqual((op["spd"], op["dir"]), (21.2, 250.0), "a location on the parent record still matches, and the right site's windData is read")
 
     def test_jpl(self):
         table = lambda unit: ("<table><tr><th>Measurement</th><th>TB1</th><th>TB2</th><th>TB3</th><th>TB4</th></tr>"
@@ -154,6 +163,22 @@ class TestFetchLoop(unittest.TestCase):
         wave = out["oceanbeach"][1]
         self.assertTrue(wave["wave_only"] and wave["spd"] is None and wave["wvht_ft"] == 5.0, "wave-only row: swell line only, never wind")
         self.assertEqual(doc["obs"]["crissy"][0]["spd"], 9.7, "obs.json carries the same rows")
+
+    def test_iem_stale_today_still_yields_the_freshest_row(self):
+        stations = {"stinson": [{"id": "MDEC1", "name": "Middle Peak", "kind": "raws", "dist_mi": 3.7, "network": "CA_DCP"}]}
+        calls = []
+
+        def getter(url):
+            calls.append(url)
+            if "date=2026-10-27" in url:
+                return json.dumps({"data": []})   # the 17:50Z pattern: today's page empty
+            return json.dumps({"data": [{"utc_valid": "2026-10-26T23:00:00Z", "USIRGZZ": 10.0, "UDIRGZZ": 280, "UPHRGZZ": 16.0}]})
+
+        with tempfile.TemporaryDirectory() as td:
+            out = O.fetch_obs(stations, now=NOW.replace(hour=17, minute=50), getter=getter, out_file=os.path.join(td, "obs.json"))
+        self.assertEqual(len(calls), 2, "today first, then yesterday")
+        row = out["stinson"][0]
+        self.assertEqual((row["spd"], row["age_min"]), (8.7, 1130), "the stale row is still returned, aged honestly (and the staleness is logged)")
 
     def test_cdip_falls_back_to_the_ndbc_mirror(self):
         stations = {"oceanbeach": [{"id": "46237", "name": "SF Bar CDIP 142", "kind": "cdip", "dist_mi": 6.7, "cdip": "142", "wave_only": True}]}
