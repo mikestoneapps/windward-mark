@@ -4,17 +4,57 @@
    "firstSeen": "2026-10-27T18:58:47Z",
    "id": "AE6DC-5",
    "kind": "cwop",
-   "lastSeen": "2026-10-27T18:58:47Z",
+   "lastSeen": "2026-10-27T19:06:25Z",
    "lat": 37.631,
    "lon": -122.494
+  },
+  "K2MRS": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "K2MRS",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 37.874,
+   "lon": -122.158
   },
   "K6CQU-13": {
    "firstSeen": "2026-10-27T18:58:47Z",
    "id": "K6CQU-13",
    "kind": "cwop",
-   "lastSeen": "2026-10-27T18:58:47Z",
+   "lastSeen": "2026-10-27T19:06:25Z",
    "lat": 37.983,
    "lon": -121.701
+  },
+  "K6FAK-13": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "K6FAK-13",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 38.355,
+   "lon": -121.945
+  },
+  "K6HN": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "K6HN",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 37.589,
+   "lon": -122.483
+  },
+  "K6POO-1": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "K6POO-1",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 37.681,
+   "lon": -122.403
+  },
+  "KA6UPU-1": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "KA6UPU-1",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 37.925,
+   "lon": -122.091
   },
   "KF6GPE": {
    "firstSeen": "2026-10-27T18:58:47Z",
@@ -32,11 +72,67 @@
    "lat": 38.512,
    "lon": -122.999
   },
+  "KF6YUA": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "KF6YUA",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 38.38,
+   "lon": -122.824
+  },
+  "KI6PPU": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "KI6PPU",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 38.754,
+   "lon": -120.977
+  },
+  "KK6LVQ-13": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "KK6LVQ-13",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 37.161,
+   "lon": -122.132
+  },
+  "KN6ETB-1": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "KN6ETB-1",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 38.351,
+   "lon": -121.908
+  },
+  "KO6BKP": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "KO6BKP",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 37.722,
+   "lon": -122.173
+  },
+  "N6AMQ-1": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "N6AMQ-1",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 37.452,
+   "lon": -122.222
+  },
+  "N6OIM": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "N6OIM",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 38.648,
+   "lon": -121.228
+  },
   "N6SPP": {
    "firstSeen": "2026-10-27T18:58:47Z",
    "id": "N6SPP",
    "kind": "cwop",
-   "lastSeen": "2026-10-27T18:58:47Z",
+   "lastSeen": "2026-10-27T19:06:25Z",
    "lat": 38.004,
    "lon": -121.9
   },
@@ -52,9 +148,17 @@
    "firstSeen": "2026-10-27T18:58:47Z",
    "id": "W6SNO-1",
    "kind": "cwop",
-   "lastSeen": "2026-10-27T18:58:47Z",
+   "lastSeen": "2026-10-27T19:06:25Z",
    "lat": 37.224,
    "lon": -121.969
+  },
+  "WA6ODQ-13": {
+   "firstSeen": "2026-10-27T19:06:25Z",
+   "id": "WA6ODQ-13",
+   "kind": "cwop",
+   "lastSeen": "2026-10-27T19:06:25Z",
+   "lat": 38.34,
+   "lon": -121.946
   },
   "WB6TTB": {
    "firstSeen": "2026-10-27T18:58:47Z",
