@@ -49,7 +49,7 @@ UA = {"User-Agent": "WindwardMark/1.0 (github.com/mikestoneapps/windward-mark)",
 
 APRS_HOST, APRS_PORT = "rotate.aprs2.net", 14580
 APRS_LOGIN = "user N0CALL pass -1 vers WindwardMark 1.0"   # receive-only login (passcode -1): we never transmit
-LISTEN_S = int(os.environ.get("CWOP_LISTEN_S") or 90)       # how long to listen per run (CWOP stations report every 5–15 min)
+LISTEN_S = int(os.environ.get("CWOP_LISTEN_S") or 300)      # how long to listen per run (CWOP stations report every 5–15 min)
 CLUSTER_KM = 20          # spots closer than this share one range filter / one Netatmo box
 RANGE_KM = 24            # ~15 mi: the APRS range filter radius beyond each cluster's own extent
 NETATMO_PAD_KM = 15      # Netatmo box padding beyond each cluster's extent
