@@ -92,11 +92,14 @@ def parse_coops(text, now):
 NDBC_COLS = ["YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT", "DPD", "APD", "MWD", "PRES", "ATMP", "WTMP", "DEWP", "VIS", "PTDY", "TIDE"]
 
 
-def parse_ndbc(text, now):
+def parse_ndbc(text, now, wave_ok=False):
+    """Latest realtime2 line with a wind value — or, with wave_ok (the CDIP mirrors, which carry no
+    anemometer), the latest line with a wave height, returned as a wave-only row (spd null)."""
     lines = [l for l in text.splitlines() if l and not l.startswith("#")]
     for l in lines[:8]:
         v = dict(zip(NDBC_COLS, l.split()))
-        if v.get("WSPD", "MM") == "MM":
+        has_wind = v.get("WSPD", "MM") != "MM"
+        if not has_wind and not (wave_ok and v.get("WVHT", "MM") != "MM"):
             continue
         t = datetime.datetime(int(v["YY"]), int(v["MM"]), int(v["DD"]), int(v["hh"]), int(v["mm"]), tzinfo=datetime.timezone.utc)
         f = lambda k: None if v.get(k, "MM") == "MM" else float(v[k])
@@ -158,8 +161,11 @@ def parse_cdec(text, now):
         if 9 not in v or v[9] < 0:
             continue
         t = datetime.datetime.strptime(ts.replace("T", " ")[:16], "%Y-%m-%d %H:%M").replace(tzinfo=LA)
-        return {"time": iso_utc(t), "spd": knots(v[9], MPH2KN), "gst": knots(v.get(77), MPH2KN) if v.get(77, -1) >= 0 else None,
-                "dir": v.get(10) if 0 <= v.get(10, -1) <= 360 else None, "age_min": age_min(now, t)}
+        o = {"time": iso_utc(t), "spd": knots(v[9], MPH2KN), "gst": knots(v.get(77), MPH2KN) if v.get(77, -1) >= 0 else None,
+             "dir": v.get(10) if 0 <= v.get(10, -1) <= 360 else None, "age_min": age_min(now, t)}
+        if o["age_min"] > 180:   # the 2026-10-27 first run saw ~10 h; say what the raw stamp was so a timezone bug would show in the log
+            print(f"obs cdec: latest usable row is stamped '{ts}' (read as California local, {o['age_min']} min old)", file=sys.stderr)
+        return o
     return None
 
 
@@ -184,7 +190,7 @@ def parse_caltrans(text, match, now):
     """One district RWIS file; pick the site whose location text carries every word of `match`.
     NTCIP ESS wind units: tenths of m/s, 65535 = missing; directions in degrees, >360 = missing."""
     doc = json.loads(text)
-    site = None
+    site, names = None, []
     for d in _walk(doc):
         if "windData" not in d:
             continue
@@ -192,7 +198,10 @@ def parse_caltrans(text, match, now):
         if all(m in hay for m in match):
             site = d
             break
+        names.append((_find_key(d, "locationName") or _find_key(d, "location") or "?"))
     if not site:
+        # Say which sites the file does carry, so the log settles whether the station lives in another district file.
+        print(f"obs caltrans: no site matching {match}; file has {len(names)} wind site(s): " + "; ".join(str(n)[:40] for n in names[:12]), file=sys.stderr)
         return None
     w = site["windData"] if isinstance(site["windData"], dict) else {}
     def ess(k):
@@ -221,9 +230,11 @@ def parse_caltrans(text, match, now):
 
 def parse_jpl(text, buoy, now):
     """laketahoe.jpl.nasa.gov/getweather: an HTML table, one column per buoy (TB1..TB4), updated at :30
-    past each hour with the previous hour's last 30 minutes; wind cells are "min:avg:max" in m/s
-    (max = gust). Cells are matched per row; the page carries no per-reading timestamp, so the reading
-    is stamped at the top of the previous hour (what the page says it shows)."""
+    past each hour with the previous hour's last 30 minutes; wind cells are "min:avg:max" (max = gust).
+    The unit is read off the Wind Speed row's own label; the page's toggle says "Switch to Metric", so
+    the default is mph (the first live run, 2026-10-27, read ~2x the neighbouring RAWS when converted
+    as m/s). Cells are matched per row; the page carries no per-reading timestamp, so the reading is
+    stamped at the top of the previous hour (what the page says it shows)."""
     rows = re.findall(r"<tr[^>]*>(.*?)</tr>", text, re.S | re.I)
     header, speed, direction = None, None, None
     for tr in rows:
@@ -239,6 +250,10 @@ def parse_jpl(text, buoy, now):
             direction = cells
     if not header or not speed:
         return None
+    label = speed[0].lower()
+    unit = MS2KN if ("m/s" in label or "m s" in label or "mps" in label) else MPH2KN   # mph unless the label says metric
+    if "mph" not in label and unit is MPH2KN:
+        print(f"obs jpl: Wind Speed label carries no unit ({speed[0][:40]!r}); assuming mph", file=sys.stderr)
     try:
         col = [h.split()[0] for h in header].index(buoy.upper())
     except ValueError:
@@ -258,19 +273,23 @@ def parse_jpl(text, buoy, now):
         return None
     dr = mam(direction) if direction else None
     t = (now - datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
-    return {"time": iso_utc(t), "spd": knots(sp[0], MS2KN), "gst": knots(sp[1], MS2KN),
+    return {"time": iso_utc(t), "spd": knots(sp[0], unit), "gst": knots(sp[1], unit),
             "dir": None if dr is None else round(dr[0]), "age_min": age_min(now, t)}
 
 
 def parse_cdip(text, now):
-    """CDIP justdar "pm" page (wave parameters only — never a wind sample): the latest line's
-    Hs (m), Tp (s), Dp (deg). Times on the page are UTC."""
-    hs = re.search(r"Hs\(m\):\s*([\d.]+)", text)
-    tp = re.search(r"Tp\(s\):\s*([\d.]+)", text)
-    dp = re.search(r"Dp\(deg\):\s*(\d+)", text)
+    """CDIP justdar "pm" page (wave parameters only — never a wind sample): the latest Hs / Tp / Dp.
+    Label spellings vary ("Hs(m):", "Hs:", "Hs ="), so match loosely and honour the unit when one is
+    given; times on the page are UTC. None when no Hs is found — the fetch loop then logs the page head
+    (so the real format shows in the job log) and falls back to the buoy's NDBC realtime2 mirror."""
+    hs = re.search(r"Hs\s*(?:\((m|ft)\))?\s*[=:]\s*([\d.]+)\s*(m|ft)?\b", text, re.I)
+    tp = re.search(r"Tp\s*(?:\(s\))?\s*[=:]\s*([\d.]+)", text, re.I)
+    dp = re.search(r"Dp\s*(?:\(deg\))?\s*[=:]\s*(\d+)", text, re.I)
     tm = re.search(r"(\d{2}):(\d{2})\s+(\d{2})/(\d{2})/(\d{4})", text) or re.search(r"(\d{4})(\d{2})(\d{2})\s+(\d{2})(\d{2})", text)
     if not hs:
         return None
+    unit = ((hs.group(1) or hs.group(3)) or "m").lower()
+    hs_ft = round(float(hs.group(2)) * (1 if unit == "ft" else M2FT), 1)
     if tm and len(tm.groups()) == 5 and "/" in tm.group(0):
         h, mi_, mo, dd, yy = tm.groups()
         t = datetime.datetime(int(yy), int(mo), int(dd), int(h), int(mi_), tzinfo=datetime.timezone.utc)
@@ -280,7 +299,7 @@ def parse_cdip(text, now):
     else:
         t = now
     return {"time": iso_utc(t), "spd": None, "gst": None, "dir": None,
-            "wvht_ft": round(float(hs.group(1)) * M2FT, 1),
+            "wvht_ft": hs_ft,
             "dpd": None if not tp else float(tp.group(1)), "mwd": None if not dp else int(dp.group(1)),
             "age_min": age_min(now, t)}
 
@@ -357,7 +376,15 @@ def fetch_obs(stations, now=None, getter=get, out_file=None):
             text = shared_text("jpl", "https://laketahoe.jpl.nasa.gov/getweather")
             return None if text is None else parse_jpl(text, st["id"], now)
         if kind == "cdip":
-            return parse_cdip(getter(f"https://cdip.ucsd.edu/data_access/justdar.cdip?{st['cdip']}+pm"), now)
+            try:
+                text = getter(f"https://cdip.ucsd.edu/data_access/justdar.cdip?{st['cdip']}+pm")
+                o = parse_cdip(text, now)
+                if o:
+                    return o
+                print(f"obs {st['id']} cdip: no Hs in the justdar answer (head: {text[:160]!r}); trying the NDBC mirror", file=sys.stderr)
+            except Exception as e:
+                print(f"obs {st['id']} cdip justdar failed, trying the NDBC mirror:", e, file=sys.stderr)
+            return parse_ndbc(getter(f"https://www.ndbc.noaa.gov/data/realtime2/{st['id']}.txt"), now, wave_ok=True)
         print("obs: unknown kind", kind, st["id"], file=sys.stderr)
         return None
 
