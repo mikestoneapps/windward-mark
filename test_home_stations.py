@@ -308,7 +308,7 @@ class Run(unittest.TestCase):
             def recv(self, n): return self.chunks.pop(0)
             def close(self): pass
         lines = H.aprs_listen("r/37.9/-122.5/30", seconds=1, now=NOW, connect=lambda addr, timeout: Sock())
-        self.assertEqual(sent, [b"user N0CALL pass -1 vers WindwardMark 1.0 filter r/37.9/-122.5/30\r\n"], "receive-only login, never a passcode")
+        self.assertEqual(sent, [b"user WWMARK pass -1 vers WindwardMark 1.0 filter r/37.9/-122.5/30\r\n"], "receive-only login, never a passcode")
         self.assertEqual(len(lines), 3)
         self.assertEqual(len(H.collect_aprs(lines, NOW)), 1)
 

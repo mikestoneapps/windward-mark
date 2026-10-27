@@ -7,7 +7,7 @@ Run right after obs_standalone.py in the hourly job (.github/workflows/observati
 Two keyless-or-free feeds, both read server-side only (the page never talks to them):
 
   cwop     CWOP citizen stations over APRS-IS (kind "cwop"): one read-only TCP connection to rotate.aprs2.net:14580,
-           logged in as N0CALL (passcode -1 = receive only, the documented way to listen), one `r/lat/lon/km` range
+           logged in as WWMARK (not N0CALL, which several servers refuse) (passcode -1 = receive only, the documented way to listen), one `r/lat/lon/km` range
            filter per cluster of spots (RANGE_KM 24 km ~ 15 mi around every curated and rider-added spot), listening
            LISTEN_S seconds and keeping the newest weather packet per callsign. APRS-IS ORs its filters together, so a
            `t/w` type filter beside the ranges would admit every weather packet on Earth; the weather test is done here
@@ -48,7 +48,7 @@ TRUST = os.path.join(HERE, "home-trust.json")
 UA = {"User-Agent": "WindwardMark/1.0 (github.com/mikestoneapps/windward-mark)", "Accept": "application/json, text/html, text/plain"}
 
 APRS_HOST, APRS_PORT = "rotate.aprs2.net", 14580
-APRS_LOGIN = "user N0CALL pass -1 vers WindwardMark 1.0"   # receive-only login (passcode -1): we never transmit
+APRS_LOGIN = "user WWMARK pass -1 vers WindwardMark 1.0"   # receive-only (passcode -1), never transmits; a unique made-up name because several servers refuse the generic N0CALL
 LISTEN_S = int(os.environ.get("CWOP_LISTEN_S") or 300)      # how long to listen per run (CWOP stations report every 5–15 min)
 CLUSTER_KM = 20          # spots closer than this share one range filter / one Netatmo box
 RANGE_KM = 24            # ~15 mi: the APRS range filter radius beyond each cluster's own extent
@@ -512,6 +512,9 @@ def fetch_cwop(filt, cat, now, listen=aprs_listen, getter=http, log=say):
     """Live APRS-IS readings, or the findu fallback for catalogued callsigns when the socket fails. (readings, source)."""
     try:
         lines = listen(filt, now=now)
+        if any("not allowed" in l or "unauthorized" in l.lower() for l in lines[:4]):   # this server refused the login: rotate.aprs2.net hands out another on reconnect
+            log("home stations: aprs-is refused the login, reconnecting to another server")
+            lines = listen(filt, now=now)
         found = collect_aprs(lines, now)
         log(f"home stations: cwop heard {len(lines)} line(s), {len(found)} station(s) with wind in the areas")
         for l in [x for x in lines if x.startswith("#")][:4]: log(f"home stations: aprs-is says: {l[:160]}")
