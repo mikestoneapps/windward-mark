@@ -123,9 +123,9 @@ try {
       await b.ctx.close();
     } else console.log("(no BASELINE_DIR: skipped the identical-to-baseline comparison)");
     // Two buttons under the list. "Look up a new spot": the sheet finds a place by name; the kept spot shows in Rider and can be removed there
-    assert((await text(page, "#openKeep")) === "Look up a new spot" && (await text(page, "#openHere")) === "This spot is killer", "two buttons under the list: 'Look up a new spot' and 'This spot is killer'");
+    assert((await text(page, "#openKeep")) === "Look up a new spot" && (await text(page, "#openHere")) === "Remember this killer spot", "two buttons under the list: 'Look up a new spot' and 'This spot is killer'");
     await page.click("#openHere"); await page.waitForSelector("#ksKeep");
-    assert(/^This spot is killer/.test(await text(page, "#sheet h2")) && (await page.locator("#ksname").count()) === 1 && (await page.locator("#ksface button").count()) === 8, "'This spot is killer' opens the same sheet (name, location, facing)");
+    assert(/^Remember this killer spot/.test(await text(page, "#sheet h2")) && (await page.locator("#ksname").count()) === 1 && (await page.locator("#ksface button").count()) === 8, "'This spot is killer' opens the same sheet (name, location, facing)");
     await page.waitForFunction(() => /Couldn't get your location/.test(document.getElementById("ksLLNote")?.textContent || ""), null, { timeout: 10000 });
     assert((await page.locator("#ksFindBox").isVisible()) && (await page.inputValue("#ksll")) === "", "location refused: says so and offers the place search instead");
     await page.click("#closeSheet");
