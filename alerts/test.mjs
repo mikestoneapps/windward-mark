@@ -313,6 +313,20 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
                         run(21, { berkeley: rd(20), candlestick: { id: "KSFO", name: "San Francisco Intl", dist_mi: 5.9, time: Z(20, 55), spd: 15, gst: 16, dir: 290 }, thirdave: { id: "KSQL", name: "San Carlos Airport", dist_mi: 5.1, time: Z(20, 55), spd: 21, gst: 27, dir: 320 }, davenport: { id: "46042", name: "Monterey buoy", dist_mi: 19.9, time: Z(20, 55), spd: 22, gst: 25, dir: 300 } }));
     r2 = evaluate(rider({ maxDrive: 300 }), dead, at14, many);
     assert(r2.notification && r2.notification.body === "Blowing now: Candlestick Point 15 kn WNW at the San Francisco Intl station — 5 min from Candlestick Point; Third Avenue (Baywinds Park) 21g27 kn NW at the San Carlos Airport station — 25 min from Candlestick Point; Berkeley Marina (Hs Lordships beach) 18g22 kn NW at the RICHMOND station — 30 min from Candlestick Point." && Object.keys(r2.state.blowing).length === 4, "four spots blowing: one line, nearest first, three named, all four marked said: " + r2.notification.body);
+
+    // rider-added spots: their own sectors apply; facing unknown (the page's UNKNOWN_DIR) falls back to any direction
+    const keptB = { id: "k-beach", name: "Kept Beach", lat: 37.8, lon: -122.5, dir: { best: [[240, 300]], work: [[200, 340]], off: [[60, 120]] }, driveLO: 40, driveBC: 90, kept: true };
+    const keptU = { id: "k-mystery", name: "Mystery Launch", lat: 37.9, lon: -122.5, dir: { best: [], work: [[0, 360]], off: [] }, driveLO: 35, driveBC: 90, kept: true };
+    const spotsR = SPOTS.concat([keptB, keptU]);
+    const kb = (hUTC, dir, sid = "XKB", spd = 18) => ({ id: sid, name: "Kept Sensor", kind: "nws", dist_mi: 2.1, time: Z(hUTC, 55), spd, gst: spd + 4, dir });
+    let br = blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, 270) }), run(21, { "k-beach": kb(20, 270) })), at14, DEFAULT_ALERTS, limitsOf, dead);
+    assert(br.length === 1 && br[0].spot.id === "k-beach" && br[0].drive === 40, "a rider spot with sectors: W wind in its best sector fires, with its own estimated drive");
+    assert(blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, 90) }), run(21, { "k-beach": kb(20, 90) })), at14, DEFAULT_ALERTS, limitsOf, dead).length === 0, "a rider spot with sectors: offshore E never fires");
+    assert(blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, null) }), run(21, { "k-beach": kb(20, null) })), at14, DEFAULT_ALERTS, limitsOf, dead).length === 0, "a rider spot with sectors still needs a direction on the reading");
+    br = blowingNow(spotsR, recent(run(20, { "k-mystery": kb(19, null) }), run(21, { "k-mystery": kb(20, null) })), at14, DEFAULT_ALERTS, limitsOf, dead);
+    assert(br.length === 1 && br[0].spot.id === "k-mystery", "facing unknown: any direction counts, even a station without a vane");
+    assert(blowingText(br) === "Blowing now: Mystery Launch 18g22 kn at the Kept Sensor station — 35 min from Paradise Cay.", "the message skips the compass when the reading has no direction: " + blowingText(br));
+    assert(blowingNow(spotsR, recent(run(20, { "k-mystery": kb(19, null, "XKB", 8) }), run(21, { "k-mystery": kb(20, null, "XKB", 8) })), at14, DEFAULT_ALERTS, limitsOf, dead).length === 0, "facing unknown still respects the wind band (8 kn is under the 12 kn minimum)");
   }
 
   /* ---------- "Send test notification" (settings.alerts.testRequested -> one test push -> state.testSent) ---------- */

@@ -19,6 +19,7 @@ import os
 import sys
 
 import accuracy   # freshest(), parse_time(): the one definition of "a fresh reading"
+import obs_standalone   # load_rider_stations(): which rider-added spot ids carry readings
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEEP_RUNS = 6   # six hours of history; the rule looks at the last two
@@ -66,9 +67,10 @@ def write(path, doc):
     os.replace(tmp, path)
 
 
-def run(obs_path, out_path, now=None):
+def run(obs_path, out_path, now=None, rider_path=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     spots = {s["id"] for s in json.load(open(os.path.join(HERE, "spots.json"), encoding="utf-8"))}
+    spots |= set(obs_standalone.load_rider_stations(rider_path))   # rider-added spots carry readings for "Blowing now" too
     with open(obs_path, encoding="utf-8") as fh:
         obs = json.load(fh)
     snap = snapshot(obs, spots, now)

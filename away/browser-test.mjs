@@ -58,6 +58,7 @@ function mock(page, opts = {}) {
       if (f === "fail") return route.abort("failed");
       return json(f === "far" ? F.AWAY_FILE_FAR : f === "empty" ? F.AWAY_FILE_EMPTY : F.AWAY_FILE);
     }
+    if (/\/rider-stations\.json/.test(u)) return json(opts.riderStations || {});   // stations the hourly job resolved for rider-added spots; {} = none yet, as on the repo today
     if (u.startsWith("http://127.0.0.1")) return route.continue();
     if (LIVE && !/fonts\.|api\.weather\.gov/.test(u)) return route.continue();
     log.push(u.split("?")[0] + (/datagetter/.test(u) ? " product=" + new URL(u).searchParams.get("product") : "") + (body ? " " + decodeURIComponent(body.replace(/^data=/, "")).slice(0, 200) : ""));
@@ -631,6 +632,48 @@ try {
       assert((await text(page, "#row-thirdave .wind")).startsWith("18g22 kn W"), `bias.json ${bias ? "empty" : "missing"}: the wind is as forecast`);
       await page.click('button[data-open="thirdave"]'); await page.waitForSelector("#detail-thirdave .kv");
       assert(!/forecast bias|has been running/i.test(await text(page, "#detail-thirdave")) && errors.length === 0, `bias.json ${bias ? "empty" : "missing"}: no bias row, no page errors (` + errors.join(" | ") + ")");
+      await ctx.close();
+    }
+  }
+  /* ---------- 4. rider-added spots get the Live line (stationsFor pairing + rider-stations.json) ---------- */
+  {
+    const fresh = m => new Date(Date.now() - m * 60000).toISOString();
+    // Readings arrive under the curated spots, as obs.json delivers them; the page pairs the kept spot with the same stations.
+    const obs = { fetchedAt: new Date().toISOString(), obs: {
+      paradisecay: [{ id: "RCMC1", name: "Richmond (Chevron Long Wharf / Berth 5)", kind: "coops", dist_mi: 4.4, time: fresh(12), spd: 14, gst: 18, dir: 290 }],
+      pointisabel: [{ id: "PPXC1", name: "Point Potrero, Richmond", kind: "coops", dist_mi: 2.3, time: fresh(9), spd: 9, gst: 11, dir: 280 }],
+    } };
+    const kept = [
+      // by Shimada Park, Richmond: PPXC1 ~1.3 mi E, RCMC1 ~1.6 mi NNW — two fresh stations on different sides
+      { id: "k-shimada", name: "Shimada Park", region: "Kept", lat: 37.9061, lon: -122.3899, plat: 37.9061, plon: -122.3899, facing: 250, dir: { best: [[220, 280]], work: [[170, 330]], off: [[40, 140]] }, waves: false, pass: false, photo: false, driveLO: 25, driveBC: 40, kept: true, addedAt: "2026-10-27T00:00:00Z" },
+      // inland Mendocino county: nothing in the catalogue within 15 mi (and still within 150 mi of home, so not away mode)
+      { id: "k-ridge", name: "Far Ridge Pond", region: "Kept", lat: 39.4, lon: -123.3, plat: 39.4, plon: -123.3, facing: null, dir: { best: [], work: [[0, 360]], off: [] }, waves: false, pass: false, photo: false, driveLO: 150, driveBC: 170, kept: true, addedAt: "2026-10-27T00:00:00Z" },
+    ];
+    const init = `localStorage.setItem("goc.settings", JSON.stringify({ home: "LO", radius: 360, kept: ${JSON.stringify(kept)}, updatedAt: "2026-10-27T00:00:00Z" }))`;
+    {
+      const { page, errors, ctx } = await newPage(browser, url, { obs, init });
+      await page.waitForSelector("#row-k-shimada", { timeout: 20000 }); await page.waitForTimeout(800);
+      await page.click('button[data-open="k-shimada"]'); await page.waitForSelector("#detail-k-shimada .kv");
+      let det = await text(page, "#detail-k-shimada");
+      assert(/Wind measured now\nPoint Potrero, Richmond 9g11 kn · 1\.\d mi — Richmond 14g18 kn · 1\.\d mi/i.test(det), "a kept spot pairs with the nearest catalogue stations and shows both readings (different sides, both under 12 mi, distances recomputed from its own coordinates): " + (det.match(/Wind measured now\n[^\n]*/i) || [""])[0]);
+      assert(/nothing averaged/.test(det), "the two readings are shown as read, nothing averaged");
+      await page.click('button[data-open="k-shimada"]');   // close
+      await page.click('button[data-open="k-ridge"]'); await page.waitForSelector("#detail-k-ridge .kv");
+      det = await text(page, "#detail-k-ridge");
+      assert(/Wind measured now\nNo sensor yet — readings arrive within the hour/i.test(det), "a kept spot outside the catalogue's footprint says readings are on their way: " + (det.match(/Wind measured now\n[^\n]*/i) || [""])[0]);
+      assert(errors.length === 0, "rider-spot pairing: no page errors (" + errors.join(" | ") + ")");
+      await ctx.close();
+    }
+    {
+      // The hourly job has since resolved the far spot (rider-stations.json) and obs.json carries rows under its own id.
+      const riderStations = { "k-ridge": { name: "Far Ridge Pond", lat: 39.4, lon: -123.3, stations: [{ id: "KUKI", name: "Ukiah Municipal Airport", kind: "nws", lat: 39.126, lon: -123.2, dist_mi: 19.5 }] } };
+      const obs2 = { fetchedAt: new Date().toISOString(), obs: { ...obs.obs, "k-ridge": [{ id: "KUKI", name: "Ukiah Municipal Airport", kind: "nws", dist_mi: 19.5, time: fresh(20), spd: 16, gst: 16, dir: 200 }] } };
+      const { page, errors, ctx } = await newPage(browser, url, { obs: obs2, init, riderStations });
+      await page.waitForSelector("#row-k-ridge", { timeout: 20000 }); await page.waitForTimeout(800);
+      await page.click('button[data-open="k-ridge"]'); await page.waitForSelector("#detail-k-ridge .kv");
+      const det = await text(page, "#detail-k-ridge");
+      assert(/Wind measured now\n16 kn from the SSW ?\nUkiah Municipal Airport, 19\.5 mi away, 20 min ago/i.test(det), "once the job resolves it, the far kept spot has the ordinary Live line with 'N mi away': " + (det.match(/Wind measured now\n[^\n]*\n[^\n]*/i) || [""])[0]);
+      assert(errors.length === 0, "rider-stations.json merge: no page errors (" + errors.join(" | ") + ")");
       await ctx.close();
     }
   }

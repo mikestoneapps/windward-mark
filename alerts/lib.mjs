@@ -110,9 +110,12 @@ export function blowingNow(spots, recent, now, A, limitsOf, forecasts) {
   for (let i = 1; i < runs.length; i++) { const gap = (Date.parse(runs[i].at) - Date.parse(runs[i - 1].at)) / min; if (gap < RUN_GAP[0] || gap > RUN_GAP[1]) return []; }   // not consecutive hourly runs
   const out = [];
   for (const spot of spots) {
-    if (!spot.dir || !Array.isArray(spot.dir.best)) continue;
+    if (!spot.dir) continue;
+    // A rider-added spot whose facing is unknown carries {best:[], work:[[0,360]], off:[]} (the page's UNKNOWN_DIR):
+    // no sectors to check against, so any direction counts — even a station without a direction vane.
+    const any = !(spot.dir.best || []).length && !(spot.dir.off || []).length;
     const L = limitsOf(spot.id);
-    const inBand = o => o && typeof o.spd === "number" && o.spd >= L.minWind && o.spd <= L.maxWind && (o.gst == null || o.gst <= L.maxGust) && o.dir != null && scoring.dirScore(o.dir, spot.dir).v >= 0.75;
+    const inBand = o => o && typeof o.spd === "number" && o.spd >= L.minWind && o.spd <= L.maxWind && (o.gst == null || o.gst <= L.maxGust) && (any || (o.dir != null && scoring.dirScore(o.dir, spot.dir).v >= 0.75));
     const rs = runs.map(r => r.obs[spot.id]);
     if (!rs.every(inBand)) continue;
     if (new Set(rs.map(o => o.time)).size < rs.length) continue;   // the same reading seen twice
@@ -127,7 +130,7 @@ export function blowingNow(spots, recent, now, A, limitsOf, forecasts) {
   return out.sort((a, b) => a.drive - b.drive || b.o.spd - a.o.spd);
 }
 export function blowingText(hits, units) {
-  return "Blowing now: " + hits.slice(0, 3).map(x => `${x.spot.name} ${windText(x.o.spd, x.o.gst, units)} ${scoring.compass(x.o.dir)} at the ${x.o.name || x.o.id} station — ${mins(x.drive)} from ${x.home}`).join("; ") + ".";
+  return "Blowing now: " + hits.slice(0, 3).map(x => `${x.spot.name} ${windText(x.o.spd, x.o.gst, units)}${x.o.dir != null ? " " + scoring.compass(x.o.dir) : ""} at the ${x.o.name || x.o.id} station — ${mins(x.drive)} from ${x.home}`).join("; ") + ".";
 }
 
 /* ---------- "Send test notification" (Rider sheet -> Alerts) ---------- */

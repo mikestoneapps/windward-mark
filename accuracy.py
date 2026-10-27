@@ -3,7 +3,7 @@
 
     python3 accuracy.py [obs.json] [accuracy.jsonl]
 
-For every curated spot whose nearest station has a wind reading under 2 h old (the same rule the page uses before it
+For every spot (curated, or rider-added with an entry in rider-stations.json) whose nearest station has a wind reading under 2 h old (the same rule the page uses before it
 blends a station into today's score), one Open-Meteo call (the page's five models, same ids) covers the hour the
 reading falls in, and one JSON line is appended per spot:
 
@@ -24,6 +24,8 @@ import time
 import urllib.parse
 import urllib.request
 import zoneinfo
+
+import obs_standalone   # load_rider_stations(): rider-added spots log beside the curated ones
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 UA = {"User-Agent": "WindwardMark/1.0 (github.com/mikestoneapps/windward-mark)", "Accept": "application/json"}
@@ -155,9 +157,14 @@ def write_lines(path, lines):
     os.replace(tmp, path)
 
 
-def run(obs_path, out_path, get=get_json, now=None):
+def run(obs_path, out_path, get=get_json, now=None, rider_path=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     spots = {s["id"]: s for s in json.load(open(os.path.join(HERE, "spots.json"), encoding="utf-8"))}
+    # Rider-added spots log too: rider-stations.json carries their coordinates for the forecast call.
+    for sid, e in obs_standalone.load_rider_stations(rider_path).items():
+        if sid in spots or not isinstance(e, dict) or e.get("lat") is None or e.get("lon") is None:
+            continue
+        spots[sid] = {"id": sid, "lat": e["lat"], "lon": e["lon"]}
     with open(obs_path, encoding="utf-8") as fh:
         obs = json.load(fh)
     run_at = obs.get("fetchedAt") or now.isoformat(timespec="seconds")

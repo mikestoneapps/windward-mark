@@ -42,6 +42,14 @@ class ObsRecent(unittest.TestCase):
         self.assertNotIn("age_min", run["obs"]["crissy"], "only the listed fields, age is read off the timestamp later")
         self.assertEqual(self.read(), doc)
 
+    def test_rider_spot_with_a_rider_stations_entry_is_kept(self):
+        rider = os.path.join(self.dir, "rider-stations.json")
+        with open(rider, "w") as fh:
+            json.dump({"k-somewhere": {"name": "Somewhere", "lat": 37.5, "lon": -122.5, "stations": []}}, fh)
+        doc = R.run(self.obs, self.out, now=NOW, rider_path=rider)
+        self.assertIn("k-somewhere", doc["runs"][0]["obs"], "a rider spot named by rider-stations.json carries its reading, for Blowing now")
+        self.assertEqual(doc["runs"][0]["obs"]["k-somewhere"]["id"], "X")
+
     def test_rolling_history(self):
         R.run(self.obs, self.out, now=NOW)
         R.run(self.obs, self.out, now=NOW + dt.timedelta(hours=1))

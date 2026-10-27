@@ -132,6 +132,23 @@ class Accuracy(unittest.TestCase):
         self.assertIn("accuracy log skipped", r.stderr)
         self.assertEqual(self.raw(), before)
 
+    def test_rider_spot_logs_once_rider_stations_has_it(self):
+        rider = os.path.join(self.dir, "rider-stations.json")
+        with open(rider, "w") as fh:
+            json.dump({"k-somewhere": {"name": "Somewhere", "lat": 37.5, "lon": -122.5,
+                                       "stations": [{"id": "X", "name": "X", "kind": "nws", "lat": 37.5, "lon": -122.5, "dist_mi": 1.0}]}}, fh)
+        calls = []
+
+        def get(url):
+            calls.append(url)
+            return fake_answer(4)
+        self.assertEqual(A.run(self.obs, self.out, get=get, now=NOW, rider_path=rider), 4)
+        q = urllib.parse.parse_qs(urllib.parse.urlparse(calls[0]).query)
+        self.assertEqual(q["latitude"], ["37.758,37.774,37.8057,37.5"], "the rider spot's own coordinates join the one forecast call")
+        L = {ln["spot"]: ln for ln in self.lines()}
+        self.assertEqual((L["k-somewhere"]["station"], L["k-somewhere"]["obs"], L["k-somewhere"]["fc"]["bm"]), ("X", 10, 13.0),
+                         "a rider spot with a rider-stations entry logs like any curated one")
+
     def test_no_fresh_readings_writes_empty_file(self):
         with open(self.obs, "w") as fh:
             json.dump({"fetchedAt": ISO(NOW), "obs": {"sherman": obs_doc()["obs"]["sherman"]}}, fh)

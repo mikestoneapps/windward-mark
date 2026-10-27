@@ -1,8 +1,11 @@
 name: Station observations
 
 # The hourly job. Two independent parts:
-#   observations — fetch the latest readings for every spot's stations (stations.json: NWS airports, CO-OPS,
-#                  NDBC buoys, RAWS/IEM, CeNCOOS ERDDAP, CDEC, Caltrans, JPL Tahoe, CDIP wave-only) into obs.json
+#   observations — first rider_stations.py resolves stations for rider-added spots (settings.kept, read off the
+#                  sync Worker) into rider-stations.json — skipped silently until the SYNC secrets exist; then
+#                  fetch the latest readings for every spot's stations (stations.json + rider-stations.json: NWS
+#                  airports, CO-OPS, NDBC buoys, RAWS/IEM, CeNCOOS ERDDAP, CDEC, Caltrans, JPL Tahoe, CDIP
+#                  wave-only) into obs.json
 #                  and commit it so the page can read the no-CORS feeds same-origin. Then accuracy.py writes one line per spot with a
 #                  fresh reading to accuracy.jsonl: observed knots beside each forecast model's number for that hour
 #                  (90-day window); obs_recent.py keeps the last few runs' nearest readings in obs-recent.json (for the
@@ -37,6 +40,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Resolve stations for rider-added spots
+        # Reads each rider's kept spots off the sync Worker and caches their nearest stations in
+        # rider-stations.json (re-resolved only when a spot's coordinates change). Prints a note and
+        # exits 0 while the secrets are absent, like the alerts job.
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_ADMIN_TOKEN: ${{ secrets.SYNC_ADMIN_TOKEN }}
+        run: python3 rider_stations.py
+
       - name: Fetch observations
         run: python3 obs_standalone.py obs.json
 
@@ -54,9 +66,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add obs.json accuracy.jsonl obs-recent.json bias.json
+          git add obs.json accuracy.jsonl obs-recent.json bias.json rider-stations.json
           if git diff --cached --quiet; then
-            echo "obs.json, accuracy.jsonl, obs-recent.json and bias.json unchanged"
+            echo "obs.json, accuracy.jsonl, obs-recent.json, bias.json and rider-stations.json unchanged"
             exit 0
           fi
           git commit -m "Update station observations"
