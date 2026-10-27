@@ -1,8 +1,9 @@
 name: Station observations
 
 # The hourly job. Two independent parts:
-#   observations — fetch the latest NWS and NDBC readings for every spot into obs.json and commit it so
-#                  the page can read buoys (no CORS) same-origin. Then accuracy.py writes one line per spot with a
+#   observations — fetch the latest readings for every spot's stations (stations.json: NWS airports, CO-OPS,
+#                  NDBC buoys, RAWS/IEM, CeNCOOS ERDDAP, CDEC, Caltrans, JPL Tahoe, CDIP wave-only) into obs.json
+#                  and commit it so the page can read the no-CORS feeds same-origin. Then accuracy.py writes one line per spot with a
 #                  fresh reading to accuracy.jsonl: observed knots beside each forecast model's number for that hour
 #                  (90-day window); obs_recent.py keeps the last few runs' nearest readings in obs-recent.json (for the
 #                  "Blowing now" alert); bias.py turns the log into per-spot, per-model bias in bias.json (Phase 5).

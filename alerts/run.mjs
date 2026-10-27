@@ -8,7 +8,7 @@ import webpush from "web-push";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SPOTS, scoring, fetchForecasts, evaluate, laNow, riderSpots, deliver, GONE } from "./lib.mjs";
+import { SPOTS, scoring, fetchForecasts, evaluate, testDue, laNow, riderSpots, deliver, GONE } from "./lib.mjs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // obs-recent.json (the last few hourly station readings, for "Blowing now") and bias.json (per-spot forecast bias, Phase 5) are
 // committed by the observations job just before this one runs (the workflow checks out the branch tip, not the scheduled commit).
@@ -44,20 +44,33 @@ scoring.setBias(readJSON("bias.json") || {});
 console.log(`${riders.length} rider(s), ${Object.keys(forecasts).length} spot forecasts, ${recent && recent.runs ? recent.runs.length : 0} recent station run(s), ${now.date} ${now.hour}:00 Pacific${DRY ? " (dry run)" : ""}`);
 
 let failures = 0;
+const send = (sub, payload) => webpush.sendNotification(sub, payload, { TTL: 6 * 3600, urgency: "normal" });
 for (const rider of riders) {
   const tag = rider.id.slice(0, 8);
   let res;
   try { res = evaluate(rider, forecasts, now, recent); } catch (e) { console.error(`rider ${tag}: evaluation failed:`, e); failures++; continue; }
-  if (!res.notification) { console.log(`rider ${tag}: ${res.why}`); continue; }
-  console.log(`rider ${tag}: ${res.notification.body}`);
+  const test = testDue(rider, now);   // "Send test notification": answered on the next run whatever the digest decides, then marked served
+  if (!res.notification && !test) { console.log(`rider ${tag}: ${res.why}`); continue; }
+  if (res.notification) console.log(`rider ${tag}: ${res.notification.body}`);
+  if (test) console.log(`rider ${tag}: sending the test push (requested ${rider.settings.alerts.testRequested})`);
   if (DRY) continue;
   // Every device's push status goes back to the Worker (PUT {pushed}); it deletes the subscriptions the push service reports gone (404/410)
-  // and leaves the rest alone, so a device that subscribed meanwhile is never overwritten. The "already alerted" state is only
-  // advanced when at least one device got the digest, so a push outage is retried next hour instead of silently swallowing the alert.
-  const d = await deliver(rider.subs, res.notification, (sub, payload) => webpush.sendNotification(sub, payload, { TTL: 6 * 3600, urgency: "normal" }));
-  for (const p of d.pushed) { if (GONE.has(p.status)) console.log(`rider ${tag}: subscription gone (${p.status}), asking the sync service to drop it`); else if (p.status >= 400 || !p.status) console.error(`rider ${tag}: push failed (${p.status || p.error})`); }
-  failures += d.failures;
-  try { await api("/v1/admin/riders/" + rider.id, "PUT", d.delivered ? { pushed: d.pushed, state: res.state } : { pushed: d.pushed }); }
+  // and leaves the rest alone, so a device that subscribed meanwhile is never overwritten. The "already alerted" state (and the served-test
+  // marker) is only advanced when at least one device got the push, so a push outage is retried next hour instead of silently swallowing it.
+  const pushed = [];
+  let state = null;
+  const logPushed = d => { for (const p of d.pushed) { if (GONE.has(p.status)) console.log(`rider ${tag}: subscription gone (${p.status}), asking the sync service to drop it`); else if (p.status >= 400 || !p.status) console.error(`rider ${tag}: push failed (${p.status || p.error})`); } pushed.push(...d.pushed); failures += d.failures; };
+  if (res.notification) {
+    const d = await deliver(rider.subs, res.notification, send);
+    logPushed(d);
+    if (d.delivered) state = res.state;
+  }
+  if (test) {
+    const d = await deliver(rider.subs, test, send);
+    logPushed(d);
+    if (d.delivered) { state = state || { ...(rider.state || {}) }; state.testSent = rider.settings.alerts.testRequested; }   // clear the flag server-side: this request is served
+  }
+  try { await api("/v1/admin/riders/" + rider.id, "PUT", state ? { pushed, state } : { pushed }); }
   catch (e) { console.error(`rider ${tag}: could not save alert state:`, e.message); failures++; }
 }
 process.exit(failures ? 1 : 0);

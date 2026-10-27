@@ -22,8 +22,8 @@ const TYPES = { ".html": "text/html", ".json": "application/json", ".js": "text/
 function serve(dir) {
   return new Promise(res => { const s = http.createServer((req, r) => { const p = path.join(dir, decodeURIComponent(req.url.split("?")[0]).replace(/^\/$/, "/index.html")); fs.readFile(p, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { "Content-Type": TYPES[path.extname(p)] || "application/octet-stream" }); r.end(d); }); }); s.listen(0, "127.0.0.1", () => res({ server: s, url: `http://127.0.0.1:${s.address().port}/` })); });
 }
-// Deterministic forecast: W wind 18g22 at every point, 25 kn at point index 1 (so the ranking is stable and non-trivial).
-const forecastFor = n => F.openMeteo(n, (i, h) => ({ spd: i === 1 ? 25 : 18, gst: i === 1 ? 30 : 22, dir: h >= 12 && h <= 17 ? 290 : 270 }));
+// Deterministic forecast: W wind 18g22 at every point, 25 kn at point index 2 (Candlestick in SPOTS order, so the ranking is stable and non-trivial).
+const forecastFor = n => F.openMeteo(n, (i, h) => ({ spd: i === 2 ? 25 : 18, gst: i === 2 ? 30 : 22, dir: h >= 12 && h <= 17 ? 290 : 270 }));
 const SYNC_URL = "https://sync.test.workers.dev", SYNC_KEY = "k".repeat(40);
 const syncStore = () => ({ doc: null, photos: {}, log: [] });   // one per "rider": pass the same object to every device's mock
 function mock(page, opts = {}) {
@@ -60,10 +60,12 @@ function mock(page, opts = {}) {
     }
     if (u.startsWith("http://127.0.0.1")) return route.continue();
     if (LIVE && !/fonts\.|api\.weather\.gov/.test(u)) return route.continue();
-    log.push(u.split("?")[0] + (body ? " " + decodeURIComponent(body.replace(/^data=/, "")).slice(0, 200) : ""));
+    log.push(u.split("?")[0] + (/datagetter/.test(u) ? " product=" + new URL(u).searchParams.get("product") : "") + (body ? " " + decodeURIComponent(body.replace(/^data=/, "")).slice(0, 200) : ""));
     if (/\/\/api\.open-meteo\.com/.test(u)) { const P = new URL(u).searchParams, n = (P.get("latitude") || "").split(",").length; log.push("models=" + P.get("models")); const a = (opts.forecast || forecastFor)(n); return a && a.status ? json({ error: true, reason: "test: rejected" }, a.status) : json(a); }
     if (/marine-api\.open-meteo\.com/.test(u)) { const n = (new URL(u).searchParams.get("latitude") || "").split(",").length; return json(F.marine(n)); }
-    if (/tidesandcurrents\.noaa\.gov/.test(u)) { if (opts.tides === "down") return json({ error: { message: "test: down" } }, 500); return json(F.tides(u)); }
+    if (/tidesandcurrents\.noaa\.gov/.test(u)) {
+      if (new URL(u).searchParams.get("product") === "wind") return json({ data: [] });   // the page's own CO-OPS station fetch (kind coops): no reading, deterministic (obs come from opts.obs)
+      if (opts.tides === "down") return json({ error: { message: "test: down" } }, 500); return json(F.tides(u)); }
     if (/overpass/.test(u)) { if (opts.overpass === "down") return json({}, 504); if (opts.overpass === "slow") await new Promise(r => setTimeout(r, 4000)); if (/surveillance/.test(body)) return json(F.OVERPASS_CAMS); if (/coastline/.test(body)) return json(F.OVERPASS_SHORE); return json({}, 400); }
     if (/commons\.wikimedia\.org/.test(u)) return json(F.COMMONS);
     if (/upload\.wikimedia\.org/.test(u)) return route.fulfill({ status: 200, contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", "base64") });
@@ -95,7 +97,7 @@ try {
     await page.waitForSelector(".row", { timeout: 20000 });
     await page.waitForTimeout(800);
     const rows = await scored(page);
-    assert(rows > 0 && rows <= 16, `home: ${rows} curated rows within 1h30 of Paradise Cay`);
+    assert(rows > 0 && rows <= 27, `home: ${rows} curated rows within 1h30 of Paradise Cay`);
     assert((await page.locator("#away").count()) === 0 && (await page.locator(".row.pending").count()) === 0, "home: no away banner, no pending rows");
     assert(!log.some(l => /overpass|nominatim|commons|away-spots/.test(l)), "home: no OpenStreetMap, Nominatim or Commons calls, no catalogue fetch");
     assert(errors.length === 0, "home: no page errors (" + errors.join(" | ") + ")");
@@ -328,9 +330,9 @@ try {
     const short = d => new Date(key(d) + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
     const long = d => new Date(key(d) + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
     const dayOf = day => Math.round((Date.parse(day + "T12:00:00Z") - Date.parse(today + "T12:00:00Z")) / 864e5);
-    // Point 0 is Crissy Field, point 1 Candlestick Point (SPOTS order). Today Crissy blows (20g24, the freeride peak), Candlestick is light (12);
-    // tomorrow the reverse; the day after Crissy again; the last two days both 18. W all week.
-    const byDay = n => F.openMeteo(n, (i, h, day) => { const d = dayOf(day); const s = i === 0 ? [20, 12, 20, 18, 18, 18, 18][d] : i === 1 ? [12, 20, 12, 18, 18, 18, 18][d] : 18; return { spd: s, gst: s + 4, dir: 270 }; });
+    // Point 1 is Crissy Field, point 2 Candlestick Point (SPOTS order; point 0 is Paradise Cay). Today Crissy blows (20g24, the freeride peak),
+    // Candlestick is light (12); tomorrow the reverse; the day after Crissy again; the last two days both 18. W all week.
+    const byDay = n => F.openMeteo(n, (i, h, day) => { const d = dayOf(day); const s = i === 1 ? [20, 12, 20, 18, 18, 18, 18][d] : i === 2 ? [12, 20, 12, 18, 18, 18, 18][d] : 18; return { spd: s, gst: s + 4, dir: 270 }; });
     // A fresh, trusted station 1.8 mi from Crissy Field reading 5 kn against the 20 kn forecast: a disagreement, today only.
     const obs = { fetchedAt: new Date().toISOString(), obs: { crissy: [{ id: "TEST1", name: "Test station", kind: "nws", dist_mi: 1.8, time: new Date(Date.now() - 10 * 60000).toISOString(), spd: 5, gst: 7, dir: 270 }] } };
     const { page, errors, ctx } = await newPage(browser, url, { forecast: byDay, obs });
@@ -413,10 +415,10 @@ try {
     await page.waitForSelector(".row", { timeout: 20000 });
     await page.waitForFunction(() => { try { return !!JSON.parse(localStorage.getItem("goc.tides") || "null"); } catch (e) { return false; } }, null, { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(300);
-    const tideCalls = log.filter(l => /tidesandcurrents/.test(l));
+    const tideCalls = log.filter(l => /tidesandcurrents.*product=predictions/.test(l));
     const stations = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem("goc.tides")).stations).sort());
-    assert(tideCalls.length === 26 && JSON.stringify(stations) === JSON.stringify(["9413745", "9414131", "9414290", "9414358", "9414458", "9414750", "9414816", "9414843", "9415020", "9415064", "9415112", "9415316", "9415625"]) && (await page.evaluate(() => JSON.parse(localStorage.getItem("goc.tides")).day)) === new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }), `the sixteen spots share thirteen tide stations: one hourly + one hilo call each (${tideCalls.length} calls), cached under goc.tides for today`);
-    assert(log.findIndex(l => /tidesandcurrents/.test(l)) > log.findIndex(l => /api\.open-meteo/.test(l)), "tides are fetched after the forecast, never before it");
+    assert(tideCalls.length === 28 && JSON.stringify(stations) === JSON.stringify(["9413450", "9413745", "9414131", "9414290", "9414358", "9414458", "9414750", "9414816", "9414843", "9415020", "9415064", "9415112", "9415316", "9415625"]) && (await page.evaluate(() => JSON.parse(localStorage.getItem("goc.tides")).day)) === new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }), `the 24 tidal spots share fourteen tide stations (the three lakes carry none): one hourly + one hilo call each (${tideCalls.length} calls), cached under goc.tides for today`);
+    assert(log.findIndex(l => /tidesandcurrents.*product=predictions/.test(l)) > log.findIndex(l => /api\.open-meteo/.test(l)), "tides are fetched after the forecast, never before it");
     await page.click('button[data-open="sherman"]'); await page.waitForSelector("#detail-sherman svg");
     const coast = await text(page, "#detail-sherman");
     const svgC = await page.evaluate(() => document.querySelector("#detail-sherman svg").outerHTML);
@@ -440,9 +442,9 @@ try {
     if (SHOT) await page.screenshot({ path: SHOT + "/ocean-390.png", fullPage: true });
     assert(errors.length === 0, "tides: no page errors (" + errors.join(" | ") + ")");
     // reload: the cached predictions are used, no new NOAA call
-    const n0 = log.filter(l => /tidesandcurrents/.test(l)).length;
+    const n0 = log.filter(l => /tidesandcurrents.*product=predictions/.test(l)).length;
     await page.reload(); await page.waitForSelector(".row", { timeout: 20000 }); await page.waitForTimeout(800);
-    assert(log.filter(l => /tidesandcurrents/.test(l)).length === n0, "reload: today's tide predictions come from localStorage, no new NOAA call");
+    assert(log.filter(l => /tidesandcurrents.*product=predictions/.test(l)).length === n0, "reload: today's tide predictions come from localStorage, no new NOAA call");
     await ctx.close();
     // NOAA down: scores and chart as before, no errors
     const down = await newPage(browser, url, { width: 390, tides: "down", init: () => { localStorage.setItem("goc.settings", JSON.stringify({ home: "BC", radius: 120, v: 2 })); } });
@@ -585,7 +587,7 @@ try {
   }
   /* ---------- per-spot forecast bias (bias.json) and the "Blowing now" toggle ---------- */
   {
-    // The fixture forecast is 18g22 W everywhere (25g30 at point 1, Candlestick). Third Ave: +4 kn on the median (applied); Crissy: −3 on the median (applied, negative);
+    // The fixture forecast is 18g22 W everywhere (25g30 at point 2, Candlestick). Third Ave: +4 kn on the median (applied); Crissy: −3 on the median (applied, negative);
     // Berkeley: +5 but only 20 readings (shown, not applied); Alameda: +1.5 over 80 readings (shown, under 2 kn); Coyote: an entry for a series it does not score on.
     const bias = { thirdave: { median: { kn: 4, n: 61 } }, crissy: { median: { kn: -3, n: 45 } }, berkeley: { median: { kn: 5, n: 20 } }, alameda: { median: { kn: 1.5, n: 80 } }, coyote: { bm: { kn: 6, n: 70 } } };
     const obs = { fetchedAt: new Date().toISOString(), obs: { candlestick: [{ id: "KSFO", name: "San Francisco Intl", kind: "nws", dist_mi: 5.9, time: new Date(Date.now() - 12 * 60000).toISOString(), spd: 18, gst: 22, dir: 280 }] } };

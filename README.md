@@ -6,8 +6,8 @@ Live: https://mikestoneapps.github.io/windward-mark/
 On an iPhone: open the link in Safari → Share → **Add to Home Screen**.
 
 - Forecasts: Open-Meteo, five models in one call (best match, ECMWF, NBM, GFS, ICON) + marine model, seven days (the last two a trend), fetched on every open. The score runs on the hourly median of best match, ECMWF and NBM over that day's sunrise-to-sunset hours; all five vote on confidence. Knots by default, mph under Rider.
-- Tides: NOAA CO-OPS predictions for the nearest tide station, drawn under each spot's hourly chart (display only — the whole Bay is tidal, so every spot names one).
-- Live wind: nearest NWS/METAR stations, with distance; NOAA buoys via the hourly job (phase 1).
+- Tides: NOAA CO-OPS predictions for the nearest tide station, drawn under each spot's hourly chart (display only; the lakes carry none).
+- Live wind: a hand-verified catalogue of free public sensors per spot — NOAA CO-OPS 6-minute stations and airports fetched by the page itself, plus NDBC buoys, RAWS/IEM, CeNCOOS ERDDAP, CDEC, Caltrans and the JPL Tahoe buoys via the hourly job (CDIP wave buoys feed the swell line only).
 - Scoring, spot rules, alerts and roadmap: see `SPEC.md` and `docs/BUILD-PLAN.md`.
 - For Claude Code: read `CLAUDE.md` first.
 

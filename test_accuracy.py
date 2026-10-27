@@ -25,13 +25,13 @@ def obs_doc():
     return {"fetchedAt": ISO(NOW), "obs": {
         # fresh nearest station, 35 min old at :05 -> hour 14:00 Pacific
         "alameda": [{"id": "AAMC1", "name": "ALAMEDA", "kind": "nws", "dist_mi": 1.8, "time": ISO(NOW - dt.timedelta(minutes=35)), "spd": 12.3, "gst": 15.1, "dir": 290}],
-        # nearest has no wind value; the second (a buoy, 25 min old at :15 -> 14:00) is used
-        "oceanbeach": [{"id": "FTPC1", "kind": "nws", "dist_mi": 3.4, "time": ISO(NOW - dt.timedelta(minutes=10)), "spd": None, "gst": None, "dir": None},
+        # nearest row is a CDIP wave buoy (wave only, spd null — never a wind sample); the second (a buoy, 25 min old at :15 -> 14:00) is used
+        "oceanbeach": [{"id": "142", "name": "SF Bar CDIP 142", "kind": "cdip", "wave_only": True, "dist_mi": 6.7, "time": ISO(NOW - dt.timedelta(minutes=10)), "spd": None, "gst": None, "dir": None, "wvht_ft": 5.2},
                         {"id": "46237", "kind": "ndbc", "dist_mi": 6.7, "time": ISO(NOW - dt.timedelta(minutes=25)), "spd": 5.8, "gst": 7.8, "dir": 150.0}],
         # only a 3-hour-old reading: skipped
-        "sherman": [{"id": "PCOC1", "kind": "nws", "dist_mi": 12.7, "time": ISO(NOW - dt.timedelta(hours=3)), "spd": 20.0, "gst": 25.0, "dir": 270}],
-        # reading at 14:35 Pacific -> rounds up to 15:00
-        "crissy": [{"id": "FTPC1", "kind": "nws", "dist_mi": 0.6, "time": ISO(NOW.replace(minute=35)), "spd": 9.0, "gst": None, "dir": 300}],
+        "sherman": [{"id": "PCOC1", "kind": "coops", "dist_mi": 12.7, "time": ISO(NOW - dt.timedelta(hours=3)), "spd": 20.0, "gst": 25.0, "dir": 270}],
+        # a CO-OPS 6-minute station (the new Bay backbone kind); reading at 14:35 Pacific -> rounds up to 15:00
+        "crissy": [{"id": "FTPC1", "kind": "coops", "dist_mi": 0.6, "time": ISO(NOW.replace(minute=35)), "spd": 9.0, "gst": None, "dir": 300}],
         # not a curated spot: ignored
         "k-somewhere": [{"id": "X", "kind": "nws", "dist_mi": 1, "time": ISO(NOW), "spd": 10}],
         "candlestick": [],
@@ -95,7 +95,7 @@ class Accuracy(unittest.TestCase):
         self.assertEqual(m["fc_gst"]["nbm"], 17.0)
         self.assertEqual((m["median"], m["fc_dir"]), (13.0, 280), "median of best match, ECMWF and NBM; GFS and ICON never enter it")
         f = L["oceanbeach"]
-        self.assertEqual((f["station"], f["dist_mi"], f["fc"]["nbm"], f["median"]), ("46237", 6.7, None, 14.0), "second station when the nearest has no wind; NBM missing -> mean of the other two")
+        self.assertEqual((f["station"], f["dist_mi"], f["fc"]["nbm"], f["median"]), ("46237", 6.7, None, 14.0), "second station when the nearest is a wave-only CDIP row; NBM missing -> mean of the other two")
         self.assertEqual(L["crissy"]["time"], "2026-10-19T15:00", "a reading at :35 belongs to the next hour")
         self.assertEqual(L["crissy"]["fc"]["bm"], 12.0, "third point of the answer")
 

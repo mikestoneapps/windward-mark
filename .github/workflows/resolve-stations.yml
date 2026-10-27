@@ -1,0 +1,42 @@
+name: Resolve stations
+
+# Manual: re-resolve the nearest stations per spot LIVE (the build container cannot reach NOAA) and
+# commit stations.json. The resolver only ever ADDS to the hand-verified catalogue seeded from
+# docs/research/stations-proposed.json — airports (K### ids) and NDBC buoys within each spot's radius;
+# CWOP/MADIS mesonet mirrors are excluded (days stale at the 2026-10 audit). See stations.py.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: observations
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve stations for every spot
+        run: python3 stations.py --resolve
+
+      - name: Commit stations.json if it changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stations.json
+          if git diff --cached --quiet; then
+            echo "stations.json unchanged"
+            exit 0
+          fi
+          git commit -m "Resolve stations live (adds only; hand-verified rows kept)"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

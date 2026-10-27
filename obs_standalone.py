@@ -1,111 +1,386 @@
 #!/usr/bin/env python3
-"""Resolve nearest public wind stations per spot (once, cached to stations.json) and fetch latest observations
-into obs.json (repo root, or the path given as the first argument):
-{fetchedAt, obs: {spotId: [{id,name,kind,dist_mi,time,spd,gst,dir,wvht_ft,age_min}, ...]}}.
-Sources: NWS/METAR via api.weather.gov (nearest 2 land stations), NOAA NDBC realtime2 (hand-mapped buoys).
+"""Fetch the latest station observations for every curated spot into obs.json (repo root, or the path
+given as the first argument): {fetchedAt, obs: {spotId: [{id,name,kind,dist_mi,time,spd,gst,dir,wvht_ft,age_min}, ...]}}.
+
+The station catalogue is stations.json (hand-verified, sorted by distance; every row names its feed in
+`kind`; docs/research/networks.md has each network's terms and cadence). Every kind returns the same row
+shape with wind in knots; a wave-only row (CDIP) carries wvht_ft and spd null, so nothing downstream ever
+scores it as wind. A kind that fails is skipped, never fatal. One request per station per run (plus one
+per Caltrans district file and one for the JPL Tahoe page, shared), well under NDBC's "keep retrievals
+minimal" ask.
+
+Kinds:
+  nws      api.weather.gov /stations/{id}/observations/latest (airports only; km/h -> kn)
+  coops    NOAA CO-OPS datagetter product=wind (6-min, already knots, gusts); NDBC realtime2 fallback
+  ndbc     NDBC realtime2 text (buoys; m/s -> kn, wave height m -> ft)
+  raws     IEM obhistory.json, network CA_DCP / NV_DCP (RAWS hourly; SHEF keys, mph -> kn)
+  iem      same IEM endpoint (GOES/HADS stations such as the Golden Gate Bridge deck, which reads high)
+  cencoos  CeNCOOS ERDDAP tabledap (per-dataset variable names in the row's `vars`; m/s -> kn)
+  cdec     CDEC JSONDataServlet sensors 9/10/77 (15-min; mph -> kn; -9999 = missing)
+  caltrans cwwp2.dot.ca.gov district RWIS file (NTCIP ESS units: tenths of m/s, 65535 = missing)
+  jpl      laketahoe.jpl.nasa.gov/getweather HTML (Tahoe buoys; "min:avg:max" m/s -> kn)
+  cdip     CDIP justdar (wave only: Hs m -> ft; never a wind sample)
+
 Run hourly by .github/workflows/observations.yml; the page reads obs.json same-origin."""
-import json, os, sys, time, math, urllib.request, datetime
+import json
+import os
+import re
+import sys
+import time
+import datetime
+import urllib.request
+import zoneinfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT_FILE = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "obs.json")
-UA = {"User-Agent": "WindwardMark/1.0 (github.com/mikestoneapps/windward-mark)", "Accept": "application/geo+json, application/json"}
-spots = []
-CACHE = os.path.join(HERE, "stations.json")
+UA = {"User-Agent": "WindwardMark/1.0 (github.com/mikestoneapps/windward-mark)", "Accept": "application/geo+json, application/json, text/plain, text/html"}
+LA = zoneinfo.ZoneInfo("America/Los_Angeles")
+MS2KN = 1.94384
+MPH2KN = 0.868976
+KMH2KN = 1 / 1.852
+M2FT = 3.28084
 
-# NDBC buoys / C-MAN near the Bay Area coast (id: name). Distance computed from spot.
-NDBC = {"46026": "San Francisco buoy", "46012": "Half Moon Bay buoy", "46013": "Bodega Bay buoy",
-        "46237": "San Francisco Bar buoy", "46042": "Monterey buoy"}
-NDBC_LL = {"46026": (37.754, -122.839), "46012": (37.356, -122.881), "46013": (38.235, -123.307),
-           "46237": (37.786, -122.634), "46042": (36.785, -122.396)}
 
-def get(url, tries=4):
+def get(url, tries=3):
     for i in range(tries):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
-                return r.read().decode()
-        except Exception as e:
-            if i == tries - 1: raise
+                return r.read().decode("utf-8", "replace")
+        except Exception:
+            if i == tries - 1:
+                raise
             time.sleep(2 + 2 * i)
 
-def mi(a, b, c, d):
-    R = 3958.8; r = math.pi / 180
-    x = math.sin((c - a) * r / 2) ** 2 + math.cos(a * r) * math.cos(c * r) * math.sin((d - b) * r / 2) ** 2
-    return 2 * R * math.asin(math.sqrt(x))
 
-STATIONS = {"crissy":[{"id":"FTPC1","name":"Fort Point, Golden Gate","kind":"nws","lat":37.8065,"lon":-122.4652,"dist_mi":0.6},{"id":"RCMC1","name":"Richmond Berth 5","kind":"nws","lat":37.9233,"lon":-122.4097,"dist_mi":8.5},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":9.9}],"candlestick":[{"id":"KSFO","name":"San Francisco Intl Airport","kind":"nws","lat":37.6213,"lon":-122.379,"dist_mi":5.9},{"id":"AAMC1","name":"Alameda NAS, San Francisco Bay","kind":"nws","lat":37.7717,"lon":-122.3,"dist_mi":6.5},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":14.6}],"thirdave":[{"id":"KSQL","name":"San Carlos Airport","kind":"nws","lat":37.5119,"lon":-122.2495,"dist_mi":5.1},{"id":"KSFO","name":"San Francisco Intl Airport","kind":"nws","lat":37.6213,"lon":-122.379,"dist_mi":5.9},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":23.9}],"coyote":[{"id":"KSFO","name":"San Francisco Intl Airport","kind":"nws","lat":37.6213,"lon":-122.379,"dist_mi":4.0},{"id":"KSQL","name":"San Carlos Airport","kind":"nws","lat":37.5119,"lon":-122.2495,"dist_mi":6.6},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":21.9}],"alameda":[{"id":"AAMC1","name":"Alameda NAS, San Francisco Bay","kind":"nws","lat":37.7717,"lon":-122.3,"dist_mi":1.8},{"id":"KOAK","name":"Oakland Intl Airport","kind":"nws","lat":37.7214,"lon":-122.2208,"dist_mi":3.7},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":19.9}],"berkeley":[{"id":"AAMC1","name":"Alameda NAS, San Francisco Bay","kind":"nws","lat":37.7717,"lon":-122.3,"dist_mi":6.4},{"id":"RCMC1","name":"Richmond Berth 5","kind":"nws","lat":37.9233,"lon":-122.4097,"dist_mi":6.6},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":18.2}],"pointisabel":[{"id":"RCMC1","name":"Richmond Berth 5","kind":"nws","lat":37.9233,"lon":-122.4097,"dist_mi":5.0},{"id":"AAMC1","name":"Alameda NAS, San Francisco Bay","kind":"nws","lat":37.7717,"lon":-122.3,"dist_mi":8.9},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":18.6}],"sherman":[{"id":"PCOC1","name":"Port Chicago, Suisun Bay","kind":"nws","lat":38.056,"lon":-122.039,"dist_mi":12.7},{"id":"KCCR","name":"Buchanan Field, Concord","kind":"nws","lat":37.9897,"lon":-122.0569,"dist_mi":14.2}],"windycove":[{"id":"KSUU","name":"Travis AFB, Fairfield","kind":"nws","lat":38.2627,"lon":-121.9272,"dist_mi":15.2},{"id":"PCOC1","name":"Port Chicago, Suisun Bay","kind":"nws","lat":38.056,"lon":-122.039,"dist_mi":19.6}],"baypoint":[{"id":"PCOC1","name":"Port Chicago, Suisun Bay","kind":"nws","lat":38.056,"lon":-122.039,"dist_mi":4.2},{"id":"KCCR","name":"Buchanan Field, Concord","kind":"nws","lat":37.9897,"lon":-122.0569,"dist_mi":6.6},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":40.9}],"stinson":[{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":7.7},{"id":"FTPC1","name":"Fort Point, Golden Gate","kind":"nws","lat":37.8065,"lon":-122.4652,"dist_mi":11.6},{"id":"RCMC1","name":"Richmond Berth 5","kind":"nws","lat":37.9233,"lon":-122.4097,"dist_mi":12.9}],"bodega":[{"id":"46013","name":"Bodega Bay buoy","kind":"ndbc","lat":38.235,"lon":-123.307,"dist_mi":15.7},{"id":"KSTS","name":"Sonoma County Airport, Santa Rosa","kind":"nws","lat":38.5089,"lon":-122.8128,"dist_mi":17.8},{"id":"PRYC1","name":"Point Reyes","kind":"nws","lat":37.9961,"lon":-123.02,"dist_mi":22.6}],"waddell":[{"id":"46042","name":"Monterey buoy","kind":"ndbc","lat":36.785,"lon":-122.396,"dist_mi":22.5},{"id":"46012","name":"Half Moon Bay buoy","kind":"ndbc","lat":37.356,"lon":-122.881,"dist_mi":37.8}],"hmb":[{"id":"KHAF","name":"Half Moon Bay Airport","kind":"nws","lat":37.5134,"lon":-122.5011,"dist_mi":3.2},{"id":"KSFO","name":"San Francisco Intl Airport","kind":"nws","lat":37.6213,"lon":-122.379,"dist_mi":10.1},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":22.9}],"oceanbeach":[{"id":"FTPC1","name":"Fort Point, Golden Gate","kind":"nws","lat":37.8065,"lon":-122.4652,"dist_mi":3.4},{"id":"46237","name":"San Francisco Bar buoy","kind":"ndbc","lat":37.786,"lon":-122.634,"dist_mi":6.7},{"id":"AAMC1","name":"Alameda NAS, San Francisco Bay","kind":"nws","lat":37.7717,"lon":-122.3,"dist_mi":11.6}],"davenport":[{"id":"46042","name":"Monterey buoy","kind":"ndbc","lat":36.785,"lon":-122.396,"dist_mi":19.9},{"id":"46012","name":"Half Moon Bay buoy","kind":"ndbc","lat":37.356,"lon":-122.881,"dist_mi":41.9}]}
-def resolve():
-    return STATIONS
-    out = {}
-    for s in spots:
-        lst = []
-        try:
-            pts = json.loads(get(f"https://api.weather.gov/points/{s['lat']},{s['lon']}"))
-            st = json.loads(get(pts["properties"]["observationStations"]))
-            for f in st["features"][:6]:
-                lon, lat = f["geometry"]["coordinates"]
-                d = mi(s["lat"], s["lon"], lat, lon)
-                if d <= 25: lst.append({"id": f["properties"]["stationIdentifier"], "name": f["properties"]["name"], "kind": "nws", "lat": lat, "lon": lon, "dist_mi": round(d, 1)})
-            lst = sorted(lst, key=lambda x: x["dist_mi"])[:2]
-        except Exception as e:
-            print("nws resolve failed", s["id"], e, file=sys.stderr)
-        for bid, (la, lo) in NDBC_LL.items():
-            d = mi(s["lat"], s["lon"], la, lo)
-            if d <= 45: lst.append({"id": bid, "name": NDBC[bid], "kind": "ndbc", "lat": la, "lon": lo, "dist_mi": round(d, 1)})
-        out[s["id"]] = sorted(lst, key=lambda x: x["dist_mi"])[:3]
-        print(s["id"], [(x["id"], x["dist_mi"]) for x in out[s["id"]]])
-        time.sleep(0.6)
-    json.dump(out, open(CACHE, "w"), indent=1)
-    return out
+def load_stations():
+    return json.load(open(os.path.join(HERE, "stations.json"), encoding="utf-8"))
 
-MS2KN = 1.94384
-def fetch_obs(stations):
-    now = datetime.datetime.now(datetime.timezone.utc)
-    cache = {}
-    def nws(sid):
-        if sid in cache: return cache[sid]
+
+def iso_utc(t):
+    return t.astimezone(datetime.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def age_min(now, t):
+    return int((now - t).total_seconds() / 60)
+
+
+def knots(v, factor):
+    return None if v is None else round(float(v) * factor, 1)
+
+
+# ---------- one parser per kind; each takes the raw text so it can be unit-tested offline ----------
+
+def parse_nws(text, now):
+    d = json.loads(text)["properties"]
+    t = datetime.datetime.fromisoformat(d["timestamp"].replace("Z", "+00:00"))
+    spd = d["windSpeed"]["value"]; gst = d["windGust"]["value"]
+    return {"time": d["timestamp"], "spd": knots(spd, KMH2KN), "gst": knots(gst, KMH2KN),
+            "dir": d["windDirection"]["value"], "age_min": age_min(now, t)}
+
+
+def parse_coops(text, now):
+    d = json.loads(text)
+    row = (d.get("data") or [None])[-1]
+    if not row or row.get("s") in (None, ""):
+        return None
+    t = datetime.datetime.strptime(row["t"], "%Y-%m-%d %H:%M").replace(tzinfo=datetime.timezone.utc)  # time_zone=gmt
+    g = row.get("g")
+    return {"time": iso_utc(t), "spd": round(float(row["s"]), 1),
+            "gst": None if g in (None, "") else round(float(g), 1),
+            "dir": None if row.get("d") in (None, "") else float(row["d"]), "age_min": age_min(now, t)}
+
+
+NDBC_COLS = ["YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT", "DPD", "APD", "MWD", "PRES", "ATMP", "WTMP", "DEWP", "VIS", "PTDY", "TIDE"]
+
+
+def parse_ndbc(text, now):
+    lines = [l for l in text.splitlines() if l and not l.startswith("#")]
+    for l in lines[:8]:
+        v = dict(zip(NDBC_COLS, l.split()))
+        if v.get("WSPD", "MM") == "MM":
+            continue
+        t = datetime.datetime(int(v["YY"]), int(v["MM"]), int(v["DD"]), int(v["hh"]), int(v["mm"]), tzinfo=datetime.timezone.utc)
+        f = lambda k: None if v.get(k, "MM") == "MM" else float(v[k])
+        return {"time": iso_utc(t), "spd": knots(f("WSPD"), MS2KN), "gst": knots(f("GST"), MS2KN),
+                "dir": f("WDIR"), "wvht_ft": None if f("WVHT") is None else round(f("WVHT") * M2FT, 1),
+                "wtmp_f": None if f("WTMP") is None else round(f("WTMP") * 9 / 5 + 32), "age_min": age_min(now, t)}
+    return None
+
+
+def parse_iem(text, now):
+    """IEM obhistory for a GOES/HADS (RAWS, bridge, Point Reyes) station: hourly SHEF decodes, values mph.
+    USIRGZZ = speed, UDIRGZZ = direction, UPHRGZZ (or UPVRGZZ) = peak gust."""
+    rows = json.loads(text).get("data") or []
+    for r in reversed(rows):
+        spd = r.get("USIRGZZ")
+        if spd is None:
+            continue
+        ts = r.get("utc_valid") or r.get("valid")
+        if not ts:
+            continue
+        t = datetime.datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=datetime.timezone.utc)
+        gst = r.get("UPHRGZZ") if r.get("UPHRGZZ") is not None else r.get("UPVRGZZ")
+        return {"time": iso_utc(t), "spd": knots(spd, MPH2KN), "gst": knots(gst, MPH2KN),
+                "dir": r.get("UDIRGZZ"), "age_min": age_min(now, t)}
+    return None
+
+
+def parse_cencoos(text, vars_, now):
+    """ERDDAP tabledap .json with orderByMax("time"): one row, columns time + the dataset's wind names (m/s)."""
+    tab = json.loads(text)["table"]
+    cols, rows = tab["columnNames"], tab["rows"]
+    if not rows:
+        return None
+    r = dict(zip(cols, rows[-1]))
+    t = datetime.datetime.fromisoformat(str(r["time"]).replace("Z", "+00:00"))
+    spd = r.get(vars_["spd"])
+    if spd is None:
+        return None
+    return {"time": iso_utc(t), "spd": knots(spd, MS2KN), "gst": knots(r.get(vars_.get("gst", "")), MS2KN),
+            "dir": r.get(vars_["dir"]), "age_min": age_min(now, t)}
+
+
+def parse_cdec(text, now):
+    """CDEC JSONDataServlet, sensors 9 (speed, mph), 10 (direction), 77 (peak, mph); -9999 = missing
+    (Delta stations sometimes return it). Timestamps are California local time."""
+    rows = json.loads(text)
+    byt = {}
+    for r in rows if isinstance(rows, list) else []:
+        sn = r.get("SENSOR_NUM") or r.get("sensorNumber") or r.get("sensorNum")
+        ts = r.get("date") or r.get("obsDate")
+        v = r.get("value")
+        if sn is None or not ts or v is None or float(v) <= -9998:
+            continue
+        byt.setdefault(ts, {})[int(sn)] = float(v)
+    for ts in sorted(byt, reverse=True):
+        v = byt[ts]
+        if 9 not in v or v[9] < 0:
+            continue
+        t = datetime.datetime.strptime(ts.replace("T", " ")[:16], "%Y-%m-%d %H:%M").replace(tzinfo=LA)
+        return {"time": iso_utc(t), "spd": knots(v[9], MPH2KN), "gst": knots(v.get(77), MPH2KN) if v.get(77, -1) >= 0 else None,
+                "dir": v.get(10) if 0 <= v.get(10, -1) <= 360 else None, "age_min": age_min(now, t)}
+    return None
+
+
+def _walk(node):
+    if isinstance(node, dict):
+        yield node
+        for v in node.values():
+            yield from _walk(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _walk(v)
+
+
+def _find_key(node, key):
+    for d in _walk(node):
+        if key in d and d[key] not in (None, ""):
+            return d[key]
+    return None
+
+
+def parse_caltrans(text, match, now):
+    """One district RWIS file; pick the site whose location text carries every word of `match`.
+    NTCIP ESS wind units: tenths of m/s, 65535 = missing; directions in degrees, >360 = missing."""
+    doc = json.loads(text)
+    site = None
+    for d in _walk(doc):
+        if "windData" not in d:
+            continue
+        hay = re.sub(r"[^a-z0-9]+", " ", json.dumps(d).lower())
+        if all(m in hay for m in match):
+            site = d
+            break
+    if not site:
+        return None
+    w = site["windData"] if isinstance(site["windData"], dict) else {}
+    def ess(k):
+        v = w.get(k)
         try:
-            d = json.loads(get(f"https://api.weather.gov/stations/{sid}/observations/latest"))["properties"]
-            t = datetime.datetime.fromisoformat(d["timestamp"].replace("Z", "+00:00"))
-            spd = d["windSpeed"]["value"]; gst = d["windGust"]["value"]; dr = d["windDirection"]["value"]
-            # NWS reports km/h
-            o = {"time": d["timestamp"], "spd": None if spd is None else round(spd / 1.852, 1), "gst": None if gst is None else round(gst / 1.852, 1),
-                 "dir": dr, "age_min": int((now - t).total_seconds() / 60)}
-        except Exception as e:
-            print("nws obs failed", sid, e, file=sys.stderr); o = None
-        cache[sid] = o; return o
-    def ndbc(sid):
-        if sid in cache: return cache[sid]
+            v = float(v)
+        except (TypeError, ValueError):
+            return None
+        return None if v >= 65535 else v
+    spd = ess("essAvgWindSpeed") if ess("essAvgWindSpeed") is not None else ess("essSpotWindSpeed")
+    if spd is None:
+        return None
+    gst = ess("essMaxWindGustSpeed")
+    dr = ess("essAvgWindDirection") if ess("essAvgWindDirection") is not None else ess("essSpotWindDirection")
+    epoch = _find_key(site, "recordEpoch")
+    if epoch:
+        t = datetime.datetime.fromtimestamp(int(epoch), datetime.timezone.utc)
+    else:
+        rd, rt = _find_key(site, "recordDate"), _find_key(site, "recordTime")
+        if not (rd and rt):
+            return None  # no timestamp, no way to age the reading
+        t = datetime.datetime.strptime(f"{rd} {rt}"[:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=LA)
+    return {"time": iso_utc(t), "spd": knots(spd / 10, MS2KN), "gst": None if gst is None else knots(gst / 10, MS2KN),
+            "dir": dr if dr is not None and dr <= 360 else None, "age_min": age_min(now, t)}
+
+
+def parse_jpl(text, buoy, now):
+    """laketahoe.jpl.nasa.gov/getweather: an HTML table, one column per buoy (TB1..TB4), updated at :30
+    past each hour with the previous hour's last 30 minutes; wind cells are "min:avg:max" in m/s
+    (max = gust). Cells are matched per row; the page carries no per-reading timestamp, so the reading
+    is stamped at the top of the previous hour (what the page says it shows)."""
+    rows = re.findall(r"<tr[^>]*>(.*?)</tr>", text, re.S | re.I)
+    header, speed, direction = None, None, None
+    for tr in rows:
+        cells = [re.sub(r"<[^>]+>", " ", c).strip() for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", tr, re.S | re.I)]
+        if not cells:
+            continue
+        joined = " ".join(cells).lower()
+        if header is None and "tb1" in joined:
+            header = [c.strip().upper() for c in cells]
+        elif "wind speed" in cells[0].lower():
+            speed = cells
+        elif "wind dir" in cells[0].lower():
+            direction = cells
+    if not header or not speed:
+        return None
+    try:
+        col = [h.split()[0] for h in header].index(buoy.upper())
+    except ValueError:
+        return None
+    def mam(cells):   # "min:avg:max" -> (avg, max), or None
+        if not cells or col >= len(cells):
+            return None
+        m = re.findall(r"-?\d+(?:\.\d+)?", cells[col])
+        if not m:
+            return None
+        v = [float(x) for x in m]
+        if any(x <= -90 for x in v):   # -99 = missing
+            return None
+        return (v[1] if len(v) >= 2 else v[0], v[-1])
+    sp = mam(speed)
+    if not sp:
+        return None
+    dr = mam(direction) if direction else None
+    t = (now - datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+    return {"time": iso_utc(t), "spd": knots(sp[0], MS2KN), "gst": knots(sp[1], MS2KN),
+            "dir": None if dr is None else round(dr[0]), "age_min": age_min(now, t)}
+
+
+def parse_cdip(text, now):
+    """CDIP justdar "pm" page (wave parameters only — never a wind sample): the latest line's
+    Hs (m), Tp (s), Dp (deg). Times on the page are UTC."""
+    hs = re.search(r"Hs\(m\):\s*([\d.]+)", text)
+    tp = re.search(r"Tp\(s\):\s*([\d.]+)", text)
+    dp = re.search(r"Dp\(deg\):\s*(\d+)", text)
+    tm = re.search(r"(\d{2}):(\d{2})\s+(\d{2})/(\d{2})/(\d{4})", text) or re.search(r"(\d{4})(\d{2})(\d{2})\s+(\d{2})(\d{2})", text)
+    if not hs:
+        return None
+    if tm and len(tm.groups()) == 5 and "/" in tm.group(0):
+        h, mi_, mo, dd, yy = tm.groups()
+        t = datetime.datetime(int(yy), int(mo), int(dd), int(h), int(mi_), tzinfo=datetime.timezone.utc)
+    elif tm:
+        yy, mo, dd, h, mi_ = tm.groups()
+        t = datetime.datetime(int(yy), int(mo), int(dd), int(h), int(mi_), tzinfo=datetime.timezone.utc)
+    else:
+        t = now
+    return {"time": iso_utc(t), "spd": None, "gst": None, "dir": None,
+            "wvht_ft": round(float(hs.group(1)) * M2FT, 1),
+            "dpd": None if not tp else float(tp.group(1)), "mwd": None if not dp else int(dp.group(1)),
+            "age_min": age_min(now, t)}
+
+
+# ---------- the fetch loop: one request per station (district files and the JPL page shared) ----------
+
+IEM_API = "https://mesonet.agron.iastate.edu/api/1/obhistory.json"
+ERDDAP = "https://erddap.cencoos.org/erddap/tabledap"
+
+
+def fetch_obs(stations, now=None, getter=get, out_file=None):
+    out_file = out_file or os.path.join(HERE, "obs.json")
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    cache, shared = {}, {}
+
+    def once(key, fn):
+        """One fetch per station id (or shared resource) per run; a failure is cached as None."""
+        if key in cache:
+            return cache[key]
         try:
-            lines = [l for l in get(f"https://www.ndbc.noaa.gov/data/realtime2/{sid}.txt").splitlines() if not l.startswith("#")]
-            cols = ["YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT", "DPD", "APD", "MWD", "PRES", "ATMP", "WTMP", "DEWP", "VIS", "PTDY", "TIDE"]
-            o = None
-            for l in lines[:6]:
-                v = dict(zip(cols, l.split()))
-                if v.get("WSPD", "MM") == "MM": continue
-                t = datetime.datetime(int(v["YY"]), int(v["MM"]), int(v["DD"]), int(v["hh"]), int(v["mm"]), tzinfo=datetime.timezone.utc)
-                f = lambda k: None if v.get(k, "MM") == "MM" else float(v[k])
-                o = {"time": t.isoformat(), "spd": round(f("WSPD") * MS2KN, 1), "gst": None if f("GST") is None else round(f("GST") * MS2KN, 1),
-                     "dir": f("WDIR"), "wvht_ft": None if f("WVHT") is None else round(f("WVHT") * 3.281, 1), "wtmp_f": None if f("WTMP") is None else round(f("WTMP") * 9 / 5 + 32),
-                     "age_min": int((now - t).total_seconds() / 60)}
-                break
+            cache[key] = fn()
         except Exception as e:
-            print("ndbc obs failed", sid, e, file=sys.stderr); o = None
-        cache[sid] = o; return o
+            print(f"obs {key} failed:", e, file=sys.stderr)
+            cache[key] = None
+        return cache[key]
+
+    def shared_text(key, url):
+        if key not in shared:
+            try:
+                shared[key] = getter(url)
+            except Exception as e:
+                print(f"obs {key} failed:", e, file=sys.stderr)
+                shared[key] = None
+        return shared[key]
+
+    def iem(st):
+        net = st.get("network", "CA_DCP")
+        for day in (now.astimezone(LA).date(), now.astimezone(LA).date() - datetime.timedelta(days=1)):
+            o = parse_iem(getter(f"{IEM_API}?station={st['id']}&network={net}&date={day.isoformat()}"), now)
+            if o:
+                return o
+        return None
+
+    def reader(st):
+        kind = st["kind"]
+        if kind == "nws":
+            return parse_nws(getter(f"https://api.weather.gov/stations/{st['id']}/observations/latest"), now)
+        if kind == "coops":
+            try:
+                o = parse_coops(getter("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=wind"
+                                       f"&station={st['nos']}&date=latest&units=english&time_zone=gmt&format=json"), now)
+                if o:
+                    return o
+            except Exception as e:
+                print(f"obs {st['id']} coops failed, trying NDBC:", e, file=sys.stderr)
+            return parse_ndbc(getter(f"https://www.ndbc.noaa.gov/data/realtime2/{st['id']}.txt"), now)
+        if kind == "ndbc":
+            return parse_ndbc(getter(f"https://www.ndbc.noaa.gov/data/realtime2/{st['id']}.txt"), now)
+        if kind in ("raws", "iem"):
+            return iem(st)
+        if kind == "cencoos":
+            cols = ",".join(["time", st["vars"]["spd"], st["vars"]["dir"]] + ([st["vars"]["gst"]] if "gst" in st["vars"] else []))
+            return parse_cencoos(getter(f"{ERDDAP}/{st['dataset']}.json?{cols}&orderByMax(%22time%22)"), st["vars"], now)
+        if kind == "cdec":
+            d0 = (now.astimezone(LA).date() - datetime.timedelta(days=1)).isoformat()
+            d1 = (now.astimezone(LA).date() + datetime.timedelta(days=1)).isoformat()
+            return parse_cdec(getter("https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet"
+                                     f"?Stations={st['id']}&SensorNums=9,10,77&dur_code=E&Start={d0}&End={d1}"), now)
+        if kind == "caltrans":
+            dist = st.get("district", "d3")
+            text = shared_text("caltrans-" + dist, f"https://cwwp2.dot.ca.gov/data/{dist}/rwis/rwisStatus{dist.upper().replace('D', 'D0')}.json")
+            return None if text is None else parse_caltrans(text, st.get("match", [st["id"].lower()]), now)
+        if kind == "jpl":
+            text = shared_text("jpl", "https://laketahoe.jpl.nasa.gov/getweather")
+            return None if text is None else parse_jpl(text, st["id"], now)
+        if kind == "cdip":
+            return parse_cdip(getter(f"https://cdip.ucsd.edu/data_access/justdar.cdip?{st['cdip']}+pm"), now)
+        print("obs: unknown kind", kind, st["id"], file=sys.stderr)
+        return None
+
     out = {}
     for sid, lst in stations.items():
         rows = []
         for st in lst:
-            o = nws(st["id"]) if st["kind"] == "nws" else ndbc(st["id"])
-            if o: rows.append({**{k: st[k] for k in ("id", "name", "kind", "dist_mi")}, **o})
-            time.sleep(0.3)
+            o = once(st["id"], lambda st=st: reader(st))
+            if o:
+                row = {**{k: st[k] for k in ("id", "name", "kind", "dist_mi")}, **o}
+                if st.get("wave_only"):
+                    row["wave_only"] = True
+                    row["spd"] = row["gst"] = row["dir"] = None   # belt and braces: never a wind sample
+                rows.append(row)
+            time.sleep(0.2)
         out[sid] = rows
-    with open(OUT_FILE, "w") as fh:
+    with open(out_file, "w") as fh:
         json.dump({"fetchedAt": now.isoformat(timespec="seconds"), "obs": out}, fh, separators=(",", ":"))
         fh.write("\n")
     return out
 
+
 if __name__ == "__main__":
-    st = resolve()
-    obs = fetch_obs(st)
+    obs = fetch_obs(load_stations(), out_file=sys.argv[1] if len(sys.argv) > 1 else None)
     for k, v in obs.items():
         print(k, [(r["id"], r["dist_mi"], r["spd"], r["dir"], r["age_min"]) for r in v])
