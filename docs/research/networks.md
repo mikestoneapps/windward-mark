@@ -244,6 +244,7 @@ The traps are: Synoptic "internal purposes only" and map-consent clauses; Tempes
 
 ### Inferences
 - Displaying iKitesurf/WeatherFlow sensor readings in a third-party app (even by scraping) is the clearest ToS violation in this list; linking out to iKitesurf is the safe alternative.
+- Home / personal stations (added 2026-10-27, `home_stations.py`): two sources are usable. **CWOP over APRS-IS** is public by design — the network exists to redistribute amateur weather packets, read-only logins (passcode −1) are the documented way to listen, and findu.com re-publishes the same packets; the staleness seen through the MADIS mirror does not apply to a direct feed. **Netatmo's public map** (`getpublicdata`) is an explicitly public endpoint of a free developer app (the owner-only restriction above concerns the private `getstationsdata`); only the rounded station location is stored. The rest stay excluded: Weather Underground (keys owner-only), WeatherFlow/Tempest/iKitesurf (no public redistribution), Ambient Weather and Davis WeatherLink (owner APIs), Holfuy (owner keys), Synoptic (internal use only). Home readings are shown as hints and only count after an earned, per-station trust record (`home_trust.py`).
 
 ### Gaps
 - Caltrans Conditions of Use and weather.com/Windfinder/Windy ToS texts were not retrieved.

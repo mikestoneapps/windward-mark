@@ -67,6 +67,26 @@ class Bias(unittest.TestCase):
         self.assertEqual(B.compute(log(), spots={"alameda", "berkeley", "sherman"}, min_n=39)["berkeley"]["bm"], {"kn": 4.0, "n": 39})
         self.assertIn("k-test", B.compute(log()), "without a spot filter every spot in the log is computed")
 
+    def test_home_station_lines_feed_the_bias_only_when_trusted_and_beyond_the_gap(self):
+        lines = []
+        for i in range(40):   # paradisecay: the official station 9 mi off reads 10 over the model; the trusted home station 0.3 mi off reads 2 over
+            lines.append(dict(line("paradisecay", 20.0, {"bm": 10.0}, median=10.0, i=i), station="PCOC1", dist_mi=9.0))
+            lines.append(dict(line("paradisecay", 12.0, {"bm": 10.0}, median=10.0, i=i), station="CW1", dist_mi=0.3, **{"class": "home"}))
+            lines.append(dict(line("paradisecay", 30.0, {"bm": 10.0}, median=10.0, i=i), station="CW2", dist_mi=0.1, **{"class": "home"}))   # nearer but untrusted
+        for i in range(40):   # alameda: the official station 1.8 mi off wins over a trusted home station
+            lines.append(dict(line("alameda", 14.0, {"bm": 10.0}, median=10.0, i=i), station="AAMC1", dist_mi=1.8))
+            lines.append(dict(line("alameda", 11.0, {"bm": 10.0}, median=10.0, i=i), station="CW3", dist_mi=0.5, **{"class": "home"}))
+        trust = {"CW1": {"trusted": True}, "CW3": {"trusted": True}, "CW2": {"trusted": False}}
+        d = B.compute(lines, spots={"paradisecay", "alameda"}, trust=trust)
+        self.assertEqual(d["paradisecay"]["bm"], {"kn": 2.0, "n": 40}, "beyond 8 mi the trusted home station's lines replace the official ones (the untrusted nearer one is ignored)")
+        self.assertEqual(d["alameda"]["bm"], {"kn": 4.0, "n": 40}, "within 8 mi the official station keeps the bias")
+        d = B.compute(lines, spots={"paradisecay", "alameda"})
+        self.assertEqual((d["paradisecay"]["bm"]["kn"], d["alameda"]["bm"]["kn"]), (10.0, 4.0), "no trust record: home lines never count")
+        self.write_log(lines)
+        tp = os.path.join(self.dir, "home-trust.json")
+        json.dump(trust, open(tp, "w"))
+        self.assertEqual(B.run(self.log, self.out, trust_path=tp)["paradisecay"]["bm"]["kn"], 2.0)
+
     def test_run_writes_file(self):
         self.write_log(log())
         d = B.run(self.log, self.out)

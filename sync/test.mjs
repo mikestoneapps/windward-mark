@@ -90,4 +90,21 @@ r = await photo("alameda", "GET"); assert(r.status === 404, "deleted photo is go
 r = await photo("alameda", "DELETE"); assert(r.status === 200, "deleting again is harmless");
 r = await req("/v1/admin/riders", "GET", undefined, A); assert(r.status === 200 && (await r.json()).riders.length === 0, "photo keys don't show up as riders");
 assert([...store.keys()].filter(k => k.startsWith("ph:")).length === 1 && [...store.keys()].every(k => !k.startsWith("ph:") || /^ph:[0-9a-f]{64}:k-mission-bay$/.test(k)), "photos live under ph:<rider hash>:<spot id>");
-if (!process.env.WORKER_TEST_QUIET) console.log("all worker tests passed");
+if (!process.env.WORKER_TEST_QUIET) 
+// admin vars: the hourly job keeps the rotated Netatmo refresh token here (home_stations.py)
+{
+  const adm = (path, method, body, token = "admin-token-1234567890") => req(path, method, body, { Authorization: "Bearer " + token });
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "GET"); assert(r.status === 404, "unset var -> 404");
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "PUT", { value: "rt-abc" }); assert(r.status === 200 && (await r.json()).name === "netatmo_refresh_token", "put a var -> 200");
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "GET"); assert(r.status === 200 && (await r.json()).value === "rt-abc", "get returns it");
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "PUT", { value: "rt-def" }); r = await adm("/v1/admin/vars/netatmo_refresh_token", "GET"); assert((await r.json()).value === "rt-def", "a later put replaces it");
+  assert(store.get("v:netatmo_refresh_token") === "rt-def", "stored under v:<name>, apart from rider keys");
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "PUT", { value: "" }); assert(r.status === 400, "an empty value -> 400");
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "PUT", { value: 5 }); assert(r.status === 400, "a non-string value -> 400");
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "PUT", { value: "x".repeat(5000) }); assert(r.status === 400, "over 4 KB -> 400");
+  r = await adm("/v1/admin/vars/Bad-Name", "PUT", { value: "x" }); assert(r.status === 404, "a name outside [a-z][a-z0-9_]* is not a var");
+  r = await adm("/v1/admin/vars/netatmo_refresh_token", "GET", null, "wrong-token-1234567890"); assert(r.status === 401, "vars need the admin token");
+  r = await req("/v1/admin/vars/netatmo_refresh_token", "GET", null, { Authorization: "Bearer " + KEY }); assert(r.status === 401, "a rider key is not the admin token");
+}
+
+console.log("all worker tests passed");

@@ -711,6 +711,47 @@ try {
       await ctx.close();
     }
   }
+  /* ---------- 5. home weather stations (class "home" rows in obs.json): a hint under the official reading, never scored ---------- */
+  {
+    const fresh = m => new Date(Date.now() - m * 60000).toISOString();
+    const F_ = n => F.openMeteo(n, () => ({ spd: 20, gst: 24, dir: 270 }));   // a steady 20 kn W at every spot: the station blend would move a score if a home row ever reached it
+    const official = { id: "RCMC1", name: "Richmond (Chevron Long Wharf / Berth 5)", kind: "coops", class: "reliable", dist_mi: 4.4, time: fresh(12), spd: 14, gst: 18, dir: 290 };
+    const homeA = { id: "WB6TTB", name: "Tiburon home station (CWOP WB6TTB)", kind: "cwop", class: "home", dist_mi: 1.2, time: fresh(8), spd: 11, gst: 14, dir: 250, trusted: true };
+    const homeB = { id: "70:ee:50:00:00:01", name: "Home station (Netatmo) · Belvedere", kind: "netatmo", class: "home", dist_mi: 2.6, time: fresh(20), spd: 4, gst: null, dir: null, trusted: false };
+    const stale = { ...homeA, id: "OLD1", name: "Home station (CWOP OLD1)", time: fresh(200), dist_mi: 0.5 };
+    // Crissy Field gets only home rows (a 5 kn reading that would flag a disagreement if it were official); Paradise Cay both
+    const withHome = { fetchedAt: new Date().toISOString(), obs: { paradisecay: [homeA, homeB, official, stale], crissy: [{ ...homeA, id: "CW5", name: "Home station (CWOP CW5)", spd: 5, gst: 6, trusted: false }] } };
+    const without = { fetchedAt: new Date().toISOString(), obs: { paradisecay: [official] } };
+    const scoresOf = async obs => {
+      const { page, errors, ctx } = await newPage(browser, url, { forecast: F_, obs });
+      await page.waitForSelector("#row-paradisecay", { timeout: 20000 }); await page.waitForTimeout(800);
+      const sc = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll(".row")].map(e => [e.id, e.querySelector(".score").textContent])));
+      return { page, errors, ctx, sc };
+    };
+    const a = await scoresOf(without), b = await scoresOf(withHome);
+    assert(JSON.stringify(a.sc) === JSON.stringify(b.sc), "home rows change no score (Paradise Cay blends the official station exactly as before; Crissy's 5 kn home reading is not scored)");
+    await a.ctx.close();
+    const { page, errors, ctx } = b;
+    await page.click('button[data-open="paradisecay"]'); await page.waitForSelector("#detail-paradisecay .kv");
+    let det = await text(page, "#detail-paradisecay");
+    assert(/Wind measured now\n14 kn gusting 18 from the WNW ?\nRichmond \(Chevron Long Wharf \/ Berth 5\), 4\.4 mi away, 12 min ago/i.test(det), "the official reading keeps first place: " + (det.match(/Wind measured now\n[^\n]*\n[^\n]*/i) || [""])[0]);
+    const home = (det.match(/Home stations\n[^\n]*\n[^\n]*/i) || [""])[0];
+    assert(/^Home stations\nWB6TTB \(CWOP\) 11g14 kn WSW · 1\.2 mi · trusted — Belvedere \(Netatmo\) 4 kn · 2\.6 mi\n/i.test(home), "a secondary Home stations row names each station, its reading and distance, 'trusted' only where earned; the 200-min-old row is left out: " + home);
+    assert(/backyard weather stations, 20 min ago · a hint only: a trusted one counts for alerts and the bias correction only when no official station is close by/i.test(home), "the row says what a home station is for: " + home);
+    assert((await page.locator('#detail-paradisecay .kv div.home a[href*="findu.com"][href*="WB6TTB"]').count()) === 1 && (await page.locator('#detail-paradisecay .kv div.home a[href*="weathermap.netatmo.com"]').count()) === 1, "each home station links to its public page");
+    assert(!/Station disagrees/.test(det) && (await page.locator("#row-paradisecay .chip.home").count()) === 0, "with a fresh official station there is no home chip on the tile and no disagreement from the home reading");
+    await page.click('button[data-open="paradisecay"]');
+    await page.click('button[data-open="crissy"]'); await page.waitForSelector("#detail-crissy .kv");
+    det = await text(page, "#detail-crissy");
+    assert(/Wind measured now\nNo recent reading from the nearest official stations/i.test(det), "a spot with only home rows still says no official reading: " + (det.match(/Wind measured now\n[^\n]*/i) || [""])[0]);
+    assert(/Home stations\nCW5 \(CWOP\) 5 kn WSW · 1\.2 mi\n/i.test(det) && !/trusted/.test((det.match(/Home stations\n[^\n]*/i) || [""])[0]), "…and lists the untrusted home station without the trusted mark");
+    assert(!/Station disagrees/.test(det) && /Nothing holding it back|What's holding it back/.test(det), "the 5 kn home reading never becomes a 'Station disagrees' flag");
+    assert((await text(page, "#row-crissy .chip.home")) === "home station 5 kn", "with no official reading the tile carries a secondary home-station chip");
+    const how = await page.evaluate(() => { howSheet(); return document.querySelector("#sheet .how").innerText; });
+    assert(/Home weather stations \(CWOP and Netatmo backyard sensors\) are shown as hints under the official reading; one only counts, for alerts and the forecast-bias correction, once it has proven accurate against an official station and there is no official station close by\./.test(how), "How it scores says what home stations are");
+    assert(errors.length === 0, "home stations: no page errors (" + errors.join(" | ") + ")");
+    await ctx.close();
+  }
 } finally {
   await browser.close(); server.close(); if (base) base.server.close();
 }

@@ -151,6 +151,7 @@ class TestFetchLoop(unittest.TestCase):
         for rows in out.values():
             for r in rows:
                 self.assertTrue({"id", "name", "kind", "dist_mi", "time", "spd", "age_min"} <= set(r), "the shared row shape")
+                self.assertEqual(r["class"], "reliable", "every public-catalogue row is tagged reliable (home_stations.py adds the class:home rows)")
         wave = out["oceanbeach"][1]
         self.assertTrue(wave["wave_only"] and wave["spd"] is None and wave["wvht_ft"] == 5.0, "wave-only row: swell line only, never wind")
         self.assertEqual(doc["obs"]["crissy"][0]["spd"], 9.7, "obs.json carries the same rows")

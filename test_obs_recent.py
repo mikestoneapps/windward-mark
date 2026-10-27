@@ -50,6 +50,30 @@ class ObsRecent(unittest.TestCase):
         self.assertIn("k-somewhere", doc["runs"][0]["obs"], "a rider spot named by rider-stations.json carries its reading, for Blowing now")
         self.assertEqual(doc["runs"][0]["obs"]["k-somewhere"]["id"], "X")
 
+    def test_trusted_home_station_stands_in_only_beyond_the_gap(self):
+        d = obs_doc()
+        t = ISO(NOW - dt.timedelta(minutes=12))
+        home = lambda sid, dist, trusted: {"id": sid, "name": f"Home station (CWOP {sid})", "kind": "cwop", "class": "home", "dist_mi": dist, "time": t, "spd": 15.0, "gst": 18.0, "dir": 280, "age_min": 12, "trusted": trusted}   # noqa: E731
+        d["obs"]["alameda"] = [home("CW1", 0.4, True), {"id": "AAMC1", "name": "ALAMEDA", "kind": "coops", "class": "reliable", "dist_mi": 1.8, "time": t, "spd": 12.3, "gst": 15.1, "dir": 290}]
+        d["obs"]["sherman"] = [home("CW2", 0.9, True), {"id": "PCOC1", "name": "Port Chicago", "kind": "coops", "class": "reliable", "dist_mi": 12.7, "time": t, "spd": 20.0, "gst": 25.0, "dir": 270}]
+        d["obs"]["crissy"] = [home("CW3", 0.9, False), {"id": "FTPC1", "name": "Fort Point", "kind": "coops", "class": "reliable", "dist_mi": 9.0, "time": t, "spd": 9.0, "gst": None, "dir": 300}]
+        d["obs"]["candlestick"] = [home("CW4", 1.2, False)]
+        d["obs"]["berkeley"] = [home("CW5", 1.2, True)]
+        with open(self.obs, "w") as fh:
+            json.dump(d, fh)
+        trust = os.path.join(self.dir, "home-trust.json")
+        with open(trust, "w") as fh:
+            json.dump({"CW1": {"trusted": True}, "CW2": {"trusted": True}, "CW5": {"trusted": True}, "CW3": {"trusted": False}}, fh)
+        run = R.run(self.obs, self.out, now=NOW, trust_path=trust)["runs"][0]["obs"]
+        self.assertEqual(run["alameda"]["id"], "AAMC1", "an official station within 8 mi wins over a nearer trusted home station")
+        self.assertNotIn("class", run["alameda"], "official rows keep the old shape exactly")
+        self.assertEqual((run["sherman"]["id"], run["sherman"]["class"], run["sherman"]["trusted"], run["sherman"]["spd"]), ("CW2", "home", True, 15.0), "official 12.7 mi off: the trusted home station stands in, tagged for the alert job")
+        self.assertEqual(run["crissy"]["id"], "FTPC1", "an untrusted home station never stands in")
+        self.assertNotIn("candlestick", run, "only an untrusted home reading: nothing")
+        self.assertEqual(run["berkeley"]["id"], "CW5", "only a trusted home reading: it stands in")
+        run = R.run(self.obs, self.out, now=NOW + dt.timedelta(minutes=1))["runs"][0]["obs"]
+        self.assertEqual((run["sherman"]["id"], "berkeley" in run), ("PCOC1", False), "without the trust file no home station counts")
+
     def test_rolling_history(self):
         R.run(self.obs, self.out, now=NOW)
         R.run(self.obs, self.out, now=NOW + dt.timedelta(hours=1))

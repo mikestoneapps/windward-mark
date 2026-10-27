@@ -4,10 +4,12 @@
     python3 accuracy.py [obs.json] [accuracy.jsonl]
 
 For every spot (curated, or rider-added with an entry in rider-stations.json) whose nearest station has a wind reading under 2 h old (the same rule the page uses before it
-blends a station into today's score), one Open-Meteo call (the page's five models, same ids) covers the hour the
-reading falls in, and one JSON line is appended per spot:
+blends a station into today's score), one Open-Meteo call (the page's five models, same ids; each spot once) covers the hour the
+reading falls in, and one JSON line is appended per spot (plus one per fresh home station there):
 
   {"spot": id, "time": "YYYY-MM-DDTHH:00" (Pacific hour of the reading), "run": fetchedAt, "station": id, "dist_mi": n,
+   "class": "reliable" | "home" (a home weather station's line, one per fresh CWOP/Netatmo row beside the official one — the trust
+   record home_trust.py is built from these; an older line without the key is an official one),
    "obs": knots, "obs_gst": knots|null, "obs_dir": deg|null,
    "fc": {"bm","ecmwf","nbm","gfs","icon"} (knots per model, null where a model has no value),
    "fc_gst": {...same...}, "fc_dir": best-match degrees, "median": the median of bm/ecmwf/nbm, the knots the score ran on (a spot with model "nbm" scores on fc.nbm)}
@@ -62,16 +64,27 @@ def hour_key(t):
     return loc.strftime("%Y-%m-%dT%H:00")
 
 
-def freshest(rows, now):
-    """Nearest station with a wind reading under MAX_AGE_MIN old; rows come nearest-first from obs.json."""
+def is_fresh(o, now, max_age_min=MAX_AGE_MIN):
+    if not isinstance(o, dict) or o.get("spd") is None:
+        return False
+    t = parse_time(o.get("time"))
+    return t is not None and (now - t).total_seconds() / 60 <= max_age_min
+
+
+def freshest(rows, now, max_age_min=MAX_AGE_MIN):
+    """Nearest OFFICIAL station (class "reliable"; a row without a class is one) with a wind reading under MAX_AGE_MIN
+    old; rows come nearest-first from obs.json. Home rows (class "home") never count here — home_trust.pick() decides
+    when a trusted one may stand in."""
     for o in rows or []:
-        if o.get("spd") is None:
-            continue
-        t = parse_time(o.get("time"))
-        if t is None or (now - t).total_seconds() / 60 > MAX_AGE_MIN:
+        if (o or {}).get("class") == "home" or not is_fresh(o, now, max_age_min):
             continue
         return o
     return None
+
+
+def fresh_home(rows, now, max_age_min=MAX_AGE_MIN):
+    """Every home-station row (class "home") with a wind reading under MAX_AGE_MIN old, nearest first."""
+    return [o for o in rows or [] if (o or {}).get("class") == "home" and is_fresh(o, now, max_age_min)]
 
 
 def median(xs):
@@ -111,6 +124,7 @@ def build_lines(picked, answer, run_at):
         present = [k for k in SCORE_MODELS if h.get(f"wind_speed_10m_{MODEL_IDS[k]}") or (k == "bm" and h.get("wind_speed_10m"))]
         med = median([fc[k] for k in SCORE_MODELS]) if len(present) >= 2 else fc["bm"]
         out.append({"spot": sid, "time": key, "run": run_at, "station": o.get("id"), "dist_mi": o.get("dist_mi"),
+                    "class": "home" if o.get("class") == "home" else "reliable",
                     "obs": o.get("spd"), "obs_gst": o.get("gst"), "obs_dir": o.get("dir"),
                     "fc": fc, "fc_gst": fc_gst, "fc_dir": val("wind_direction_10m", "bm"),
                     "median": None if med is None else round(med, 1)})
@@ -168,11 +182,23 @@ def run(obs_path, out_path, get=get_json, now=None, rider_path=None):
     with open(obs_path, encoding="utf-8") as fh:
         obs = json.load(fh)
     run_at = obs.get("fetchedAt") or now.isoformat(timespec="seconds")
-    picked = [(sid, o) for sid, rows in (obs.get("obs") or {}).items() if sid in spots for o in [freshest(rows, now)] if o]
+    # One line per spot for the nearest fresh official station, plus one per fresh home station (class "home": the
+    # trust record in home_trust.py is built from these; bias.py only ever uses them under its rule).
+    picked = []
+    for sid, rows in (obs.get("obs") or {}).items():
+        if sid not in spots:
+            continue
+        o = freshest(rows, now)
+        if o:
+            picked.append((sid, o))
+        picked += [(sid, h) for h in fresh_home(rows, now)]
     new = []
     if picked:
-        answer = get(forecast_url([(spots[sid]["lat"], spots[sid]["lon"]) for sid, _ in picked]))
-        new = build_lines(picked, answer, run_at)
+        points = list(dict.fromkeys(sid for sid, _ in picked))   # each spot once in the forecast call, however many lines it gets
+        answer = get(forecast_url([(spots[sid]["lat"], spots[sid]["lon"]) for sid in points]))
+        arr = answer if isinstance(answer, list) else [answer]
+        by_spot = dict(zip(points, arr))
+        new = build_lines(picked, [by_spot.get(sid) for sid, _ in picked], run_at)
     lines, added = merge(read_lines(out_path), new, now)
     write_lines(out_path, lines)
     print(f"accuracy: {len(picked)} spot(s) with a fresh reading, {added} line(s) added, {len(lines)} kept ({KEEP_DAYS}-day window)")
