@@ -11,7 +11,7 @@ A kiteboarding spot-finder for one rider in the San Francisco Bay Area (derived 
 - **No AI calls at runtime.** The narrative line is rule-based. Claude is used to write the code, not inside the product.
 - **Everything free-tier.** Open-Meteo, NOAA (NDBC, NWS), OpenStreetMap, Wikimedia Commons, GitHub Actions/Pages. Google Maps only behind a server-side key and only on user action. No paid services without asking.
 - **Adding a spot requires only name, coordinates and direction sectors.** Everything else optional.
-- **Don't re-litigate what the prototype settled** (SPEC.md §10). Keep the Harbor look: the current tokens, fonts and layout in `index.html`.
+- **Don't re-litigate what the prototype settled** (SPEC.md §10). Keep the house style, **"A1 · Navy band"** (Oct 2026, superseding the original Harbor look): a full-bleed navy (`#0f2236`) header band and dock, the wordmark "Windward <span>Mark</span>" in Montserrat 500 caps with "Mark" in `--wm2`, Montserrat for buttons (filled `#2f9be0` pills), day tabs and score numbers, spot names still in the condensed display face, and the `:root` tokens (light and dark navy) in `index.html`. Riding style reads Foil · Freeride · Wave with **Foil the default** for a new install (a saved style is kept); the sort control is **Score | Distance** (a saved `"tomorrow"` migrates to `"score"`). The synopsis line names places and days only, never figures.
 - **Settings sync (phase 2) must not lose what is in the phone's localStorage today**: migrate `goc.settings` and `goc.cache` keys forward.
 
 ## Layout of the repo

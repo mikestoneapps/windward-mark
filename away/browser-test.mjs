@@ -79,6 +79,9 @@ async function newPage(browser, url, opts) {
   const ctx = await browser.newContext({ viewport: { width: (opts && opts.width) || 420, height: 860 }, geolocation: opts && opts.geo, permissions: opts && opts.geo ? ["geolocation"] : [] });
   const page = await ctx.newPage();
   if (opts && opts.init) await page.addInitScript(opts.init);
+  // The fixtures' winds (18g22, 20g24) are tuned to the freeride band, so a page with no saved settings is seeded with a saved freeride style,
+  // after any init script (which may write its own settings) and only when none exist. opts.style: null is a fresh install (Foil, the default).
+  if (!opts || opts.style !== null) await page.addInitScript(st => { if (!localStorage.getItem("goc.settings")) localStorage.setItem("goc.settings", JSON.stringify({ style: st })); }, (opts && opts.style) || "freeride");
   const errors = []; page.on("pageerror", e => errors.push(String(e))); page.on("console", m => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });   // aborted fonts/NWS requests are expected offline
   const log = mock(page, opts);
   await page.goto(url);
@@ -113,6 +116,9 @@ try {
       await b.page.click("#homeBC"); await b.page.waitForTimeout(200); theirs.bc = await text(b.page, "#list");
       await b.page.click(".row .head"); await b.page.waitForTimeout(200); theirs.detail = await text(b.page, ".row .detail");
       const norm = s => s.replace(/(\d+g\d+) (kn|mph)\b/g, "$1");   // Oct 2026 added the unit after the wind shorthand; an older baseline still has to compare on everything else
+      // the synopsis line changed on purpose (Oct 2026: places and days only, no figures), so it is checked on its own below, not against the baseline
+      assert(/^Today is the day: Paradise Cay on the Bay, holding through \w+\.$/.test(mine.narr) && !/\d/.test(mine.narr), "home: the synopsis names the spot (short form) and region, collapses the run of days, and carries no figures: " + mine.narr);
+      delete theirs.narr;
       for (const k of Object.keys(theirs)) { const same = norm(mine[k]) === norm(theirs[k]); let diff = ""; if (!same) { const A = norm(theirs[k]).split("\n"), B = norm(mine[k]).split("\n"); for (let i = 0; i < Math.max(A.length, B.length); i++) if (A[i] !== B[i]) { diff += `\n  line ${i}: baseline ${JSON.stringify(A[i])} / now ${JSON.stringify(B[i])}`; if (diff.length > 1500) break; } } assert(same, `home mode ${k} identical to the baseline page` + diff); }
       await b.ctx.close();
     } else console.log("(no BASELINE_DIR: skipped the identical-to-baseline comparison)");
@@ -268,7 +274,7 @@ try {
     assert(log.filter(l => /^models=/.test(l)).length === 1 && log.includes("models=best_match,ecmwf_ifs025,ncep_nbm_conus,gfs_seamless,icon_seamless"), "one Open-Meteo call asks for the five models");
     const wind1 = await first(page, ".row .wind");
     assert(/^16g19 kn /.test(wind1), "the row scores and shows the median of best match / ECMWF / NBM (12 / 20 / 16 -> 16g19), with its unit: " + wind1);
-    assert(/16g19 kn /.test(await text(page, "#hero")) && /16g19 kn/.test(await text(page, "#narr")) && / · knots · /.test(await text(page, "#sub")), "hero, narrative and the header line carry the unit");
+    assert(/16g19 kn /.test(await text(page, "#hero")) && / · knots · /.test(await text(page, "#sub")) && !/\d/.test(await text(page, "#narr")), "hero and the header line carry the unit; the synopsis carries no wind figure");
     const firstId = await page.getAttribute(".row", "id");
     await page.click(".row .head"); await page.waitForTimeout(200);
     let det = await text(page, "#" + firstId.replace("row-", "detail-"));
@@ -344,8 +350,8 @@ try {
 
     // today
     assert((await text(page, '#days button[aria-pressed="true"]')).startsWith("Today"), "today is selected on load");
-    assert((await sortBtn("score").innerText()) === short(0) && (await sortBtn("tomorrow").innerText()) === short(1) && (await sortBtn("tomorrow").isVisible()) && (await sortBtn("distance").innerText()) === "Distance", `sort buttons read ${short(0)} / ${short(1)} / Distance with today selected`);
-    assert((await sortBtn("score").getAttribute("aria-pressed")) === "true", "the day sort is pressed by default");
+    assert((await page.locator("[data-sort]").allInnerTexts()).join(" | ") === "Score | Distance" && (await page.locator('[data-sort="tomorrow"]').count()) === 0, "two sort buttons, Score | Distance; no next-day sort");
+    assert((await sortBtn("score").getAttribute("aria-pressed")) === "true" && (await sortBtn("score").getAttribute("aria-label")) === `Sort by ${long(0)}'s score`, "Score is pressed by default and sorts by the selected day");
     const hero0 = await text(page, "#hero");
     assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(0)} · within 1h30\nCrissy Field\n`, "i").test(hero0), "hero: score, then 'BEST BET · " + short(0).toUpperCase() + " · WITHIN 1H30', then Crissy Field on top today: " + hero0.split("\n").slice(0, 3).join(" | "));
     assert((await page.getAttribute(".row", "id")) === "row-crissy" && /Station reads 5 kn/.test(await first(page, ".row .wind")), "today's list: Crissy Field first, with the 'Station reads 5 kn' chip (station 5 kn vs the 20 kn forecast hour): " + JSON.stringify(await first(page, ".row .wind")));
@@ -357,7 +363,7 @@ try {
 
     // tomorrow
     await page.click("#days button >> nth=1"); await page.waitForTimeout(300);
-    assert((await sortBtn("score").innerText()) === short(1) && (await sortBtn("tomorrow").innerText()) === short(2) && (await sortBtn("tomorrow").isVisible()), `tomorrow selected: sort buttons read ${short(1)} / ${short(2)}`);
+    assert((await sortBtn("score").innerText()) === "Score" && (await sortBtn("score").getAttribute("aria-label")) === `Sort by ${long(1)}'s score`, `tomorrow selected: Score still reads 'Score' and sorts by ${long(1)}`);
     const hero1 = await text(page, "#hero");
     assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(1)} · within 1h30\nCandlestick`, "i").test(hero1), "hero keeps the one format and names tomorrow's best (Candlestick Point): " + hero1.split("\n").slice(0, 3).join(" | "));
     assert((await page.getAttribute(".row", "id")) === "row-candlestick" && !/Station reads/.test(await text(page, "#list")), "tomorrow's list: Candlestick Point first; no 'Station reads' chip on any row");
@@ -369,16 +375,17 @@ try {
     assert(/Lead time\nTomorrow: hour-by-hour timing is usually good\./i.test(det), "lead-time line for tomorrow");
     assert(new RegExp(`the best 3-hour stretch ${long(1)};`).test(det), "the best-window row names the day");
     assert(!/Models agree/.test(await first(page, ".row .wind")) && /Confidence\nModels agree/i.test(det), "identical models: no confidence chip on the tile (the spread can't move the score), the detail keeps the Confidence row");
-    // the second sort button: the day after the selected one
-    await sortBtn("tomorrow").click(); await page.waitForTimeout(300);
-    { const id = await page.getAttribute(".row", "id"), w = await first(page, ".row .wind"), sk = await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).sort);
-      assert(id === "row-crissy" && new RegExp(`${short(2)} \\d+\\.\\d`).test(w) && sk === "tomorrow", `'${short(2)}' sorts by ${long(2)}'s score (Crissy first) and shows that day's score chip; stored key still 'tomorrow' (${id}, ${JSON.stringify(w)}, ${sk})`); }
-    assert((await page.locator(".row .score").first().innerText()) === (await page.evaluate(() => { const r = computeAll().find(x => x.spot.id === "crissy"); return r.r.score.toFixed(1); })), "the tile's main score is still the selected day's");
+    // Distance, then back to Score: the selected day's ranking returns
+    await sortBtn("distance").click(); await page.waitForTimeout(300);
+    { const ids = await page.locator(".row").evaluateAll(rs => rs.map(r => r.id)), drives = await page.evaluate(() => computeAll().map(x => x.drive));
+      assert(drives.every((d, i) => i === 0 || d >= drives[i - 1]) && (await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).sort)) === "distance", "Distance sorts by drive and is saved: " + ids.slice(0, 3).join(", ")); }
+    await sortBtn("score").click(); await page.waitForTimeout(300);
+    assert((await page.getAttribute(".row", "id")) === "row-candlestick" && (await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).sort)) === "score", "Score: tomorrow's best (Candlestick Point) first again, saved as 'score'");
+    assert((await page.locator(".row .score").first().innerText()) === (await page.evaluate(() => computeAll()[0].r.score.toFixed(1))), "the tile's score is the selected day's");
 
     // two and three days out
     await page.click("#days button >> nth=2"); await page.waitForTimeout(300); await openFirst(); det = await detailOf();
     assert(/Lead time\n2–3 days out: expect the window to shift an hour or two\./i.test(det) && new RegExp(`${short(2)} morning · 7a–10a`, "i").test(det), "two days out: '2–3 days out' lead line, rows labelled " + short(2));
-    assert((await sortBtn("score").innerText()) === short(2) && (await sortBtn("tomorrow").innerText()) === short(3), `sort buttons read ${short(2)} / ${short(3)}`);
 
     // seven day tabs; the last two are a trend
     const tabs = await page.locator("#days button").allInnerTexts();
@@ -388,9 +395,7 @@ try {
     assert(/Lead time\n4 days out: trust the pattern, not the hour\./i.test(det), "four days out: '4 days out' lead line");
     // the last forecast day
     await page.click("#days button >> nth=6"); await page.waitForTimeout(300);
-    assert((await sortBtn("score").innerText()) === short(6) && (await sortBtn("tomorrow").isHidden()) && (await sortBtn("distance").isVisible()), `last day: first button reads ${short(6)}, the second is hidden, Distance stays`);
-    assert((await sortBtn("score").getAttribute("aria-pressed")) === "true" && (await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).sort)) === "tomorrow", "with no next day the day sort is pressed; the stored key is untouched");
-    assert(!new RegExp(`\\b(${[0, 1, 2, 3, 4, 5, 6, 7].map(short).join("|")}) \\d+\\.\\d`).test(await text(page, "#list")), "no next-day score chips on the last day");
+    assert((await page.locator("[data-sort]").allInnerTexts()).join(" | ") === "Score | Distance" && (await sortBtn("score").getAttribute("aria-pressed")) === "true", "last day: the same two sort buttons, Score pressed");
     await openFirst(); det = await detailOf();
     assert(/Lead time\n5–6 days out: a trend, not a forecast\./i.test(det) && new RegExp(`^${long(6)}, hour by hour`, "i").test(det), "last day: the trend lead line, chart titled with the day");
     assert(new RegExp(`^\\d+\\.\\d\nBest bet · ${short(6)} · within 1h30\n`, "i").test(await text(page, "#hero")), "hero format holds on the last day");
@@ -404,9 +409,38 @@ try {
     assert(/Nothing worth the drive/.test(trendOnly) && !/looks like the day/.test(trendOnly), "a 6+ on a trend day alone does not become the 'looks like the day' card");
     await page.evaluate(() => { selDay = dayKeys[6]; settings.radius = 30; render(); }); await page.waitForTimeout(100);
     await page.click("#days button >> nth=0"); await page.waitForTimeout(300);
-    assert((await sortBtn("tomorrow").isVisible()) && (await sortBtn("tomorrow").innerText()) === short(1) && (await sortBtn("tomorrow").getAttribute("aria-pressed")) === "true", "back on today the second button returns, labelled " + short(1) + ", pressed again since the stored sort is still 'tomorrow'");
+    assert((await sortBtn("score").getAttribute("aria-pressed")) === "true" && (await page.getAttribute(".row", "id")) === "row-crissy", "back on today: Score pressed, today's best (Crissy Field) first");
     assert(errors.length === 0, "selected day: no page errors (" + errors.join(" | ") + ")");
     await ctx.close();
+  }
+
+  /* ---------- 1e. Oct 2026 refresh: Foil first and default, Score | Distance, the A1 navy band ---------- */
+  {
+    const fresh = await newPage(browser, url, { width: 390, style: null });
+    await fresh.page.waitForSelector(".row", { timeout: 20000 }); await fresh.page.waitForTimeout(500);
+    const styles = await fresh.page.locator("[data-style]").evaluateAll(bs => bs.map(b => b.textContent + (b.getAttribute("aria-pressed") === "true" ? "*" : "")));
+    assert(styles.join(" · ") === "Foil* · Freeride · Wave" && (await fresh.page.evaluate(() => settings.style)) === "foil", "a new install: style selector reads Foil · Freeride · Wave with Foil pressed: " + styles.join(" · "));
+    const look = await fresh.page.evaluate(() => { const h = document.querySelector("header.top"), cs = getComputedStyle(h), h1 = h.querySelector("h1");
+      return { text: h1.textContent, m: h1.querySelector(".m") && h1.querySelector(".m").textContent, font: getComputedStyle(h1).fontFamily, bg: cs.backgroundColor, btn: getComputedStyle(document.querySelector(".dock .btn")).fontFamily, name: getComputedStyle(document.querySelector(".row .name")).fontFamily, meta: document.querySelector('meta[name="theme-color"]').content }; });
+    assert(look.text === "Windward Mark" && look.m === "Mark" && /Montserrat/.test(look.font) && /Montserrat/.test(look.btn) && /Barlow/.test(look.name) && look.bg === "rgb(15, 34, 54)" && look.meta === "#0f2236", "A1 look: wordmark 'Windward Mark' (Mark in its own span), Montserrat wordmark and buttons, spot names stay in the condensed face, navy band, theme-color matches: " + JSON.stringify(look));
+    // the band is painted by a spread shadow, so read the pixels: both screen edges, just inside the header's top
+    const shot = (await fresh.page.screenshot({ clip: { x: 0, y: 0, width: 390, height: 40 } })).toString("base64");
+    const bleed = await fresh.page.evaluate(async b64 => { const im = new Image(); im.src = "data:image/png;base64," + b64; await im.decode(); const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const x = c.getContext("2d"); x.drawImage(im, 0, 0);
+      return [[1, 4], [im.width - 2, 4], [1, 36]].map(([px, py]) => Array.from(x.getImageData(px, py, 1, 1).data.slice(0, 3)).join(",")); }, shot);
+    assert(bleed.every(c => c === "15,34,54"), "the band reaches both screen edges at 390 px: " + bleed.join(" / "));
+    assert(fresh.errors.length === 0, "fresh install: no page errors (" + fresh.errors.join(" | ") + ")");
+    await fresh.ctx.close();
+    // saved settings: the old next-day sort migrates to Score, a chosen style is kept
+    const saved = await newPage(browser, url, { width: 390, init: () => { if (!sessionStorage.getItem("seeded")) { sessionStorage.setItem("seeded", "1"); localStorage.setItem("goc.settings", JSON.stringify({ home: "LO", radius: 90, style: "wave", sort: "tomorrow" })); } } });
+    await saved.page.waitForSelector(".row", { timeout: 20000 }); await saved.page.waitForTimeout(500);
+    assert((await saved.page.evaluate(() => [settings.sort, settings.style].join())) === "score,wave" && (await saved.page.getAttribute('[data-sort="score"]', "aria-pressed")) === "true" && (await saved.page.getAttribute('[data-style="wave"]', "aria-pressed")) === "true", "saved sort 'tomorrow' migrates to 'score'; a saved Wave style stays Wave");
+    await saved.page.click('[data-style="foil"]'); await saved.page.waitForTimeout(200);
+    const stored = await saved.page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")));
+    await saved.page.reload(); await saved.page.waitForSelector(".row", { timeout: 20000 }); await saved.page.waitForTimeout(300);
+    const after = await saved.page.evaluate(() => settings.style);
+    assert(stored.sort === "score" && stored.style === "foil" && after === "foil", `after a save the stored sort is 'score' and the new style survives a reload (${stored.sort}, ${stored.style}, ${after})`);
+    assert(saved.errors.length === 0, "migrated settings: no page errors (" + saved.errors.join(" | ") + ")");
+    await saved.ctx.close();
   }
 
   /* ---------- 1e. tides and daylight at 390 px: a Delta spot (Sherman Island) and an Ocean spot (Ocean Beach) open ---------- */
