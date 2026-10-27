@@ -36,6 +36,7 @@ class ObsRecent(unittest.TestCase):
         run = doc["runs"][0]
         self.assertEqual(run["at"], ISO(NOW))
         self.assertEqual(set(run["obs"]), {"alameda", "oceanbeach", "crissy"}, "stale sherman, empty candlestick and the kept spot are absent")
+        self.assertEqual((run["obs"]["crissy"]["kind"], run["obs"]["oceanbeach"]["kind"]), ("coops", "ndbc"), "new kinds flow through; the wave-only CDIP row is never picked as wind")
         self.assertEqual(run["obs"]["alameda"], {"id": "AAMC1", "name": "ALAMEDA", "kind": "nws", "dist_mi": 1.8, "time": ISO(NOW - dt.timedelta(minutes=35)), "spd": 12.3, "gst": 15.1, "dir": 290})
         self.assertEqual(run["obs"]["oceanbeach"]["id"], "46237", "second station when the nearest has no wind")
         self.assertNotIn("age_min", run["obs"]["crissy"], "only the listed fields, age is read off the timestamp later")

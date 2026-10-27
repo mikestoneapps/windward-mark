@@ -4,7 +4,7 @@ import vm from "node:vm";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { scoring, SPOTS, evaluate, DEFAULT_ALERTS, inQuiet, laNow, fetchForecasts, MODEL_IDS, DAYS, ALERT_DAYS, deliver, GONE, sunOf, blowingNow, blowingText, laHour, windText, BLOW_RUNS, OBS_MAX_AGE } from "./lib.mjs";
+import { scoring, SPOTS, evaluate, testDue, DEFAULT_ALERTS, inQuiet, laNow, fetchForecasts, MODEL_IDS, DAYS, ALERT_DAYS, deliver, GONE, sunOf, blowingNow, blowingText, laHour, windText, BLOW_RUNS, OBS_MAX_AGE } from "./lib.mjs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 let fails = 0;
 const assert = (c, m) => { if (!c) { fails++; console.error("FAIL:", m); } else console.log("ok  ", m); };
@@ -71,9 +71,11 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     assert(DAYS === 7 && ALERT_DAYS === 5 && /const DAYS=7,/.test(html) && /const ALERT_DAYS=5;/.test(html), "the job and the page both ask for seven days and alert on five");
     const embedded = JSON.parse(html.match(/const SPOTS = \/\*SPOTS\*\/(\[.*?\]);\n/)[1]);
     assert(JSON.stringify(embedded) === JSON.stringify(SPOTS), "the page's embedded SPOTS equals spots.json");
-    assert(SPOTS.every(s => /^\d{7}$/.test(s.tideStation || "")), "every Bay spot names a 7-digit NOAA tide station (the whole Bay is tidal)");
+    const LAKES = ["kingsbeach", "granitebay", "folsompoint"];
+    assert(SPOTS.length === 27 && SPOTS.filter(s => !LAKES.includes(s.id)).every(s => /^\d{7}$/.test(s.tideStation || "")), "27 spots; every tidal spot names a 7-digit NOAA tide station");
+    assert(SPOTS.filter(s => LAKES.includes(s.id)).every(s => s.tideStation === null), "the lakes (Tahoe, Folsom) carry tideStation null, so they never draw a tide line");
     const T = {}; SPOTS.filter(s => s.tideStation).forEach(s => { (T[s.tideStation] = T[s.tideStation] || []).push(s.id); });
-    assert(JSON.stringify(T) === JSON.stringify({ "9414290": ["crissy", "oceanbeach"], "9414358": ["candlestick"], "9414458": ["thirdave", "coyote"], "9414750": ["alameda"], "9414816": ["berkeley"], "9414843": ["pointisabel"], "9415064": ["sherman"], "9415316": ["windycove"], "9415112": ["baypoint"], "9415020": ["stinson"], "9415625": ["bodega"], "9413745": ["waddell", "davenport"], "9414131": ["hmb"] }), "tide stations: San Francisco for Crissy and Ocean Beach, San Mateo Bridge for the Peninsula pair, Santa Cruz for Waddell and Davenport, one each elsewhere");
+    assert(JSON.stringify(T) === JSON.stringify({ "9414290": ["paradisecay", "crissy", "oceanbeach"], "9414358": ["candlestick"], "9414458": ["thirdave", "coyote"], "9414750": ["alameda", "tollplaza"], "9414816": ["berkeley", "racetrack", "pointemery"], "9414843": ["pointisabel"], "9415064": ["sherman"], "9415316": ["windycove"], "9415112": ["baypoint"], "9415020": ["stinson", "dillon"], "9415625": ["bodega"], "9413745": ["waddell", "davenport", "gazos"], "9414131": ["hmb", "pillarpoint"], "9413450": ["marina"] }), "tide stations: San Francisco for Paradise Cay, Crissy and Ocean Beach, Alameda for Toll Plaza, Berkeley for the Emeryville strip, Santa Cruz for the Waddell coast, Monterey for Marina, one each elsewhere");
     assert(sunOf({ daily: { time: ["2026-10-17"], sunrise_best_match: ["2026-10-17T07:33"], sunset_best_match: ["2026-10-17T18:20"] } })["2026-10-17"][1] === "2026-10-17T18:20" && sunOf({ daily: { time: ["2026-10-17"], sunrise: ["a"], sunset: ["b"] } })["2026-10-17"][0] === "a" && sunOf({ daily: { time: ["2026-10-17"], sunrise_ecmwf_ifs025: ["a"], sunset_ecmwf_ifs025: ["b"] } })["2026-10-17"][0] === "a" && sunOf({}) === undefined && sunOf({ daily: { time: [] } }) === undefined, "sunOf(): plain, best-match-suffixed or any-model-suffixed daily keys; undefined when the answer has none");
   }
 
@@ -311,6 +313,22 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
                         run(21, { berkeley: rd(20), candlestick: { id: "KSFO", name: "San Francisco Intl", dist_mi: 5.9, time: Z(20, 55), spd: 15, gst: 16, dir: 290 }, thirdave: { id: "KSQL", name: "San Carlos Airport", dist_mi: 5.1, time: Z(20, 55), spd: 21, gst: 27, dir: 320 }, davenport: { id: "46042", name: "Monterey buoy", dist_mi: 19.9, time: Z(20, 55), spd: 22, gst: 25, dir: 300 } }));
     r2 = evaluate(rider({ maxDrive: 300 }), dead, at14, many);
     assert(r2.notification && r2.notification.body === "Blowing now: Candlestick Point 15 kn WNW at the San Francisco Intl station — 5 min from Candlestick Point; Third Avenue (Baywinds Park) 21g27 kn NW at the San Carlos Airport station — 25 min from Candlestick Point; Berkeley Marina (Hs Lordships beach) 18g22 kn NW at the RICHMOND station — 30 min from Candlestick Point." && Object.keys(r2.state.blowing).length === 4, "four spots blowing: one line, nearest first, three named, all four marked said: " + r2.notification.body);
+  }
+
+  /* ---------- "Send test notification" (settings.alerts.testRequested -> one test push -> state.testSent) ---------- */
+  {
+    const req = "2026-10-17T18:40:00.000Z";
+    const tRider = (alerts = {}, state = {}) => ({ id: "r1", settings: { alerts: { ...DEFAULT_ALERTS, ...alerts } }, state });
+    let t = testDue(tRider({ testRequested: req }), sat);
+    assert(t && t.body === "Windward Mark test — alerts are working" && t.url === "./#day=2026-10-17", "a requested test is due, opening the app on today: " + (t && t.body));
+    assert(testDue(tRider(), sat) === null && testDue(tRider({ testRequested: "garbage" }), sat) === null, "no request (or an unreadable one): nothing due");
+    assert(testDue(tRider({ testRequested: req }, { testSent: req }), sat) === null, "already served: the flag was cleared server-side (testSent)");
+    assert(testDue(tRider({ testRequested: req }, { testSent: "2026-10-17T12:00:00.000Z" }), sat) !== null, "a new press after an old test: due again");
+    assert(testDue(tRider({ testRequested: req }, { testSent: "2026-10-17T19:00:00.000Z" }), sat) === null, "a stale request older than the last test: not re-sent");
+    assert(testDue(tRider({ testRequested: req }), { ...sat, hour: 23 }) !== null, "not held by quiet hours or the delivery hour: he pressed the button and is waiting");
+    const ev = evaluate(tRider({}, { testSent: req }), F, sat);
+    assert(ev.state.testSent === req, "evaluate() carries testSent through, so a digest save never un-serves a test");
+    assert(evaluate(tRider({ testRequested: req }), F, sat).state.testSent === undefined, "evaluate() itself never writes testSent: only a delivered push does (run.mjs)");
   }
 
   assert(inQuiet(22, 21, 7) && inQuiet(3, 21, 7) && !inQuiet(8, 21, 7) && inQuiet(13, 12, 14) && !inQuiet(15, 12, 14), "quiet-hours window wraps midnight");

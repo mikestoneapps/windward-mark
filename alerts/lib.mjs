@@ -130,6 +130,18 @@ export function blowingText(hits, units) {
   return "Blowing now: " + hits.slice(0, 3).map(x => `${x.spot.name} ${windText(x.o.spd, x.o.gst, units)} ${scoring.compass(x.o.dir)} at the ${x.o.name || x.o.id} station — ${mins(x.drive)} from ${x.home}`).join("; ") + ".";
 }
 
+/* ---------- "Send test notification" (Rider sheet -> Alerts) ---------- */
+// The page writes settings.alerts.testRequested (ISO) and syncs; the next hourly run answers with one test
+// push and records the request it served as state.testSent, so each press is answered exactly once. Not
+// subject to quiet hours, the delivery hour or the daily cap: he pressed the button and is waiting for it.
+export function testDue(rider, now) {
+  const req = rider.settings && rider.settings.alerts && rider.settings.alerts.testRequested;
+  if (!req || isNaN(Date.parse(req))) return null;
+  const sent = rider.state && rider.state.testSent;
+  if (sent && !isNaN(Date.parse(sent)) && Date.parse(sent) >= Date.parse(req)) return null;
+  return { title: "Windward Mark", body: "Windward Mark test — alerts are working", url: "./#day=" + now.date, tag: "wm-test" };
+}
+
 // Pure decision. Returns {notification: {title, body, url} | null, state, hits, blowing, why}.
 // recent: obs-recent.json's content (optional; without it there is no "Blowing now").
 export function evaluate(rider, forecasts, now, recent) {
@@ -140,7 +152,8 @@ export function evaluate(rider, forecasts, now, recent) {
   const limitsOf = id => scoring.limitsFor({ comfort: S.comfort, overrides: S.overrides }, id);
   const spots = riderSpots(S);
   const dayKeys = dayKeysOf(forecasts).filter(d => d >= now.date).slice(0, ALERT_DAYS);   // never days 6–7: a trend is not something to clear a calendar for
-  const state = { alerted: { ...((rider.state && rider.state.alerted) || {}) }, sent: { ...((rider.state && rider.state.sent) || {}) }, blowing: { ...((rider.state && rider.state.blowing) || {}) } };
+  const state = { alerted: { ...((rider.state && rider.state.alerted) || {}) }, sent: { ...((rider.state && rider.state.sent) || {}) }, blowing: { ...((rider.state && rider.state.blowing) || {}) },
+    ...(rider.state && rider.state.testSent ? { testSent: rider.state.testSent } : {}) };   // the served test-notification marker survives a digest save
   // prune state for days that have passed
   for (const k of Object.keys(state.alerted)) if (k.split("|")[1] < now.date) delete state.alerted[k];
   for (const k of Object.keys(state.sent)) if (k !== now.date) delete state.sent[k];
