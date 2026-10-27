@@ -170,27 +170,39 @@ def parse_cencoos(text, vars_, now):
             "dir": r.get(vars_["dir"]), "age_min": age_min(now, t)}
 
 
+def _cdec_time(ts):
+    """CDEC stamps are California local with the hour NOT zero-padded ('2026-10-26 9:45'), so they must
+    never be ordered as strings ('9:45' sorts after '16:14'; the first live runs picked a 9:45 AM row
+    over the 4 PM ones that way). Parsed datetime, or None."""
+    m = re.match(r"(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})", str(ts))
+    if not m:
+        return None
+    try:
+        return datetime.datetime(*(int(x) for x in m.groups()), tzinfo=LA)
+    except ValueError:
+        return None
+
+
 def parse_cdec(text, now):
     """CDEC JSONDataServlet, sensors 9 (speed, mph), 10 (direction), 77 (peak, mph); -9999 = missing
-    (Delta stations sometimes return it). Timestamps are California local time."""
+    (Delta stations sometimes return it). Timestamps are California local time, ordered via _cdec_time."""
     rows = json.loads(text)
     byt = {}
     for r in rows if isinstance(rows, list) else []:
         sn = r.get("SENSOR_NUM") or r.get("sensorNumber") or r.get("sensorNum")
-        ts = r.get("date") or r.get("obsDate")
+        t = _cdec_time(r.get("date") or r.get("obsDate"))
         v = r.get("value")
-        if sn is None or not ts or v is None or float(v) <= -9998:
+        if sn is None or t is None or v is None or float(v) <= -9998:
             continue
-        byt.setdefault(ts, {})[int(sn)] = float(v)
-    for ts in sorted(byt, reverse=True):
-        v = byt[ts]
+        byt.setdefault(t, {})[int(sn)] = float(v)
+    for t in sorted(byt, reverse=True):
+        v = byt[t]
         if 9 not in v or v[9] < 0:
             continue
-        t = datetime.datetime.strptime(ts.replace("T", " ")[:16], "%Y-%m-%d %H:%M").replace(tzinfo=LA)
         o = {"time": iso_utc(t), "spd": knots(v[9], MPH2KN), "gst": knots(v.get(77), MPH2KN) if v.get(77, -1) >= 0 else None,
              "dir": v.get(10) if 0 <= v.get(10, -1) <= 360 else None, "age_min": age_min(now, t)}
-        if o["age_min"] > 180:   # the 2026-10-27 first run saw ~10 h; say what the raw stamp was so a timezone bug would show in the log
-            print(f"obs cdec: latest usable row is stamped '{ts}' (read as California local, {o['age_min']} min old)", file=sys.stderr)
+        if o["age_min"] > 180:   # a genuinely stale station: say what the newest usable stamp was
+            print(f"obs cdec: latest usable row is from {o['time']} ({o['age_min']} min old)", file=sys.stderr)
         return o
     return None
 
@@ -216,7 +228,7 @@ def parse_caltrans(text, match, now):
     """One district RWIS file; pick the site whose location text carries every word of `match`.
     NTCIP ESS wind units: tenths of m/s, 65535 = missing; directions in degrees, >360 = missing."""
     doc = json.loads(text)
-    site, names = None, []
+    site, misses = None, []
     for d in _walk(doc):
         if "windData" not in d:
             continue
@@ -224,10 +236,12 @@ def parse_caltrans(text, match, now):
         if all(m in hay for m in match):
             site = d
             break
-        names.append((_find_key(d, "locationName") or _find_key(d, "location") or "?"))
+        misses.append(d)
     if not site:
-        # Say which sites the file does carry, so the log settles whether the station lives in another district file.
-        print(f"obs caltrans: no site matching {match}; file has {len(names)} wind site(s): " + "; ".join(str(n)[:40] for n in names[:12]), file=sys.stderr)
+        # Show a sample site verbatim (the 2026-10-27 run proved these dicts carry no locationName where
+        # we looked), so the log settles what the location fields are called and where the station lives.
+        head = json.dumps(misses[0], separators=(",", ":"))[:300] if misses else "none"
+        print(f"obs caltrans: no site matching {match} among {len(misses)} wind site(s); first site: {head}", file=sys.stderr)
         return None
     w = site["windData"] if isinstance(site["windData"], dict) else {}
     def ess(k):
@@ -298,16 +312,61 @@ def parse_jpl(text, buoy, now):
     if not sp:
         return None
     dr = mam(direction) if direction else None
-    t = (now - datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+    # The page updates at :30 with the last 30 min of the previous hour, so the newest reading's window
+    # ENDS at the most recent top of the hour once :30 has passed — an hour earlier before that. Stamping
+    # the window's end keeps a fresh fetch from looking ~60 min stale (the first live runs aged 97 min).
+    top = now.replace(minute=0, second=0, microsecond=0)
+    t = top if now.minute >= 30 else top - datetime.timedelta(hours=1)
     return {"time": iso_utc(t), "spd": knots(sp[0], unit), "gst": knots(sp[1], unit),
             "dir": None if dr is None else round(dr[0]), "age_min": age_min(now, t)}
 
 
 def parse_cdip(text, now):
-    """CDIP justdar "pm" page (wave parameters only — never a wind sample): the latest Hs / Tp / Dp.
-    Label spellings vary ("Hs(m):", "Hs:", "Hs ="), so match loosely and honour the unit when one is
-    given; times on the page are UTC. None when no Hs is found — the fetch loop then logs the page head
-    (so the real format shows in the job log) and falls back to the buoy's NDBC realtime2 mirror."""
+    """CDIP justdar "pm" page (wave parameters only — never a wind sample): a columnar table, as the
+    2026-10-27 run's log showed —
+
+        <pre>YEAR MO DY HR MN   Hs   Tp   Dp    Depth   Ta    Pres   Wspd Wdir Temp   Temp
+              UTC           m   sec  deg     m     sec    mB     m/s  deg Air(C) Sf...
+        2026 10 27 03 26  1.19 11.76  285 ...
+
+    Take the newest data row's Hs (m), Tp (s), Dp (deg); times are UTC; the Wspd column is ignored by
+    design (these rows are wave-only). A labelled "Hs: 1.52 m" page still parses as a fallback. None when
+    nothing matches — the fetch loop then logs the page head and reads the buoy's NDBC realtime2 mirror."""
+    lines = [re.sub(r"<[^>]+>", " ", l) for l in text.splitlines()]
+    hdr = next((l for l in lines if re.search(r"\bYEAR\b.*\bHs\b", l)), None)
+    if hdr:
+        cols = hdr.split()
+        try:
+            iHs, iTp, iDp = cols.index("Hs"), cols.index("Tp"), cols.index("Dp")
+        except ValueError:
+            iHs = None
+        best = None
+        if iHs is not None:
+            for l in lines:
+                tk = l.split()
+                if len(tk) <= max(iHs, iTp, iDp) or not re.fullmatch(r"\d{4}", tk[0]):
+                    continue
+                try:
+                    t = datetime.datetime(int(tk[0]), int(tk[1]), int(tk[2]), int(tk[3]), int(tk[4]), tzinfo=datetime.timezone.utc)
+                    hs_m = float(tk[iHs])
+                except (ValueError, IndexError):
+                    continue
+                if not 0 < hs_m < 30:   # -999 sentinels and garbage
+                    continue
+                if best is None or t > best[0]:
+                    best = (t, hs_m, tk)
+        if best:
+            t, hs_m, tk = best
+            def num(i):
+                try:
+                    return float(tk[i])
+                except (ValueError, IndexError):
+                    return None
+            dp = num(iDp)
+            return {"time": iso_utc(t), "spd": None, "gst": None, "dir": None,
+                    "wvht_ft": round(hs_m * M2FT, 1), "dpd": num(iTp),
+                    "mwd": None if dp is None or not 0 <= dp <= 360 else int(dp),
+                    "age_min": age_min(now, t)}
     hs = re.search(r"Hs\s*(?:\((m|ft)\))?\s*[=:]\s*([\d.]+)\s*(m|ft)?\b", text, re.I)
     tp = re.search(r"Tp\s*(?:\(s\))?\s*[=:]\s*([\d.]+)", text, re.I)
     dp = re.search(r"Dp\s*(?:\(deg\))?\s*[=:]\s*(\d+)", text, re.I)

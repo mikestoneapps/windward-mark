@@ -52,12 +52,14 @@ class TestParsers(unittest.TestCase):
         self.assertEqual((o["spd"], o["gst"], o["dir"], o["age_min"]), (15.0, 20.0, 295.0, 20), "ERDDAP m/s -> knots")
 
     def test_cdec(self):
-        rows = [{"stationId": "FLD", "SENSOR_NUM": 9, "date": "2026-10-26 16:14", "value": 8.0},
+        rows = [{"stationId": "FLD", "SENSOR_NUM": 9, "date": "2026-10-26 9:45", "value": 20.0},
+                {"stationId": "FLD", "SENSOR_NUM": 9, "date": "2026-10-26 16:14", "value": 8.0},
                 {"stationId": "FLD", "SENSOR_NUM": 10, "date": "2026-10-26 16:14", "value": 169.0},
                 {"stationId": "FLD", "SENSOR_NUM": 9, "date": "2026-10-26 17:14", "value": -9999.0}]
         o = O.parse_cdec(json.dumps(rows), NOW)
         self.assertEqual((o["spd"], o["dir"], o["gst"]), (7.0, 169.0, None), "mph -> knots; a -9999 row (Delta CDEC) is missing, not zero")
-        self.assertEqual(o["time"], "2026-10-26T23:14:00Z", "CDEC timestamps are California local time")
+        self.assertEqual(o["time"], "2026-10-26T23:14:00Z",
+                         "rows order chronologically: CDEC hours are not zero-padded ('9:45' sorts after '16:14' as a string, which is how the first live runs went 10 h stale)")
 
     def test_caltrans(self):
         site = {"location": {"locationName": "SR-12 - SR-160 (Rio Vista Bridge)"},
@@ -82,7 +84,24 @@ class TestParsers(unittest.TestCase):
         o4 = O.parse_jpl(table("mph"), "TB4", NOW)
         self.assertEqual((o4["spd"], o4["gst"]), (4.3, 7.0), "each buoy reads its own column")
         self.assertIsNone(O.parse_jpl(table("mph"), "TB2", NOW), "-99 = missing")
-        self.assertEqual(o["time"], "2026-10-26T23:00:00Z", "stamped at the top of the previous hour (what the page shows)")
+        self.assertEqual(o["time"], "2026-10-27T00:00:00Z", "fetched at :30 or later: the page just updated, and its window ends at the top of this hour")
+        early = O.parse_jpl(table("mph"), "TB1", NOW.replace(minute=10))
+        self.assertEqual(early["time"], "2026-10-26T23:00:00Z", "fetched before :30: the page still shows the window ending at the previous top of the hour")
+
+    def test_cdip_columnar(self):
+        # The real justdar "pm" shape, from the 2026-10-27 run's log: a columnar table, newest row wanted,
+        # Wspd column present but never read (wave only).
+        txt = ("<pre>YEAR MO DY HR MN   Hs   Tp   Dp    Depth   Ta    Pres   Wspd Wdir Temp   Temp\n"
+               "      UTC           m   sec  deg     m     sec    mB     m/s  deg Air(C) Sf\n"
+               "2026 10 27 00 26  1.19 11.76  285    17.3   7.2  1014.6  5.1  290  12.1  13.5\n"
+               "2026 10 26 23 56  1.21 12.50  280    17.3   7.2  1014.8  4.8  292  12.0  13.5\n")
+        o = O.parse_cdip(txt, NOW)
+        self.assertEqual((o["wvht_ft"], o["dpd"], o["mwd"], o["time"]), (3.9, 11.76, 285, "2026-10-27T00:26:00Z"), "the newest row's Hs/Tp/Dp, m -> ft, whichever order the rows come in")
+        self.assertTrue(o["spd"] is None and o["gst"] is None and o["dir"] is None, "the Wspd column is ignored: a CDIP row is never a wind sample")
+        swapped = txt.replace("2026 10 27 00 26  1.19", "X").replace("2026 10 26 23 56  1.21", "2026 10 27 00 26  1.19").replace("X", "2026 10 26 23 56  1.21")
+        self.assertEqual(O.parse_cdip(swapped, NOW)["wvht_ft"], 3.9, "newest-first pages give the same answer")
+        sentinel = ("<pre>YEAR MO DY HR MN   Hs   Tp   Dp\n      UTC           m   sec  deg\n2026 10 27 00 26  -999.0 -999 -999\n")
+        self.assertIsNone(O.parse_cdip(sentinel, NOW), "-999 sentinels are not a reading")
 
     def test_cdip_wave_only(self):
         txt = "Station 142p1 San Francisco Bar\n00:00 10/27/2026  Hs(m): 1.52  Tp(s): 11.76  Dp(deg): 285\n"
