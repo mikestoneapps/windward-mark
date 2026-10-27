@@ -26,6 +26,30 @@
    "lon": -122.393,
    "dist_mi": 9.4,
    "nos": "9414311"
+  },
+  {
+   "id": "KDVO",
+   "name": "Novato / Gnoss Field",
+   "kind": "nws",
+   "lat": 38.14178,
+   "lon": -122.55463,
+   "dist_mi": 16.1
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 19.5
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy",
+   "kind": "ndbc",
+   "lat": 37.754,
+   "lon": -122.839,
+   "dist_mi": 22.7
   }
  ],
  "crissy": [
@@ -57,12 +81,36 @@
    "nos": "9414311"
   },
   {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 13.7
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 14.0
+  },
+  {
    "id": "46026",
    "name": "San Francisco (18 NM W of SF)",
    "kind": "ndbc",
    "lat": 37.75,
    "lon": -122.838,
    "dist_mi": 21.3
+  },
+  {
+   "id": "46012",
+   "name": "Half Moon Bay buoy",
+   "kind": "ndbc",
+   "lat": 37.356,
+   "lon": -122.881,
+   "dist_mi": 38.9
   }
  ],
  "candlestick": [
@@ -91,6 +139,30 @@
    "lon": -122.2983,
    "dist_mi": 6.5,
    "nos": "9414750"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 9.0
+  },
+  {
+   "id": "KHAF",
+   "name": "Half Moon Bay Airport",
+   "kind": "nws",
+   "lat": 37.5136,
+   "lon": -122.4996,
+   "dist_mi": 14.7
+  },
+  {
+   "id": "KHWD",
+   "name": "Hayward, Hayward Air Terminal",
+   "kind": "nws",
+   "lat": 37.66083,
+   "lon": -122.11833,
+   "dist_mi": 15.0
   }
  ],
  "thirdave": [
@@ -118,6 +190,30 @@
    "lon": -122.21,
    "dist_mi": 6.5,
    "nos": "9414523"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 10.3
+  },
+  {
+   "id": "KHWD",
+   "name": "Hayward, Hayward Air Terminal",
+   "kind": "nws",
+   "lat": 37.66083,
+   "lon": -122.11833,
+   "dist_mi": 10.6
+  },
+  {
+   "id": "KPAO",
+   "name": "Palo Alto Airport",
+   "kind": "nws",
+   "lat": 37.46667,
+   "lon": -122.11667,
+   "dist_mi": 12.1
   }
  ],
  "coyote": [
@@ -145,6 +241,30 @@
    "lon": -122.21,
    "dist_mi": 8.3,
    "nos": "9414523"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 10.6
+  },
+  {
+   "id": "KHAF",
+   "name": "Half Moon Bay Airport",
+   "kind": "nws",
+   "lat": 37.5136,
+   "lon": -122.4996,
+   "dist_mi": 11.2
+  },
+  {
+   "id": "KHWD",
+   "name": "Hayward, Hayward Air Terminal",
+   "kind": "nws",
+   "lat": 37.66083,
+   "lon": -122.11833,
+   "dist_mi": 12.0
   }
  ],
  "alameda": [
@@ -173,6 +293,30 @@
    "lat": 37.7213,
    "lon": -122.2211,
    "dist_mi": 3.7
+  },
+  {
+   "id": "KHWD",
+   "name": "Hayward, Hayward Air Terminal",
+   "kind": "nws",
+   "lat": 37.66083,
+   "lon": -122.11833,
+   "dist_mi": 10.7
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 10.9
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy",
+   "kind": "ndbc",
+   "lat": 37.754,
+   "lon": -122.839,
+   "dist_mi": 31.0
   }
  ],
  "berkeley": [
@@ -202,6 +346,30 @@
    "lon": -122.4,
    "dist_mi": 6.5,
    "nos": "9414863"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 11.1
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 17.1
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy",
+   "kind": "ndbc",
+   "lat": 37.754,
+   "lon": -122.839,
+   "dist_mi": 29.6
   }
  ],
  "pointisabel": [
@@ -222,6 +390,30 @@
    "lon": -122.4,
    "dist_mi": 4.6,
    "nos": "9414863"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 13.5
+  },
+  {
+   "id": "KCCR",
+   "name": "Concord, Buchanan Field",
+   "kind": "nws",
+   "lat": 37.99167,
+   "lon": -122.05194,
+   "dist_mi": 16.2
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy",
+   "kind": "ndbc",
+   "lat": 37.754,
+   "lon": -122.839,
+   "dist_mi": 29.8
   }
  ],
  "tollplaza": [
@@ -260,6 +452,30 @@
    "lon": -122.2983,
    "dist_mi": 3.9,
    "nos": "9414750"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 8.8
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 14.7
+  },
+  {
+   "id": "KHWD",
+   "name": "Hayward, Hayward Air Terminal",
+   "kind": "nws",
+   "lat": 37.66083,
+   "lon": -122.11833,
+   "dist_mi": 15.5
   }
  ],
  "racetrack": [
@@ -280,6 +496,30 @@
    "lon": -122.3331,
    "dist_mi": 5.4,
    "nos": "9414776"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 12.5
+  },
+  {
+   "id": "KCCR",
+   "name": "Concord, Buchanan Field",
+   "kind": "nws",
+   "lat": 37.99167,
+   "lon": -122.05194,
+   "dist_mi": 15.9
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy",
+   "kind": "ndbc",
+   "lat": 37.754,
+   "lon": -122.839,
+   "dist_mi": 30.2
   }
  ],
  "pointemery": [
@@ -318,6 +558,30 @@
    "lon": -122.2983,
    "dist_mi": 4.7,
    "nos": "9414750"
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 9.4
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 15.6
+  },
+  {
+   "id": "KHWD",
+   "name": "Hayward, Hayward Air Terminal",
+   "kind": "nws",
+   "lat": 37.66083,
+   "lon": -122.11833,
+   "dist_mi": 16.0
   }
  ],
  "sherman": [
@@ -329,6 +593,30 @@
    "lon": -121.8867,
    "dist_mi": 4.4,
    "nos": "9415115"
+  },
+  {
+   "id": "KSUU",
+   "name": "Fairfield / Travis Air Force Base",
+   "kind": "nws",
+   "lat": 38.26667,
+   "lon": -121.95,
+   "dist_mi": 17.3
+  },
+  {
+   "id": "KVCB",
+   "name": "Vacaville Nut Tree Airport",
+   "kind": "nws",
+   "lat": 38.37755,
+   "lon": -121.95853,
+   "dist_mi": 24.5
+  },
+  {
+   "id": "KSCK",
+   "name": "Stockton, Stockton Metropolitan Airport",
+   "kind": "nws",
+   "lat": 37.88972,
+   "lon": -121.22361,
+   "dist_mi": 33.5
   }
  ],
  "windycove": [
@@ -365,6 +653,30 @@
     "sr 12",
     "brannan"
    ]
+  },
+  {
+   "id": "KSUU",
+   "name": "Fairfield / Travis Air Force Base",
+   "kind": "nws",
+   "lat": 38.26667,
+   "lon": -121.95,
+   "dist_mi": 16.3
+  },
+  {
+   "id": "KVCB",
+   "name": "Vacaville Nut Tree Airport",
+   "kind": "nws",
+   "lat": 38.37755,
+   "lon": -121.95853,
+   "dist_mi": 21.7
+  },
+  {
+   "id": "KEDU",
+   "name": "University Airport",
+   "kind": "nws",
+   "lat": 38.5315,
+   "lon": -121.7865,
+   "dist_mi": 27.4
   }
  ],
  "baypoint": [
@@ -393,6 +705,14 @@
    "lat": 37.9917,
    "lon": -122.0519,
    "dist_mi": 6.3
+  },
+  {
+   "id": "KAPC",
+   "name": "Napa, Napa County Airport",
+   "kind": "nws",
+   "lat": 38.2075,
+   "lon": -122.27944,
+   "dist_mi": 20.5
   }
  ],
  "granitebay": [
@@ -411,6 +731,30 @@
    "lat": 38.56,
    "lon": -121.284,
    "dist_mi": 13.9
+  },
+  {
+   "id": "KLHM",
+   "name": "Lincoln Regional Karl Harder Field",
+   "kind": "nws",
+   "lat": 38.9092,
+   "lon": -121.3513,
+   "dist_mi": 15.3
+  },
+  {
+   "id": "KAUN",
+   "name": "Auburn Municipal Airport",
+   "kind": "nws",
+   "lat": 38.95535,
+   "lon": -121.08636,
+   "dist_mi": 15.6
+  },
+  {
+   "id": "KSMF",
+   "name": "Sacramento International Airport",
+   "kind": "nws",
+   "lat": 38.70071,
+   "lon": -121.59479,
+   "dist_mi": 23.1
   }
  ],
  "folsompoint": [
@@ -421,6 +765,30 @@
    "lat": 38.6931,
    "lon": -121.1297,
    "dist_mi": 0.8
+  },
+  {
+   "id": "KMHR",
+   "name": "Sacramento Mather Airport",
+   "kind": "nws",
+   "lat": 38.55996,
+   "lon": -121.28397,
+   "dist_mi": 13.1
+  },
+  {
+   "id": "KAUN",
+   "name": "Auburn Municipal Airport",
+   "kind": "nws",
+   "lat": 38.95535,
+   "lon": -121.08636,
+   "dist_mi": 17.4
+  },
+  {
+   "id": "KLHM",
+   "name": "Lincoln Regional Karl Harder Field",
+   "kind": "nws",
+   "lat": 38.9092,
+   "lon": -121.3513,
+   "dist_mi": 18.6
   }
  ],
  "stinson": [
@@ -477,6 +845,30 @@
    "lat": 37.75,
    "lon": -122.838,
    "dist_mi": 14.7
+  },
+  {
+   "id": "KDVO",
+   "name": "Novato / Gnoss Field",
+   "kind": "nws",
+   "lat": 38.14178,
+   "lon": -122.55463,
+   "dist_mi": 17.6
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 24.5
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 26.1
   },
   {
    "id": "46214",
@@ -536,12 +928,36 @@
    "dist_mi": 13.4
   },
   {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 16.3
+  },
+  {
    "id": "46026",
    "name": "San Francisco buoy, 18 NM W of SF",
    "kind": "ndbc",
    "lat": 37.75,
    "lon": -122.838,
    "dist_mi": 17.9
+  },
+  {
+   "id": "KHAF",
+   "name": "Half Moon Bay Airport",
+   "kind": "nws",
+   "lat": 37.5136,
+   "lon": -122.4996,
+   "dist_mi": 18.0
+  },
+  {
+   "id": "46012",
+   "name": "Half Moon Bay buoy",
+   "kind": "ndbc",
+   "lat": 37.356,
+   "lon": -122.881,
+   "dist_mi": 35.2
   }
  ],
  "hmb": [
@@ -561,6 +977,30 @@
    "lon": -122.4364,
    "dist_mi": 5.2,
    "network": "CA_DCP"
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 10.3
+  },
+  {
+   "id": "KPAO",
+   "name": "Palo Alto Airport",
+   "kind": "nws",
+   "lat": 37.46667,
+   "lon": -122.11667,
+   "dist_mi": 18.5
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 20.5
   },
   {
    "id": "46237",
@@ -606,6 +1046,30 @@
    "lon": -122.4364,
    "dist_mi": 5.0,
    "network": "CA_DCP"
+  },
+  {
+   "id": "KSFO",
+   "name": "San Francisco, San Francisco International Airport",
+   "kind": "nws",
+   "lat": 37.61961,
+   "lon": -122.36558,
+   "dist_mi": 10.5
+  },
+  {
+   "id": "KPAO",
+   "name": "Palo Alto Airport",
+   "kind": "nws",
+   "lat": 37.46667,
+   "lon": -122.11667,
+   "dist_mi": 20.6
+  },
+  {
+   "id": "KOAK",
+   "name": "San Francisco Bay Oakland International Airport",
+   "kind": "nws",
+   "lat": 37.72126,
+   "lon": -122.22115,
+   "dist_mi": 21.0
   },
   {
    "id": "46237",
@@ -663,6 +1127,22 @@
    "network": "CA_DCP"
   },
   {
+   "id": "KNUQ",
+   "name": "Mountain View, Moffett Field",
+   "kind": "nws",
+   "lat": 37.40583,
+   "lon": -122.04806,
+   "dist_mi": 23.7
+  },
+  {
+   "id": "KPAO",
+   "name": "Palo Alto Airport",
+   "kind": "nws",
+   "lat": 37.46667,
+   "lon": -122.11667,
+   "dist_mi": 24.5
+  },
+  {
    "id": "KHAF",
    "name": "Half Moon Bay Airport",
    "kind": "nws",
@@ -677,6 +1157,14 @@
    "lat": 36.787,
    "lon": -122.408,
    "dist_mi": 26.7
+  },
+  {
+   "id": "KSJC",
+   "name": "San Jose, San Jose International Airport",
+   "kind": "nws",
+   "lat": 37.35917,
+   "lon": -121.92417,
+   "dist_mi": 27.4
   },
   {
    "id": "46012",
@@ -737,6 +1225,30 @@
    "lat": 36.787,
    "lon": -122.408,
    "dist_mi": 22.5
+  },
+  {
+   "id": "KNUQ",
+   "name": "Mountain View, Moffett Field",
+   "kind": "nws",
+   "lat": 37.40583,
+   "lon": -122.04806,
+   "dist_mi": 24.8
+  },
+  {
+   "id": "KSJC",
+   "name": "San Jose, San Jose International Airport",
+   "kind": "nws",
+   "lat": 37.35917,
+   "lon": -121.92417,
+   "dist_mi": 26.6
+  },
+  {
+   "id": "KPAO",
+   "name": "Palo Alto Airport",
+   "kind": "nws",
+   "lat": 37.46667,
+   "lon": -122.11667,
+   "dist_mi": 27.1
   },
   {
    "id": "46092",
@@ -815,6 +1327,30 @@
    "dist_mi": 24.9,
    "wave_only": true,
    "cdip": "156"
+  },
+  {
+   "id": "KWVI",
+   "name": "Watsonville, Watsonville Municipal Airport",
+   "kind": "nws",
+   "lat": 36.93944,
+   "lon": -121.78889,
+   "dist_mi": 25.4
+  },
+  {
+   "id": "KNUQ",
+   "name": "Mountain View, Moffett Field",
+   "kind": "nws",
+   "lat": 37.40583,
+   "lon": -122.04806,
+   "dist_mi": 27.2
+  },
+  {
+   "id": "KSJC",
+   "name": "San Jose, San Jose International Airport",
+   "kind": "nws",
+   "lat": 37.35917,
+   "lon": -121.92417,
+   "dist_mi": 27.7
   }
  ],
  "marina": [
@@ -873,12 +1409,36 @@
    "cdip": "156"
   },
   {
+   "id": "KSNS",
+   "name": "Salinas, Salinas Municipal Airport",
+   "kind": "nws",
+   "lat": 36.66361,
+   "lon": -121.60806,
+   "dist_mi": 11.4
+  },
+  {
    "id": "46092",
    "name": "MBARI M1 mooring, central Monterey Bay",
    "kind": "ndbc",
    "lat": 36.751,
    "lon": -122.029,
    "dist_mi": 12.8
+  },
+  {
+   "id": "KWVI",
+   "name": "Watsonville, Watsonville Municipal Airport",
+   "kind": "nws",
+   "lat": 36.93944,
+   "lon": -121.78889,
+   "dist_mi": 17.7
+  },
+  {
+   "id": "KCVH",
+   "name": "Hollister, CA",
+   "kind": "nws",
+   "lat": 36.8933,
+   "lon": -121.4103,
+   "dist_mi": 26.6
   },
   {
    "id": "46042",
@@ -927,6 +1487,14 @@
    "lat": 38.5,
    "lon": -122.8167,
    "dist_mi": 19.1
+  },
+  {
+   "id": "KDVO",
+   "name": "Novato / Gnoss Field",
+   "kind": "nws",
+   "lat": 38.14178,
+   "lon": -122.55463,
+   "dist_mi": 23.5
   },
   {
    "id": "46214",
@@ -995,6 +1563,14 @@
    "dist_mi": 34.9,
    "wave_only": true,
    "cdip": "029"
+  },
+  {
+   "id": "46026",
+   "name": "San Francisco buoy",
+   "kind": "ndbc",
+   "lat": 37.754,
+   "lon": -122.839,
+   "dist_mi": 40.8
   }
  ],
  "kingsbeach": [
