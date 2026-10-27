@@ -514,6 +514,7 @@ def fetch_cwop(filt, cat, now, listen=aprs_listen, getter=http, log=say):
         lines = listen(filt, now=now)
         found = collect_aprs(lines, now)
         log(f"home stations: cwop heard {len(lines)} line(s), {len(found)} station(s) with wind in the areas")
+        for l in [x for x in lines if x.startswith("#")][:4]: log(f"home stations: aprs-is says: {l[:160]}")
         return found, "aprs-is"
     except Exception as e:
         log(f"home stations: APRS-IS unreachable ({e!r}); trying findu for catalogued callsigns", file=sys.stderr)
