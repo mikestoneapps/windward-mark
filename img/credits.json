@@ -104,11 +104,6 @@
   "license": "CC BY-SA 4.0",
   "artist": "Rhododendrites"
  },
- "sherman": {
-  "title": "Antioch Bridge, California (13048168).jpg",
-  "license": "CC BY 2.0",
-  "artist": "Amit Patel from Silicon Valley, CA"
- },
  "baypoint": {
   "title": "Suisun Bay Reserve Fleet, Benicia, California.jpg",
   "license": "CC BY-SA 2.0",
@@ -128,10 +123,5 @@
   "title": "Bliss Beach, Lake Tahoe, CA 9-10 (18311771608).jpg",
   "license": "CC BY-SA 2.0",
   "artist": "inkknife_2000 (7.5 million views +)"
- },
- "granitebay": {
-  "title": "The Elms Inn, Harrison, ME.jpg",
-  "license": "Public domain",
-  "artist": "Unknown photographer"
  }
 }
