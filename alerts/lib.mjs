@@ -150,7 +150,7 @@ export function testDue(rider, now) {
 export function evaluate(rider, forecasts, now, recent) {
   const S = rider.settings || {};
   const A = { ...DEFAULT_ALERTS, ...(S.alerts || {}) };
-  const style = ["freeride", "wave", "foil"].includes(S.style) ? S.style : "freeride";
+  const style = ["foil", "freeride", "wave"].includes(S.style) ? S.style : "foil";   // foil is the default for a new install, as on the page
   const weights = { ...DEFAULT_WEIGHTS, ...(S.weights || {}) };
   const limitsOf = id => scoring.limitsFor({ comfort: S.comfort, overrides: S.overrides }, id);
   const spots = riderSpots(S);

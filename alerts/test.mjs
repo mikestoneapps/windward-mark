@@ -190,6 +190,11 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
   r2 = evaluate(rider({ sameDay: false, maxDrive: 60 }), F, sat);
   assert(r2.notification && !/Davenport/.test(r2.notification.body) && Object.keys(r2.state.alerted).length < keys, "drive radius trims the digest");
   const F18 = {}; SPOTS.forEach(s => { F18[s.id] = doc(() => ({ spd: 18 })); });
+  // riding style: a rider with none saved is scored as foil (the page's default for a new install); a saved style is used as is
+  const F13 = {}; SPOTS.forEach(s => { F13[s.id] = doc(() => ({ spd: 13 })); });
+  const noStyle = { id: "r1", settings: { alerts: { ...DEFAULT_ALERTS, sameDay: false } }, state: {} };
+  assert(evaluate(noStyle, F13, sat).notification && !evaluate(rider({ sameDay: false }), F13, sat).notification, "no saved style -> foil: 13 kn (the foil peak) alerts; the same day for a saved freeride rider does not");
+  assert(!evaluate(noStyle, F, sat).notification && evaluate({ ...noStyle, settings: { ...noStyle.settings, style: "freeride" } }, F, sat).notification, "20 kn: too strong for the foil default, a digest for a saved freeride rider");
   r2 = evaluate(rider({ sameDay: false, minScore: 10 }), F18, sat);
   assert(!r2.notification && evaluate(rider({ sameDay: false, minScore: 8 }), F18, sat).notification, "threshold above every score -> nothing; lower it -> digest");
   r2 = evaluate(rider({ sameDay: false }, {}, { comfort: { maxWind: 18 } }), F, sat);

@@ -6,28 +6,37 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Windward Mark">
-<meta name="theme-color" content="#0e5f7a">
+<meta name="theme-color" content="#0f2236">
 <meta name="description" content="Where to kite today: the Bay, the Delta or the coast, scored and ranked by drive time.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}html,body{margin:0}</style>
 <title>Windward Mark</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Montserrat:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
 /* Layout: one ranked list, scanned like a lift-line board. Big score left, drive time right, detail folds open under the row. */
+/* Look "A1 · Navy band" (Oct 2026): a full-bleed navy header band and dock, Montserrat for the wordmark, buttons, day tabs and score numbers,
+   filled pill buttons. Spot names stay in the condensed display face so long names don't wrap more. */
 :root{
-  --bg:#edf0f2; --surface:#ffffff; --surface2:#f5f7f8; --fg:#162029; --muted:#5d6c78; --line:#d3dbe1; --accent:#0e5f7a; --accent-fg:#ffffff;
+  --bg:#dde5ec; --surface:#ffffff; --surface2:#eef3f7; --fg:#0f2236; --muted:#56687a; --line:#cdd8e2; --accent:#1f86cc; --accent-fg:#ffffff; --wm2:#4fb0f0; --focus:#4fb0f0;
+  --band:#0f2236; --band-fg:#ffffff; --band-sub:#a9bccd; --band-seg:#1b3550; --band-seg-line:#2c4a68; --band-seg-fg:#c4d4e2; --band-seg-on:#2f9be0;
+  --btn:#2f9be0; --btn-fg:#ffffff; --btn-shadow:0 2px 6px rgba(47,155,224,.35); --btn-primary:#0f2236; --btn-primary-fg:#ffffff; --dock-btn:#1b3550; --dock-btn-fg:#e2ecf4;
+  --sel:#0f2236; --sel-fg:#ffffff; --sel-sub:#a9bccd; --card-shadow:0 1px 3px rgba(15,34,54,.12),0 4px 12px rgba(15,34,54,.06);
   --good:#1e7f49; --ok:#b8800a; --poor:#b23f2c; --gate:#7c8792;
   --good-bg:#dff3e6; --ok-bg:#fbefd0; --poor-bg:#f8dcd6; --gate-bg:#e6eaee;
-  --display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; --brand:Montserrat,system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0f161c; --surface:#17222b; --surface2:#1e2b35; --fg:#e8eef2; --muted:#93a3b0; --line:#2b3a46; --accent:#5fc3e6; --accent-fg:#0b1218;
+  --bg:#0a1b2e; --surface:#13304d; --surface2:#1a3a5a; --fg:#eaf2f8; --muted:#8fa6ba; --line:#1f4568; --accent:#4fb0f0; --accent-fg:#071423;
+  --band:#071423; --band-seg:#13304d; --band-seg-line:#1f4568; --btn-shadow:0 2px 6px rgba(0,0,0,.35); --btn-primary:#4fb0f0; --btn-primary-fg:#071423; --dock-btn:#13304d;
+  --sel:#4fb0f0; --sel-fg:#071423; --sel-sub:#13304d; --card-shadow:0 1px 3px rgba(0,0,0,.35),0 4px 12px rgba(0,0,0,.2);
   --good:#5fd38a; --ok:#f0bd4e; --poor:#f08670; --gate:#8a97a3;
   --good-bg:#153726; --ok-bg:#3b2f10; --poor-bg:#3f1f19; --gate-bg:#243039; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f161c; --surface:#17222b; --surface2:#1e2b35; --fg:#e8eef2; --muted:#93a3b0; --line:#2b3a46; --accent:#5fc3e6; --accent-fg:#0b1218;
+  --bg:#0a1b2e; --surface:#13304d; --surface2:#1a3a5a; --fg:#eaf2f8; --muted:#8fa6ba; --line:#1f4568; --accent:#4fb0f0; --accent-fg:#071423;
+  --band:#071423; --band-seg:#13304d; --band-seg-line:#1f4568; --btn-shadow:0 2px 6px rgba(0,0,0,.35); --btn-primary:#4fb0f0; --btn-primary-fg:#071423; --dock-btn:#13304d;
+  --sel:#4fb0f0; --sel-fg:#071423; --sel-sub:#13304d; --card-shadow:0 1px 3px rgba(0,0,0,.35),0 4px 12px rgba(0,0,0,.2);
   --good:#5fd38a; --ok:#f0bd4e; --poor:#f08670; --gate:#8a97a3;
   --good-bg:#153726; --ok-bg:#3b2f10; --poor-bg:#3f1f19; --gate-bg:#243039; color-scheme:dark}
 
@@ -35,32 +44,35 @@
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;margin:0;padding-block:0 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .wrap{max-width:760px;margin:0 auto}
 h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
-header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:18px 0 10px;flex-wrap:wrap}
-header.top h1{font-size:30px;line-height:1;letter-spacing:-.01em;font-weight:700}
-header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
-.refresh{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}.refresh span{font-size:12px;color:var(--muted)}
-.btn.small{padding:4px 10px;font-size:13px}.btn:disabled{opacity:.6;cursor:default}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:20px 0 14px;margin-bottom:10px;flex-wrap:wrap;background:var(--band);color:var(--band-fg);box-shadow:0 0 0 100vmax var(--band);clip-path:inset(-100vmax -100vmax 0)}   /* full-bleed band: the spread shadow paints it to both screen edges and up under the status bar (safe areas included), clipped at its own bottom edge */
+header.top h1{font-family:var(--brand);font-size:24px;line-height:1;letter-spacing:.2em;text-transform:uppercase;font-weight:500}
+header.top h1 .m{color:var(--wm2)}
+header.top .sub{color:var(--band-sub);font-size:13px;margin-top:4px}
+.refresh{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}.refresh span{font-size:12px;color:var(--muted)}header.top .refresh span{color:var(--band-sub)}
+header.top .seg{background:var(--band-seg);border-color:var(--band-seg-line)}header.top .seg button{color:var(--band-seg-fg)}header.top .seg button[aria-pressed="true"]{background:var(--band-seg-on);color:#fff;box-shadow:none}
+.btn.small{padding:4px 10px;font-size:13px}.btn:disabled{opacity:.5;cursor:default;box-shadow:none;transform:none}
 .hold{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px}.hold.warn{border-color:var(--ok);background:var(--ok-bg)}
 .link{all:unset;color:var(--accent);cursor:pointer;font-weight:600}.kv span small{display:block;font:500 11px var(--body);color:var(--muted)}
 .narr{font-size:15px;line-height:1.35;margin:2px 0 10px;color:var(--fg)}.narr b{font-family:var(--display);font-weight:600}
 .notif{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 4px 14px rgba(0,0,0,.12);margin:8px 0;display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start}.notif .ic{width:34px;height:34px;border-radius:8px;background:var(--accent);color:var(--accent-fg);display:flex;align-items:center;justify-content:center;font:700 14px var(--display)}.notif .t{font:600 13px var(--body)}.notif .b{font-size:13px;color:var(--fg)}.notif .when{font-size:11px;color:var(--muted);float:right}
-.widget{width:170px;height:170px;border-radius:22px;background:linear-gradient(160deg,var(--accent),#0a3d50);color:#fff;padding:14px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 18px rgba(0,0,0,.2)}.widget .w1{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;opacity:.8}.widget .w2{font:700 40px var(--display);line-height:1}.widget .w3{font:600 16px var(--display);line-height:1.1}.widget .w4{font:500 12px var(--body);opacity:.85}
+.widget{width:170px;height:170px;border-radius:22px;background:linear-gradient(160deg,var(--accent),#0f2236);color:#fff;padding:14px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 18px rgba(0,0,0,.2)}.widget .w1{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;opacity:.8}.widget .w2{font:700 40px var(--display);line-height:1}.widget .w3{font:600 16px var(--display);line-height:1.1}.widget .w4{font:500 12px var(--body);opacity:.85}
 .strip7{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:6px 0 12px}.strip7 div{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 4px;text-align:center;min-width:0}.strip7 small{display:block;font:600 10px var(--body);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}.strip7 b{display:block;font:700 16px var(--display);line-height:1.1}.strip7 span{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ticks{display:flex;justify-content:space-between;font:500 10px var(--body);color:var(--muted);margin:-2px 2px 4px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.dayspick{display:flex;gap:4px}.dayspick button{flex:1;border:1px solid var(--line);background:var(--surface2);color:var(--muted);font:600 12px var(--body);padding:6px 0;border-radius:6px;cursor:pointer}.dayspick button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:transparent}
 .seg{display:inline-flex;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px}
 .seg button{border:0;background:transparent;color:var(--muted);font:600 13px var(--body);padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.seg button:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg button[aria-pressed="true"]{background:var(--sel);color:var(--sel-fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg button:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .days{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
-.days button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:8px 12px;cursor:pointer;font-family:var(--display);font-size:15px;font-weight:600;line-height:1.1;text-align:left;min-width:84px}
+.days button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:8px 12px;cursor:pointer;font-family:var(--brand);font-size:14px;font-weight:600;line-height:1.1;text-align:left;min-width:84px}
 .days button small{display:block;font:500 11px var(--body);color:var(--muted);margin-top:2px}
-.days button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.hero{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:4px 0 14px;display:flex;align-items:stretch;overflow:hidden}
+.days button[aria-pressed="true"]{background:var(--sel);color:var(--sel-fg);border-color:var(--sel);box-shadow:none}
+.days button[aria-pressed="true"] small{color:var(--sel-sub)}
+.hero{background:var(--surface);border:1px solid transparent;border-radius:14px;box-shadow:var(--card-shadow);margin:4px 0 14px;display:flex;align-items:stretch;overflow:hidden}
 .hero .hpic{flex:0 0 132px;position:relative;background:var(--surface2)}.hero .hpic img{width:100%;height:100%;object-fit:cover;display:block;min-height:96px}
 .hero .hbody{display:flex;gap:14px;align-items:center;padding:12px 14px;min-width:0;flex:1}
 @media (max-width:480px){.hero .hpic{flex-basis:104px}}
-.hero .big{font-family:var(--display);font-size:40px;font-weight:700;line-height:1;min-width:58px;text-align:center;font-variant-numeric:tabular-nums}
+.hero .big{font-family:var(--brand);font-size:38px;font-weight:700;line-height:1;min-width:58px;flex:0 0 auto;letter-spacing:-.03em;text-align:center;font-variant-numeric:tabular-nums}
 .hero .lbl{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .hero .name{font-family:var(--display);font-size:20px;font-weight:600;line-height:1.15}
 .hero .meta{color:var(--muted);font-size:14px}
@@ -71,7 +83,7 @@ header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
 .radius input{flex:1;min-width:0;accent-color:var(--accent)}
 .radius output{font:500 13px var(--mono);min-width:5ch;text-align:right}
 .list{display:flex;flex-direction:column;gap:8px}
-.row{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.row{background:var(--surface);border:1px solid transparent;border-radius:14px;box-shadow:var(--card-shadow);overflow:hidden}
 .row>button.head{all:unset;display:grid;grid-template-columns:112px 1fr auto;gap:12px;align-items:stretch;width:100%;min-height:76px;padding:0 12px 0 0;cursor:pointer;box-sizing:border-box}
 .row>button.head>.body{min-width:0;display:flex;flex-direction:column;justify-content:center;padding:10px 0}   /* the chip row keeps clearance from the tile's bottom edge however the name or conditions wrap */
 .row>button.head>.drive{align-self:center}
@@ -81,8 +93,8 @@ header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
 .pic.nophoto svg,.hpic.nophoto svg{width:40%;height:40%;color:var(--muted);opacity:.7}
 .pic.nophoto .score{left:6px;bottom:6px}
 .pic .score{position:absolute;left:6px;bottom:6px;height:auto;padding:3px 7px;font-size:17px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.35)}
-.row>button.head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.score{font-family:var(--display);font-size:28px;font-weight:700;line-height:1;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.row>button.head:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.score{font-family:var(--brand);font-size:28px;font-weight:700;line-height:1;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .score.good{background:var(--good-bg);color:var(--good)}.score.ok{background:var(--ok-bg);color:var(--ok)}.score.poor{background:var(--poor-bg);color:var(--poor)}.score.gate{background:var(--gate-bg);color:var(--gate)}
 .row .name{font-family:var(--display);font-size:18px;font-weight:600;line-height:1.1}
 .row .name span{font:500 12px var(--body);color:var(--muted);margin-left:6px}
@@ -102,8 +114,9 @@ header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
 .strip{width:100%;height:auto;display:block}
 .legend{display:flex;align-items:center;gap:6px;font:500 13px var(--body);color:var(--muted);margin:-4px 0 0}.legend svg{width:18px;height:11px;display:block;overflow:visible}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 12px;border-radius:8px;font:600 14px var(--body);cursor:pointer;text-decoration:none}
-.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;background:var(--btn);color:var(--btn-fg);padding:8px 14px;border-radius:999px;font:600 13px var(--brand);letter-spacing:.02em;white-space:nowrap;cursor:pointer;text-decoration:none;box-shadow:var(--btn-shadow);transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--btn-primary);color:var(--btn-primary-fg);border-color:transparent}
 .empty{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted)}
 .beyond{margin-top:14px;color:var(--muted);font-size:14px}
 .beyond button{all:unset;color:var(--accent);cursor:pointer;font-weight:600}
@@ -112,7 +125,8 @@ header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
 .away .lbl{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .away .actions{margin-top:8px}
 .row.pending .head{cursor:default;opacity:.8}.row.pending .wind{color:var(--muted)}
-.dock{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:8px;justify-content:center;z-index:5}
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--band);border-top:1px solid var(--band);padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:8px;justify-content:center;z-index:5}
+.dock .btn{background:var(--dock-btn);color:var(--dock-btn-fg);box-shadow:none;font-size:12px;padding:8px 11px;letter-spacing:0}
 .sheet{position:fixed;inset:0;background:rgba(10,16,20,.45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
 .sheet>div{background:var(--surface);color:var(--fg);width:100%;max-width:640px;max-height:85vh;overflow:auto;border-radius:14px 14px 0 0;padding-block:14px calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .sheet h2{font-size:22px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
@@ -132,7 +146,7 @@ header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
 .kites button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:transparent}
 .how p{font-size:14px;margin:0 0 8px}
 .how ol{padding-left:18px;margin:0 0 8px;font-size:14px}
-@media (max-width:480px){.row>button.head{grid-template-columns:96px 1fr auto;gap:8px;min-height:72px}.pic{width:96px;min-height:72px}.pic .score{font-size:15px}.row .name{font-size:16px}.drive{font-size:16px}.hero .big{font-size:34px}}
+@media (max-width:480px){.row>button.head{grid-template-columns:96px 1fr auto;gap:8px;min-height:72px}.pic{width:96px;min-height:72px}.pic .score{font-size:15px}.row .name{font-size:16px}.drive{font-size:16px}.hero .big{font-size:28px}}
 @media (prefers-reduced-motion:no-preference){.detail{animation:fade .18s ease-out}@keyframes fade{from{opacity:.4}}}
 </style>
 </head>
@@ -140,7 +154,7 @@ header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>Windward Mark</h1>
+      <h1>Windward <span class="m">Mark</span></h1>
       <div class="sub" id="sub">Loading forecast…</div>
       <div class="refresh"><button class="btn small" id="refreshBtn" hidden>Refresh now</button><span id="refreshNote" hidden></span></div>
     </div>
@@ -158,13 +172,12 @@ header.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
   <div class="controls">
     <div class="seg" role="group" aria-label="Riding style">
-      <button data-style="freeride" aria-pressed="true">Freeride</button>
+      <button data-style="foil" aria-pressed="true">Foil</button>
+      <button data-style="freeride" aria-pressed="false">Freeride</button>
       <button data-style="wave" aria-pressed="false">Wave</button>
-      <button data-style="foil" aria-pressed="false">Foil</button>
     </div>
     <div class="seg" role="group" aria-label="Sort">
-      <button data-sort="score" aria-pressed="true">Today</button>
-      <button data-sort="tomorrow" aria-pressed="false" hidden>Tomorrow</button>
+      <button data-sort="score" aria-pressed="true">Score</button>
       <button data-sort="distance" aria-pressed="false">Distance</button>
     </div>
     <div class="radius">
@@ -222,8 +235,9 @@ const DEFAULT_COMFORT={minWind:12, maxWind:32, maxGust:34, maxSurf:9, minHours:3
 const DEFAULT_ALERTS={minScore:8, maxDrive:180, days:[0,1,2,3,4,5,6], hour:19, lead:3, cap:1, confidence:true, sameDay:true, quietFrom:21, quietTo:7, email:true, blowing:true};   // blowing: the "Blowing now" station alert (SPEC §8)
 const ALERT_DAYS=5;   // alerts only ever cover the first five forecast days; days 6–7 are a trend (alerts/lib.mjs applies the same cap)
 const TREND_FROM=5;   // lead days 5 and 6 (the 6th and 7th forecast day) are labelled "trend": the models rarely agree that far out
-let settings = {home:"LO", style:"freeride", weightLb:185, kites:[7,9,12,14], radius:90, weights:{...DEFAULT_WEIGHTS}, custom:{name:"San Francisco (downtown)",lat:37.7749,lon:-122.4194}, check:null, comfort:{...DEFAULT_COMFORT}, overrides:{}, alerts:{...DEFAULT_ALERTS}, sort:"score", kept:[], photos:{}, units:"kn", updatedAt:null, v:2};   // units: "kn" | "mph", display only; every number inside stays in knots
-try{ const s=JSON.parse(localStorage.getItem("goc.settings")||"null"); if(s) settings={...settings,...s, weights:{...DEFAULT_WEIGHTS,...(s.weights||{})}, comfort:{...DEFAULT_COMFORT,...(s.comfort||{})}, alerts:{...DEFAULT_ALERTS,...(s.alerts||{})}, overrides:s.overrides||{}, kept:Array.isArray(s.kept)?s.kept:[], photos:(s.photos&&typeof s.photos==="object")?s.photos:{}, units:s.units==="mph"?"mph":"kn"}; }catch(e){}
+let settings = {home:"LO", style:"foil", weightLb:185, kites:[7,9,12,14], radius:90, weights:{...DEFAULT_WEIGHTS}, custom:{name:"San Francisco (downtown)",lat:37.7749,lon:-122.4194}, check:null, comfort:{...DEFAULT_COMFORT}, overrides:{}, alerts:{...DEFAULT_ALERTS}, sort:"score", kept:[], photos:{}, units:"kn", updatedAt:null, v:2};   // units: "kn" | "mph", display only; every number inside stays in knots
+try{ const s=JSON.parse(localStorage.getItem("goc.settings")||"null"); if(s) settings={...settings,...s, weights:{...DEFAULT_WEIGHTS,...(s.weights||{})}, comfort:{...DEFAULT_COMFORT,...(s.comfort||{})}, alerts:{...DEFAULT_ALERTS,...(s.alerts||{})}, overrides:s.overrides||{}, kept:Array.isArray(s.kept)?s.kept:[], photos:(s.photos&&typeof s.photos==="object")?s.photos:{}, units:s.units==="mph"?"mph":"kn", sort:sortKey(s.sort)}; }catch(e){}
+function sortKey(k){ return k==="distance"? "distance" : "score"; }   // "score" | "distance"; the next-day sort ("tomorrow", until Oct 2026) and anything unknown migrate to "score"
 function allSpots(){ const extra=settings.kept.concat(awaySpots()); return extra.length? SPOTS.concat(extra) : SPOTS; }   // awaySpots() is [] unless away from home (Phase 4)
 function limitsFor(spotId){ return {...settings.comfort, ...(settings.overrides[spotId]||{})}; }
 const CAMS={oceanbeach:{name:"Ocean Beach surf cam",url:"https://www.surf-forecast.com/breaks/Ocean-Beach/webcams/latest",mi:0.4},
@@ -487,12 +501,10 @@ function todayKey(){ return new Date().toLocaleDateString("en-CA",{timeZone:"Ame
 function isToday(d){ return d===todayKey(); }
 function dayShort(d){ return new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",timeZone:"America/Los_Angeles"}); }   // "Fri"
 function dayLong(d){ return new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",timeZone:"America/Los_Angeles"}); }     // "Friday"
-function nextDay(){ const i=dayKeys.indexOf(selDay); return i>=0? dayKeys[i+1]||null : null; }                                          // the forecast day after the selected one, null on the last day
 function leadDays(d){ return Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(todayKey()+"T12:00:00Z"))/864e5); }                     // 0 today, 1 tomorrow …
 function isTrend(d){ return leadDays(d)>=TREND_FROM; }                                                                                        // the 6th and 7th forecast day
 function leadText(n){ return n<=0? null : n===1? "Tomorrow: hour-by-hour timing is usually good." : n<=3? "2–3 days out: expect the window to shift an hour or two." : n<TREND_FROM? "4 days out: trust the pattern, not the hour." : "5–6 days out: a trend, not a forecast. The models rarely agree this far ahead; check again closer to the day."; }
 function hm(t){ const M=Math.round(t*60), h=Math.floor(M/60)%24, m=M%60; return `${((h+11)%12)+1}:${String(m).padStart(2,"0")}${h<12?"a":"p"}`; }   // decimal hour -> "3:12p" (sunrise, high/low tide)
-function effSort(){ return settings.sort==="tomorrow"&&!nextDay()? "score" : settings.sort; }   // the stored key stays "tomorrow"; on the last forecast day it behaves as the day sort
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function mapPointUrl(lat,lon){ return `https://www.google.com/maps/search/?api=1&query=${lat}%2C${lon}`; }   // a point, not directions: "Check on map" in the Add-a-spot sheet
 function mapsUrl(spot){ const h=homeInfo(); return `https://www.google.com/maps/dir/?api=1&origin=${h.lat},${h.lon}&destination=${spot.plat},${spot.plon}&travelmode=driving`; }
@@ -510,22 +522,34 @@ function bestPerDay(homeKey, maxDrive, style){
   }
   settings.home=saveHome; return out;
 }
-function narrative(){
-  const bp=bestPerDay(settings.home, Math.max(settings.radius,180), settings.style);
-  const good=[], ok=[];
-  for(const d of dayKeys){ const b=bp[d]; if(!b) continue; const lbl=dayLabel(d)[0]; if(b.r.score>=6) good.push({d,lbl,b}); else if(b.r.score>=4) ok.push({d,lbl,b}); }
-  const reg=b=> b.spot.region==="Delta"?"the Delta": b.spot.region==="Ocean"||b.spot.region==="Monterey Bay"?"the coast": b.spot.region==="Tahoe"?"Tahoe":"the Bay";
+function shortName(name){ return String(name).split(" /")[0].split(" (")[0]; }   // "Sherman Island (County Park)" -> "Sherman Island"
+function regionWord(spot){ return spot.region==="Delta"?"the Delta": spot.region==="Ocean"||spot.region==="Monterey Bay"?"the coast": spot.region==="Tahoe"?"Tahoe":"the Bay"; }
+function narrative(){ return synopsis(dayKeys, bestPerDay(settings.home, Math.max(settings.radius,180), settings.style), d=>dayLabel(d)[0], dayShort); }
+function synopsis(days, bp, lbl, short){
+  // The line above the best bet: places and days only. Scores, wind, directions, windows and drive times live on the tiles.
+  // days: forecast day keys in order; bp: {day: {spot, r}} the best spot per day; lbl(d): "Today" / "Tomorrow" / "Fri"; short(d): "Fri".
+  // Good is 6+, marginal 4–6, dead under 4. Consecutive good days on the same best spot read as one phrase; at most three phrases follow the lead.
+  const sc=d=> bp[d]? bp[d].r.score : -1;
+  const good=days.filter(d=>sc(d)>=6), ok=days.filter(d=>sc(d)>=4&&sc(d)<6), dead=days.filter(d=>sc(d)<4);
   if(!good.length&&!ok.length){
-    const why=mode(dayKeys.map(d=>bp[d]&&bp[d].r.reason).filter(Boolean));
-    return `<b>Quiet stretch.</b> Nothing within ${mins(Math.max(settings.radius,180))} scores above 4 through ${dayLabel(dayKeys[dayKeys.length-1])[0]}${why?` — mostly "${why.toLowerCase()}"`:""}.`;
+    const why=mode(days.map(d=>bp[d]&&bp[d].r.reason).filter(Boolean));
+    return `<b>Quiet stretch.</b> Nothing worth the drive through ${lbl(days[days.length-1])}${why?` — mostly "${esc(why.toLowerCase())}"`:""}.`;
   }
-  const parts=[];
-  if(good.length){ const g=good[0]; parts.push(`<b>${g.lbl} is the day:</b> ${esc(g.b.spot.name)} on ${reg(g.b)} at ${g.b.r.score.toFixed(1)} (${wg(g.b.r.spd,g.b.r.gst)} ${compass(g.b.r.dir)}, ${hhmm(g.b.r.from)}–${hhmm(g.b.r.to)}, ${mins(g.b.drive)})`);
-    if(good.length>1) parts.push(`${good.slice(1).map(x=>`${x.lbl} ${esc(x.b.spot.name)} ${x.b.r.score.toFixed(1)}`).join(", ")} also work`); }
-  if(ok.length) parts.push(`${ok.map(x=>x.lbl).join(" and ")} ${ok.length>1?"are":"is"} marginal`);
-  const dead=dayKeys.filter(d=>!bp[d]||bp[d].r.score<4).map(d=>dayLabel(d)[0]);
-  if(dead.length&&dead.length<dayKeys.length) parts.push(dead.length>2? "everything else looks dead" : `${dead.join(" and ")} ${dead.length>1?"look":"looks"} dead`);
-  return parts.join("; ")+".";
+  const runs=[];   // [{from, to, spot}] runs of consecutive good days with the same best spot
+  for(const d of good){ const last=runs[runs.length-1], prev=days[days.indexOf(d)-1];
+    if(last&&last.to===prev&&last.spot.id===bp[d].spot.id) last.to=d; else runs.push({from:d,to:d,spot:bp[d].spot}); }
+  const mid=d=>{ const l=lbl(d); return /^(Today|Tomorrow)$/.test(l)? l.toLowerCase() : l; };   // mid-sentence: "through tomorrow", "Sat and today"
+  const span=x=> x.from===x.to? lbl(x.from) : `${short(x.from)}–${short(x.to)}`;
+  const MAX=3, out=[];
+  let lead="", n=0;
+  if(runs.length){ const g=runs[0]; lead=`<b>${lbl(g.from)} is the day:</b> ${esc(shortName(g.spot.name))} on ${regionWord(g.spot)}${g.to!==g.from?`, holding through ${mid(g.to)}`:""}.`; }
+  const also=runs.slice(1), shown=also.slice(0,MAX);
+  if(shown.length){ out.push(`Also good: ${shown.map(x=>`${span(x)} ${esc(shortName(x.spot.name))}`).join(", ")}${also.length>shown.length?", and more":""}.`); n+=shown.length; }
+  const tail=[];
+  if(ok.length&&n<MAX){ tail.push(`${ok.map(mid).join(" and ")} ${ok.length>1?"are":"is"} marginal`); n++; }
+  if(dead.length&&n<MAX) tail.push(dead.length>2? "everything else looks dead" : `${dead.map(mid).join(" and ")} ${dead.length>1?"look":"looks"} dead`);
+  if(tail.length){ const t=tail.join("; "); out.push(t.charAt(0).toUpperCase()+t.slice(1)+"."); }
+  return [lead, ...out].filter(Boolean).join(" ");
 }
 function alertDigest(){
   // Simulate what the alert job would send right now under the rider's parameters.
@@ -578,14 +602,10 @@ function laterDay(){
 function dayWord(d){ const n=leadDays(d); return n===0? "today" : n===1? "tomorrow" : dayLong(d); }   // "today", "tomorrow", "Friday"
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function computeAll(){
-  const nd=nextDay();   // rt = the day after the selected day (the second sort button); null on the last forecast day
   const rows=allSpots().map(spot=>{ const f=forecasts[spot.id]; if(!f) return null; const r=dayScore(spot,f,selDay,settings.style); if(!r) return null;
-    const rt= nd? dayScore(spot,f,nd,settings.style):null; return {spot,f:applyBias(spot,f),r,rt,drive:driveMins(spot)??999}; }).filter(Boolean);   // f as scored: bias-corrected where bias.json says so
-  const byScore=(a,b)=> b.r.score-a.r.score || a.drive-b.drive;
-  const sort=effSort();
-  if(sort==="distance") return rows.sort((a,b)=> a.drive-b.drive || b.r.score-a.r.score);
-  if(sort==="tomorrow") return rows.sort((a,b)=> ((b.rt?b.rt.score:b.r.score)-(a.rt?a.rt.score:a.r.score)) || a.drive-b.drive);
-  return rows.sort(byScore);
+    return {spot,f:applyBias(spot,f),r,drive:driveMins(spot)??999}; }).filter(Boolean);   // f as scored: bias-corrected where bias.json says so
+  if(settings.sort==="distance") return rows.sort((a,b)=> a.drive-b.drive || b.r.score-a.r.score);
+  return rows.sort((a,b)=> b.r.score-a.r.score || a.drive-b.drive);   // Score: the selected day's score
 }
 function render(){
   maybeDiscover();   // away from home: starts or resumes the spot search for this area (away-spots.json); no-op at home
@@ -594,11 +614,8 @@ function render(){
   document.getElementById("homeX").setAttribute("aria-pressed",settings.home==="X");
   document.getElementById("homeX").textContent = settings.home==="X" ? (settings.custom.name||"Custom").split(" (")[0] : "Elsewhere";
   document.querySelectorAll("[data-style]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.style===settings.style));
-  { const nd=nextDay(), sort=effSort();   // sort labels follow the selected day: "Mon" sorts by its score, "Tue" by the next day's; no next day on the last forecast day
-    document.querySelectorAll("[data-sort]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sort===sort));
-    const b1=document.querySelector('[data-sort="score"]'), b2=document.querySelector('[data-sort="tomorrow"]');
-    if(selDay){ b1.textContent=dayShort(selDay); b1.setAttribute("aria-label",`Sort by ${dayLong(selDay)}'s score`); }
-    b2.hidden=!nd; if(nd){ b2.textContent=dayShort(nd); b2.setAttribute("aria-label",`Sort by ${dayLong(nd)}'s score`); } }
+  document.querySelectorAll("[data-sort]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sort===settings.sort));
+  if(selDay) document.querySelector('[data-sort="score"]').setAttribute("aria-label",`Sort by ${dayLong(selDay)}'s score`);
   const rIn=document.getElementById("radius"); rIn.value=settings.radius; document.getElementById("radiusOut").textContent=mins(settings.radius);
   const days=document.getElementById("days"); days.innerHTML=dayKeys.map((d,i)=>{const [a,b]=dayLabel(d,i); return `<button data-day="${d}" aria-pressed="${d===selDay}">${a}<small>${b}</small></button>`;}).join("");
   const all=computeAll();
@@ -637,14 +654,13 @@ function dayPeak(f, r){
   return best;
 }
 function ageShort(min){ return min<60? min+" min" : min<1440? Math.round(min/60)+"h" : Math.round(min/1440)+"d"; }   // "4h" for a chip; agoText() for sentences
-function row({spot,r,rt,drive,f}){
+function row({spot,r,drive,f}){
   f=f||forecasts[spot.id];
   const c=cls(r.score,r.reason&&["Offshore","Nuking","Storms"].includes(r.reason));
   const chips=[]; if(r.reason) chips.push(`<span class="chip ${c}">${esc(r.reason)}</span>`);
   if(r.agree&&!isToday(selDay)&&r.models&&r.models.swing>=2) chips.push(`<span class="chip">${r.agree}</span>`);   // only when the spread could move the score a band or more; the detail always has it
   if(r.dis) chips.push(`<span class="chip ok">${esc(r.dis.text)}</span>`);
   else if(isToday(selDay)){ const st=latestStation(spot.id); if(st&&st.age_min>OBS_MAX_AGE) chips.push(`<span class="chip">station ${ageShort(st.age_min)} old</span>`); }   // a reading too old to score is said, not dropped
-  if(effSort()==="tomorrow"&&rt) chips.push(`<span class="chip ${cls(rt.score)}">${dayShort(nextDay())} ${rt.score.toFixed(1)}</span>`);
   const peak= r.reason==="Too light"&&f? dayPeak(f,r):null;
   const when= peak? `peak ${wn(peak.spd)} at ${hhmm(peak.hour)}` : `${hhmm(r.from)}–${hhmm(r.to)}`;
   return `<div class="row" id="row-${spot.id}"><button class="head" aria-expanded="${openSpot===spot.id}" data-open="${spot.id}">
@@ -1437,7 +1453,7 @@ async function syncFetch(method, body, path="/v1/settings"){
 function applyRemote(doc){
   // Server copy wins only when it is newer; defaults are re-merged exactly as on page load.
   const s=doc.settings||{};
-  settings={...settings,...s, weights:{...DEFAULT_WEIGHTS,...(s.weights||{})}, comfort:{...DEFAULT_COMFORT,...(s.comfort||{})}, alerts:{...DEFAULT_ALERTS,...(s.alerts||{})}, overrides:s.overrides||{}, kept:Array.isArray(s.kept)?s.kept:[], photos:(s.photos&&typeof s.photos==="object")?s.photos:(settings.photos||{}), check:s.check||settings.check, units:s.units==="mph"?"mph":"kn", updatedAt:doc.updatedAt};
+  settings={...settings,...s, weights:{...DEFAULT_WEIGHTS,...(s.weights||{})}, comfort:{...DEFAULT_COMFORT,...(s.comfort||{})}, alerts:{...DEFAULT_ALERTS,...(s.alerts||{})}, overrides:s.overrides||{}, kept:Array.isArray(s.kept)?s.kept:[], photos:(s.photos&&typeof s.photos==="object")?s.photos:(settings.photos||{}), check:s.check||settings.check, units:s.units==="mph"?"mph":"kn", sort:sortKey(s.sort), updatedAt:doc.updatedAt};
   refreshKeptDrives(); syncState.remoteUpdatedAt=doc.updatedAt; saveLocal(); syncSave();
   ensureKeptForecasts();
 }

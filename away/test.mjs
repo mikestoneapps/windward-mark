@@ -248,5 +248,40 @@ function sandbox(net = {}) {
   S.maybeDiscover(); assert(S.away.status === "idle" && S.away.key === null, "maybeDiscover at home does nothing");
 }
 
+/* ---------- the synopsis line (narrative(), home and away alike): places and days only ---------- */
+{
+  const a = html.indexOf("function shortName("), b = html.indexOf("function alertDigest(");
+  const modeFn = html.match(/function mode\(a\).*\n/)[0];
+  assert(a > 0 && b > a, "found the page's synopsis block");
+  const N = { esc: s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])) };
+  vm.createContext(N); vm.runInContext(modeFn + html.slice(a, b), N);
+  const days = ["d0", "d1", "d2", "d3", "d4", "d5", "d6"], W = ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon"];
+  const lbl = d => ["Today", "Tomorrow", ...W.slice(2)][days.indexOf(d)], short = d => W[days.indexOf(d)];
+  const SP = { sherman: { id: "sherman", name: "Sherman Island (County Park)", region: "Delta" }, crissy: { id: "crissy", name: "Crissy Field", region: "SF Bay" },
+    thirdave: { id: "thirdave", name: "Third Avenue (Baywinds Park)", region: "Peninsula" }, ob: { id: "oceanbeach", name: "Ocean Beach (north end)", region: "Ocean" } };
+  // per day: [spot key, score, reason]; the r carries the numbers the old line used to print, so a leak would show
+  const bp = plan => Object.fromEntries(days.map((d, i) => { const p = plan[i]; return [d, p ? { spot: SP[p[0]], r: { score: p[1], reason: p[2] || "Too light", spd: 18.4, gst: 23.6, dir: 290, from: 13, to: 16 }, drive: 75 } : null]; }));
+  const say = plan => N.synopsis(days, bp(plan), lbl, short);
+  const clean = (t, m) => assert(!/\d+\s*(kn|mph)\b/.test(t) && !/\d\.\d/.test(t) && !/\b\d{1,2}(:\d\d)?\s*[ap]m?\b/i.test(t) && !/\d+h\d\d|\d+ min/.test(t) && !/\b(NW|SW|NE|SE|N|S|E|W)\b/.test(t) && !/\(/.test(t), m + ": no wind, score, time, drive or direction: " + t);
+  const plain = t => t.replace(/<[^>]+>/g, "");
+  let t = say([["sherman", 8.1], ["crissy", 2], ["crissy", 1], ["crissy", 0.5], ["crissy", 1], ["crissy", 0], ["crissy", 0]]);
+  assert(plain(t) === "Today is the day: Sherman Island on the Delta. Everything else looks dead." && t.startsWith("<b>Today is the day:</b> "), "one good day: bold lead, short spot name, region: " + t); clean(t, "one good day");
+  t = say([["crissy", 1], ["sherman", 7], ["sherman", 9], ["sherman", 6.5], ["crissy", 2], ["thirdave", 7.2], ["crissy", 3]]);
+  assert(plain(t) === "Tomorrow is the day: Sherman Island on the Delta, holding through Fri. Also good: Sun Third Avenue. Everything else looks dead.", "a run of the same spot is one phrase, not the name per day: " + t);
+  assert((plain(t).match(/Sherman Island/g) || []).length === 1, "the run names its spot once"); clean(t, "run");
+  t = say([["crissy", 3], ["thirdave", 5], ["crissy", 7], ["crissy", 8], ["crissy", 7.5], ["ob", 6.2], ["sherman", 4.4]]);
+  assert(plain(t) === "Thu is the day: Crissy Field on the Bay, holding through Sat. Also good: Sun Ocean Beach. Tomorrow and Mon are marginal; today looks dead.", "mixed good / marginal / dead: " + t); clean(t, "mixed");
+  t = say([["crissy", 6], ["sherman", 7], ["crissy", 6.1], ["thirdave", 6.3], ["ob", 6.8], ["sherman", 7.7], ["crissy", 4.2]]);
+  const after = plain(t).replace(/^[^.]*\.\s*/, "");
+  assert(/^Also good: Tomorrow Sherman Island, Thu Crissy Field, Fri Third Avenue, and more\.$/.test(after), "at most three phrases after the lead (two lines on a phone): " + t); clean(t, "busy week");
+  t = say([["crissy", 6.5], ["crissy", 6.6], ["thirdave", 7], ["crissy", 7], ["crissy", 7], ["crissy", 2], ["crissy", 1]]);
+  assert(/Also good: Thu Third Avenue, Fri–Sat Crissy Field\./.test(plain(t)) && /holding through tomorrow\./.test(plain(t)), "a later run reads as a day range; a run ending tomorrow says 'through tomorrow': " + t); clean(t, "ranges");
+  t = say([["crissy", 2, "Too light"], ["sherman", 3, "Too light"], ["crissy", 1, "Offshore"], ["crissy", 0, "Too light"], null, ["crissy", 2], ["crissy", 3.9]]);
+  assert(plain(t) === 'Quiet stretch. Nothing worth the drive through Mon — mostly "too light".' && t.startsWith("<b>Quiet stretch.</b>"), "no good days: the quiet-stretch line, no score figure or radius: " + t); clean(t, "quiet");
+  t = say([["crissy", 4.5], ["crissy", 2], ["crissy", 1], ["crissy", 0], ["crissy", 1], ["crissy", 0], ["crissy", 0]]);
+  assert(plain(t) === "Today is marginal; everything else looks dead.", "marginal only: as before: " + t); clean(t, "marginal");
+  assert(N.shortName("Rio Vista (Windy Cove / Sandy Beach)") === "Rio Vista" && N.shortName("Folsom Lake - Granite Bay") === "Folsom Lake - Granite Bay", "short names drop the parenthetical only");
+}
+
 console.log(fails ? `\n${fails} away test(s) FAILED` : "\nall away tests passed");
 process.exit(fails ? 1 : 0);
