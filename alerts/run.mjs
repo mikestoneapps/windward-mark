@@ -49,6 +49,8 @@ for (const rider of riders) {
   const tag = rider.id.slice(0, 8);
   let res;
   try { res = evaluate(rider, forecasts, now, recent); } catch (e) { console.error(`rider ${tag}: evaluation failed:`, e); failures++; continue; }
+  const host = e => { try { return new URL(e).host; } catch (_) { return "?"; } };
+  console.log(`rider ${tag}: ${(rider.subs || []).length} device(s) [${(rider.subs || []).map(x => host(x.endpoint)).join(", ")}], test requested ${(rider.settings.alerts || {}).testRequested || "never"}, last test sent ${(rider.state || {}).testSent || "never"}`);
   const test = testDue(rider, now);   // "Send test notification": answered on the next run whatever the digest decides, then marked served
   if (!res.notification && !test) { console.log(`rider ${tag}: ${res.why}`); continue; }
   if (res.notification) console.log(`rider ${tag}: ${res.notification.body}`);
@@ -59,7 +61,7 @@ for (const rider of riders) {
   // marker) is only advanced when at least one device got the push, so a push outage is retried next hour instead of silently swallowing it.
   const pushed = [];
   let state = null;
-  const logPushed = d => { for (const p of d.pushed) { if (GONE.has(p.status)) console.log(`rider ${tag}: subscription gone (${p.status}), asking the sync service to drop it`); else if (p.status >= 400 || !p.status) console.error(`rider ${tag}: push failed (${p.status || p.error})`); } pushed.push(...d.pushed); failures += d.failures; };
+  const logPushed = d => { for (const p of d.pushed) { console.log(`rider ${tag}: push to ${host(p.endpoint)} -> ${p.status || p.error}`); if (GONE.has(p.status)) console.log(`rider ${tag}: subscription gone (${p.status}), asking the sync service to drop it`); else if (p.status >= 400 || !p.status) console.error(`rider ${tag}: push failed (${p.status || p.error})`); } pushed.push(...d.pushed); failures += d.failures; };
   if (res.notification) {
     const d = await deliver(rider.subs, res.notification, send);
     logPushed(d);
