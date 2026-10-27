@@ -99,6 +99,37 @@ class Accuracy(unittest.TestCase):
         self.assertEqual(L["crissy"]["time"], "2026-10-19T15:00", "a reading at :35 belongs to the next hour")
         self.assertEqual(L["crissy"]["fc"]["bm"], 12.0, "third point of the answer")
 
+    def test_home_station_rows_log_beside_the_official_one(self):
+        d = obs_doc()
+        t = ISO(NOW - dt.timedelta(minutes=12))
+        d["obs"]["alameda"] = [{"id": "CW1234", "name": "Home station (CWOP CW1234)", "kind": "cwop", "class": "home", "dist_mi": 0.4, "time": t, "spd": 14.0, "gst": 17.0, "dir": 280, "trusted": False},
+                               {"id": "AAMC1", "name": "ALAMEDA", "kind": "coops", "class": "reliable", "dist_mi": 1.8, "time": t, "spd": 12.3, "gst": 15.1, "dir": 290},
+                               {"id": "70:ee:50:00:00:01", "name": "Home station (Netatmo) · Alameda", "kind": "netatmo", "class": "home", "dist_mi": 2.5, "time": t, "spd": 9.0, "gst": None, "dir": None, "trusted": True},
+                               {"id": "OLD", "name": "x", "kind": "cwop", "class": "home", "dist_mi": 3.0, "time": ISO(NOW - dt.timedelta(hours=3)), "spd": 9.0}]
+        d["obs"]["crissy"] = [{"id": "CW9", "name": "Home station (CWOP CW9)", "kind": "cwop", "class": "home", "dist_mi": 0.9, "time": t, "spd": 20.0}]   # a spot with only a home reading
+        with open(self.obs, "w") as fh:
+            json.dump(d, fh)
+        calls = []
+
+        def get(url):
+            calls.append(url)
+            return fake_answer(3)
+        self.assertEqual(A.run(self.obs, self.out, get=get, now=NOW), 5, "alameda: official + two fresh home rows (the 3-hour-old one skipped); oceanbeach; crissy's home row")
+        q = urllib.parse.parse_qs(urllib.parse.urlparse(calls[0]).query)
+        self.assertEqual(q["latitude"], ["37.758,37.774,37.8057"], "each spot once in the forecast call however many lines it gets")
+        L = self.lines()
+        al = {ln["station"]: ln for ln in L if ln["spot"] == "alameda"}
+        self.assertEqual({k: v["class"] for k, v in al.items()}, {"AAMC1": "reliable", "CW1234": "home", "70:ee:50:00:00:01": "home"})
+        self.assertEqual((al["AAMC1"]["obs"], al["CW1234"]["obs"], al["CW1234"]["dist_mi"], al["CW1234"]["fc"]["bm"]), (12.3, 14.0, 0.4, 10.0), "the official line is the one the bias has always used; home lines carry the same forecast columns")
+        self.assertEqual((al["CW1234"]["median"], al["70:ee:50:00:00:01"]["median"]), (13.0, 13.0))
+        self.assertNotIn("trusted", al["CW1234"], "trust is not frozen into the log: home_trust.py re-evaluates it hourly")
+        cr = [ln for ln in L if ln["spot"] == "crissy"]
+        self.assertEqual([(ln["station"], ln["class"]) for ln in cr], [("CW9", "home")], "a spot with only a home reading logs it (home class) and no official line")
+        self.assertEqual([ln for ln in L if ln["spot"] == "oceanbeach"][0]["class"], "reliable", "an untagged row is an official one")
+        self.assertEqual(A.run(self.obs, self.out, get=get, now=NOW + dt.timedelta(minutes=30)), 0, "the same readings next run add nothing (home lines dedupe by station and hour too)")
+        self.assertIsNone(A.freshest(d["obs"]["crissy"], NOW), "freshest() is the official pick: never a home row")
+        self.assertEqual([o["id"] for o in A.fresh_home(d["obs"]["alameda"], NOW)], ["CW1234", "70:ee:50:00:00:01"])
+
     def test_no_duplicates_and_cap(self):
         old = {"spot": "alameda", "time": "2026-07-01T10:00", "run": ISO(NOW - dt.timedelta(days=100)), "station": "AAMC1", "obs": 1}
         recent = {"spot": "alameda", "time": "2026-10-10T10:00", "run": ISO(NOW - dt.timedelta(days=9)), "station": "AAMC1", "obs": 2}

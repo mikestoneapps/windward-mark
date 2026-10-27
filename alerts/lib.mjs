@@ -21,6 +21,9 @@ const RESCORE = 2;        // a repeat alert needs the score to move this much
 const SAMEDAY_UNTIL = 12; // a same-day ("this morning") alert is only useful before noon
 export const BLOW_RUNS = 2;          // "Blowing now" needs the station inside the band on this many consecutive hourly runs
 export const OBS_MAX_AGE = 120;      // minutes; a station reading older than this is never used (the page's rule for scoring too)
+export const HOME_GAP_MI = 8;        // home_trust.py's rule, restated: a TRUSTED home weather station stands in for "Blowing now" only when no
+                                     // official station reads within this of the spot. obs_recent.py applies it when it writes obs-recent.json
+                                     // (home_trust.pick()); the check below only refuses a home row that is not marked trusted.
 const RUN_GAP = [30, 150];           // minutes between two runs for them to count as consecutive hourly runs (the cron is hourly; a skipped hour breaks the streak)
 const RECENT_MAX_AGE = 90;           // minutes; an obs-recent.json whose latest run is older than this is stale (the observations job did not run) and never fires
 
@@ -95,8 +98,9 @@ export function dayKeysOf(forecasts) {
 }
 
 /* ---------- "Blowing now": the station, not the forecast ---------- */
-// recent = obs-recent.json ({runs: [{at, obs: {spotId: {id, name, dist_mi, time, spd, gst, dir}}}], oldest first; obs_recent.py keeps the
-// nearest station with a reading under 2 h old per spot per run). A spot qualifies when, on each of the last BLOW_RUNS runs, that
+// recent = obs-recent.json ({runs: [{at, obs: {spotId: {id, name, dist_mi, time, spd, gst, dir, class?, trusted?}}}], oldest first; obs_recent.py keeps
+// the nearest official station with a reading under 2 h old per spot per run, or — beyond HOME_GAP_MI of any — a trusted home station's,
+// tagged class "home", trusted true; an untrusted home row never fires, whatever the file says). A spot qualifies when, on each of the last BLOW_RUNS runs, that
 // reading was inside the rider's wind range (comfort minWind..maxWind, per-spot override), under the gust limit, from a best or work
 // sector, and the two readings are distinct (a station that has not updated between runs is one reading, not two). The latest reading
 // must still be under OBS_MAX_AGE, in daylight when the forecast carries the day's sunrise/sunset (nobody rides a 6am reading in October),
@@ -115,7 +119,7 @@ export function blowingNow(spots, recent, now, A, limitsOf, forecasts) {
     // no sectors to check against, so any direction counts — even a station without a direction vane.
     const any = !(spot.dir.best || []).length && !(spot.dir.off || []).length;
     const L = limitsOf(spot.id);
-    const inBand = o => o && typeof o.spd === "number" && o.spd >= L.minWind && o.spd <= L.maxWind && (o.gst == null || o.gst <= L.maxGust) && (any || (o.dir != null && scoring.dirScore(o.dir, spot.dir).v >= 0.75));
+    const inBand = o => o && typeof o.spd === "number" && !(o.class === "home" && o.trusted !== true) && o.spd >= L.minWind && o.spd <= L.maxWind && (o.gst == null || o.gst <= L.maxGust) && (any || (o.dir != null && scoring.dirScore(o.dir, spot.dir).v >= 0.75));
     const rs = runs.map(r => r.obs[spot.id]);
     if (!rs.every(inBand)) continue;
     if (new Set(rs.map(o => o.time)).size < rs.length) continue;   // the same reading seen twice
@@ -130,7 +134,8 @@ export function blowingNow(spots, recent, now, A, limitsOf, forecasts) {
   return out.sort((a, b) => a.drive - b.drive || b.o.spd - a.o.spd);
 }
 export function blowingText(hits, units) {
-  return "Blowing now: " + hits.slice(0, 3).map(x => `${x.spot.name} ${windText(x.o.spd, x.o.gst, units)}${x.o.dir != null ? " " + scoring.compass(x.o.dir) : ""} at the ${x.o.name || x.o.id} station — ${mins(x.drive)} from ${x.home}`).join("; ") + ".";
+  const where = o => o.class === "home" ? `at ${o.name || o.id}, a trusted home station` : `at the ${o.name || o.id} station`;
+  return "Blowing now: " + hits.slice(0, 3).map(x => `${x.spot.name} ${windText(x.o.spd, x.o.gst, units)}${x.o.dir != null ? " " + scoring.compass(x.o.dir) : ""} ${where(x.o)} — ${mins(x.drive)} from ${x.home}`).join("; ") + ".";
 }
 
 /* ---------- "Send test notification" (Rider sheet -> Alerts) ---------- */

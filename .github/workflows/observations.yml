@@ -6,11 +6,16 @@ name: Station observations
 #                  fetch the latest readings for every spot's stations (stations.json + rider-stations.json: NWS
 #                  airports, CO-OPS, NDBC buoys, RAWS/IEM, CeNCOOS ERDDAP, CDEC, Caltrans, JPL Tahoe, CDIP
 #                  wave-only) into obs.json
-#                  and commit it so the page can read the no-CORS feeds same-origin. Then accuracy.py writes one line per spot with a
-#                  fresh reading to accuracy.jsonl: observed knots beside each forecast model's number for that hour
-#                  (90-day window); obs_recent.py keeps the last few runs' nearest readings in obs-recent.json (for the
-#                  "Blowing now" alert); bias.py turns the log into per-spot, per-model bias in bias.json (Phase 5).
-#                  All four files are committed together.
+#                  and commit it so the page can read the no-CORS feeds same-origin; then home_stations.py listens to
+#                  CWOP over APRS-IS (one socket) and asks Netatmo's public map (one call per area; silent without its
+#                  secrets), documents every station heard in home-stations.json and adds the nearest home stations to
+#                  each spot's rows as class:"home". Then accuracy.py writes one line per spot with a
+#                  fresh reading to accuracy.jsonl (plus one per fresh home station): observed knots beside each forecast
+#                  model's number for that hour (90-day window); home_trust.py re-scores every home station's 30-day
+#                  record into home-trust.json; obs_recent.py keeps the last few runs' nearest readings in obs-recent.json
+#                  (for the "Blowing now" alert; a trusted home station only beyond HOME_GAP_MI of any official one);
+#                  bias.py turns the log into per-spot, per-model bias in bias.json (Phase 5, same rule for home lines).
+#                  All the data files are committed together.
 #   alerts       — runs after observations (whatever its outcome) on the branch tip, so it sees the files just
 #                  committed: scores every spot for every rider who enabled notifications (alerts/run.mjs, scoring.js)
 #                  and sends one push digest per rider, forecast digest and "Blowing now" alike. Skips itself until the
@@ -52,9 +57,23 @@ jobs:
       - name: Fetch observations
         run: python3 obs_standalone.py obs.json
 
+      - name: Home weather stations (CWOP over APRS-IS, Netatmo public map)
+        # Adds class:"home" rows to obs.json and grows home-stations.json. Exits 0 on any error; Netatmo is skipped
+        # until its three secrets exist (docs/SETUP-NETATMO.md); the SYNC secrets let it keep the rotated refresh token.
+        env:
+          NETATMO_CLIENT_ID: ${{ secrets.NETATMO_CLIENT_ID }}
+          NETATMO_CLIENT_SECRET: ${{ secrets.NETATMO_CLIENT_SECRET }}
+          NETATMO_REFRESH_TOKEN: ${{ secrets.NETATMO_REFRESH_TOKEN }}
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_ADMIN_TOKEN: ${{ secrets.SYNC_ADMIN_TOKEN }}
+        run: python3 home_stations.py obs.json
+
       - name: Log forecast accuracy
         # Never fails the job (exits 0 on any error) so a forecast outage can't hold up obs.json.
         run: python3 accuracy.py obs.json accuracy.jsonl
+
+      - name: Re-score home-station trust (30-day window)
+        run: python3 home_trust.py accuracy.jsonl home-trust.json
 
       - name: Keep the last few runs' readings (for "Blowing now")
         run: python3 obs_recent.py obs.json obs-recent.json
@@ -66,9 +85,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add obs.json accuracy.jsonl obs-recent.json bias.json rider-stations.json
+          git add obs.json accuracy.jsonl obs-recent.json bias.json rider-stations.json home-stations.json home-trust.json
           if git diff --cached --quiet; then
-            echo "obs.json, accuracy.jsonl, obs-recent.json, bias.json and rider-stations.json unchanged"
+            echo "obs.json, accuracy.jsonl, obs-recent.json, bias.json, rider-stations.json, home-stations.json and home-trust.json unchanged"
             exit 0
           fi
           git commit -m "Update station observations"
@@ -91,7 +110,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}   # the branch tip, which carries the obs-recent.json and bias.json the observations job just pushed
+          ref: ${{ github.ref_name }}   # the branch tip, which carries the obs-recent.json, bias.json and home-trust.json the observations job just pushed
       - uses: actions/setup-node@v4
         with:
           node-version: "22"

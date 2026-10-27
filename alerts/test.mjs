@@ -4,7 +4,7 @@ import vm from "node:vm";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { scoring, SPOTS, evaluate, testDue, DEFAULT_ALERTS, inQuiet, laNow, fetchForecasts, MODEL_IDS, DAYS, ALERT_DAYS, deliver, GONE, sunOf, blowingNow, blowingText, laHour, windText, BLOW_RUNS, OBS_MAX_AGE } from "./lib.mjs";
+import { scoring, SPOTS, evaluate, testDue, DEFAULT_ALERTS, inQuiet, laNow, fetchForecasts, MODEL_IDS, DAYS, ALERT_DAYS, deliver, GONE, sunOf, blowingNow, blowingText, laHour, windText, BLOW_RUNS, OBS_MAX_AGE, HOME_GAP_MI } from "./lib.mjs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 let fails = 0;
 const assert = (c, m) => { if (!c) { fails++; console.error("FAIL:", m); } else console.log("ok  ", m); };
@@ -300,6 +300,19 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     none(two, "obs-recent.json is stale: the latest run is 2 h old", { ...at14, hour: 16, ms: ms(Z(23, 10)) });
     none(recent(run(20, { berkeley: rd(17) }), run(21, { berkeley: rd(18) })), "the latest reading is over 2 h old (the runs are fresh, the station went quiet)");
     none(recent(run(17, { berkeley: rd(16) }), run(21, { berkeley: rd(20) })), "runs four hours apart are not consecutive hourly runs");
+
+    // home weather stations: obs_recent.py only ever writes a home row that was trusted and beyond HOME_GAP_MI of any official reading;
+    // the job double-checks the trusted mark and never fires on an untrusted home row, whatever the file says
+    const HOME = { id: "CW1234", name: "Home station (CWOP CW1234)", kind: "cwop", class: "home", dist_mi: 0.4, trusted: true };
+    const hrd = (hUTC, extra = {}) => ({ ...rd(hUTC), ...HOME, ...extra });
+    const homeTwo = recent(run(20, { berkeley: hrd(19) }), run(21, { berkeley: hrd(20) }));
+    b = blowingNow(SPOTS, homeTwo, at14, DEFAULT_ALERTS, limitsOf, dead);
+    assert(b.length === 1 && b[0].o.id === "CW1234", "a trusted home station's two readings fire like an official station's");
+    assert(blowingText(b) === "Blowing now: Berkeley Marina (Hs Lordships beach) 18g22 kn NW at Home station (CWOP CW1234), a trusted home station — 30 min from Candlestick Point.", "the message names it as a home station: " + blowingText(b));
+    none(recent(run(20, { berkeley: hrd(19, { trusted: false }) }), run(21, { berkeley: hrd(20, { trusted: false }) })), "an untrusted home station never fires");
+    none(recent(run(20, { berkeley: hrd(19, { trusted: undefined }) }), run(21, { berkeley: hrd(20, { trusted: undefined }) })), "a home row without the trusted mark never fires");
+    none(recent(run(20, { berkeley: hrd(19) }), run(21, { berkeley: hrd(20, { trusted: false }) })), "trust lost between the two runs: no fire");
+    assert(HOME_GAP_MI === 8 && new RegExp("^HOME_GAP_MI = " + HOME_GAP_MI + "\\b", "m").test(fs.readFileSync(path.join(ROOT, "home_trust.py"), "utf8")), "HOME_GAP_MI is the same constant in alerts/lib.mjs and home_trust.py");
     none(recent(run(21, { berkeley: rd(20) })), "a single run");
     none({ runs: [] }, "an empty file"); none(null, "no file"); none({ runs: "x" }, "garbage");
     assert(BLOW_RUNS === 2, "two consecutive runs");

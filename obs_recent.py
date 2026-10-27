@@ -10,6 +10,9 @@ before it blends a station into today's score, accuracy.freshest()), as
 
   {"runs": [{"at": fetchedAt, "obs": {spotId: {"id", "name", "kind", "dist_mi", "time", "spd", "gst", "dir"}}}, ...]}
 
+(a home-station row — kept only when it is trusted and no official station reads within home_trust.HOME_GAP_MI of the
+spot — also carries "class": "home" and "trusted": true),
+
 oldest first, the last KEEP_RUNS runs only, one entry per fetchedAt (a re-run on the same obs.json adds nothing). A spot with
 no fresh reading is simply absent from that run. Nothing here can fail the job: any error is printed and the exit status
 stays 0, so obs.json is still committed."""
@@ -19,11 +22,13 @@ import os
 import sys
 
 import accuracy   # freshest(), parse_time(): the one definition of "a fresh reading"
+import home_trust  # pick(): a trusted home station stands in only beyond HOME_GAP_MI of any official reading
 import obs_standalone   # load_rider_stations(): which rider-added spot ids carry readings
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEEP_RUNS = 6   # six hours of history; the rule looks at the last two
 FIELDS = ("id", "name", "kind", "dist_mi", "time", "spd", "gst", "dir")
+HOME_FIELDS = ("class", "trusted")   # only on a home row: the alert job double-checks that a home row it fires on was trusted
 
 
 def read(path):
@@ -39,16 +44,19 @@ def read(path):
         return {"runs": []}
 
 
-def snapshot(obs, spots, now):
-    """One run's entry from an obs.json document: the nearest fresh reading per curated spot."""
+def snapshot(obs, spots, now, trust=None):
+    """One run's entry from an obs.json document: the nearest fresh official reading per spot — or, beyond
+    home_trust.HOME_GAP_MI of any, the nearest fresh TRUSTED home station (home_trust.pick(); never an untrusted one)."""
     at = obs.get("fetchedAt") or now.isoformat(timespec="seconds")
     picked = {}
     for sid, rows in (obs.get("obs") or {}).items():
         if sid not in spots:
             continue
-        o = accuracy.freshest(rows, now)
+        o = home_trust.pick(rows, now, trust or {})
         if o:
             picked[sid] = {k: o.get(k) for k in FIELDS}
+            if home_trust.is_home(o):
+                picked[sid].update({k: o.get(k) for k in HOME_FIELDS})
     return {"at": at, "obs": picked}
 
 
@@ -67,13 +75,13 @@ def write(path, doc):
     os.replace(tmp, path)
 
 
-def run(obs_path, out_path, now=None, rider_path=None):
+def run(obs_path, out_path, now=None, rider_path=None, trust_path=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     spots = {s["id"] for s in json.load(open(os.path.join(HERE, "spots.json"), encoding="utf-8"))}
     spots |= set(obs_standalone.load_rider_stations(rider_path))   # rider-added spots carry readings for "Blowing now" too
     with open(obs_path, encoding="utf-8") as fh:
         obs = json.load(fh)
-    snap = snapshot(obs, spots, now)
+    snap = snapshot(obs, spots, now, home_trust.load(trust_path))
     doc = merge(read(out_path), snap)
     write(out_path, doc)
     print(f"obs_recent: {len(snap['obs'])} spot(s) with a fresh reading at {snap['at']}, {len(doc['runs'])} run(s) kept")

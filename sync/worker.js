@@ -21,6 +21,8 @@
 // Job routes (Authorization: Bearer <ADMIN_TOKEN>; 404 until the ADMIN_TOKEN secret exists):
 //   GET    /v1/admin/riders        -> {riders:[{id, settings, updatedAt, subs, state}]} riders with >=1 subscription
 //   PUT    /v1/admin/riders/<id>   body {pushed?, subs?, state?}
+//   GET    /v1/admin/vars/<name>   -> {name, value} | 404   small values a job keeps between runs (the Netatmo refresh token)
+//   PUT    /v1/admin/vars/<name>   body {value}            (admin token only; <name> is [a-z][a-z0-9_]*, value a non-empty string <= 4 KB)
 //          pushed = [{endpoint, status}] per device from the last send: a 404 or 410 from the push service means the
 //          subscription is gone and it is deleted here (by endpoint, so a device that subscribed meanwhile is kept);
 //          subs (the whole list, older jobs) replaces the stored list; state = the "already alerted" document.
@@ -32,6 +34,7 @@
 
 const DEFAULT_ORIGINS = ["https://mikestoneapps.github.io", "http://localhost:8000", "http://127.0.0.1:8000"];
 const MAX_BODY = 256 * 1024;   // settings are a few KB; this is a generous ceiling
+const MAX_VAR = 4096;          // an admin var (a token) is a few hundred bytes
 const MIN_KEY = 32;
 const MAX_SUBS = 10;           // devices per rider
 const MAX_PHOTO = 100 * 1024;  // bytes per rider photo; the page resizes to 480×320 JPEG (about 40 KB) before uploading
@@ -185,6 +188,20 @@ async function admin(request, env, path, cors) {
     if (subs) { if (subs.length) await env.SETTINGS.put("p:" + id, JSON.stringify(subs)); else await env.SETTINGS.delete("p:" + id); }
     if (body.state && typeof body.state === "object") await env.SETTINGS.put("a:" + id, JSON.stringify(body.state));
     return json({ ok: true, dropped, count: subs ? subs.length : undefined }, 200, cors);
+  }
+  // Small admin-only values the hourly jobs must carry between runs (Actions cannot rewrite its own secrets): today the
+  // Netatmo refresh token, which Netatmo rotates on every use (home_stations.py). Stored under v:<name>, never per rider.
+  const v = path.match(/^\/v1\/admin\/vars\/([a-z][a-z0-9_]{0,63})$/);
+  if (v && request.method === "GET") {
+    const value = await env.SETTINGS.get("v:" + v[1]);
+    return value == null ? json({ error: "not found" }, 404, cors) : json({ name: v[1], value }, 200, cors);
+  }
+  if (v && request.method === "PUT") {
+    const body = await readBody(request);
+    if (body === TOO_LARGE) return json({ error: "too large" }, 413, cors);
+    if (body === BAD_JSON || !body || typeof body.value !== "string" || !body.value || body.value.length > MAX_VAR) return json({ error: "bad json" }, 400, cors);
+    await env.SETTINGS.put("v:" + v[1], body.value);
+    return json({ ok: true, name: v[1] }, 200, cors);
   }
   return json({ error: "not found" }, 404, cors);
 }

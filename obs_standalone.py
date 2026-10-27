@@ -6,8 +6,8 @@ The station catalogue is stations.json (hand-verified, sorted by distance) plus 
 (rider-added spots, resolved hourly by rider_stations.py; capped at 3 wind stations each, and station ids
 are fetched once per run however many spots share them). Every row names its feed in
 `kind`; docs/research/networks.md has each network's terms and cadence). Every kind returns the same row
-shape with wind in knots; a wave-only row (CDIP) carries wvht_ft and spd null, so nothing downstream ever
-scores it as wind. A kind that fails is skipped, never fatal. One request per station per run (plus one
+shape with wind in knots and class "reliable" (home_stations.py adds the CWOP / Netatmo rows with class "home" afterwards);
+a wave-only row (CDIP) carries wvht_ft and spd null, so nothing downstream ever scores it as wind. A kind that fails is skipped, never fatal. One request per station per run (plus one
 per Caltrans district file and one for the JPL Tahoe page, shared), well under NDBC's "keep retrievals
 minimal" ask.
 
@@ -487,7 +487,7 @@ def fetch_obs(stations, now=None, getter=get, out_file=None):
         for st in lst:
             o = once(st["id"], lambda st=st: reader(st))
             if o:
-                row = {**{k: st[k] for k in ("id", "name", "kind", "dist_mi")}, **o}
+                row = {**{k: st[k] for k in ("id", "name", "kind", "dist_mi")}, "class": "reliable", **o}
                 if st.get("wave_only"):
                     row["wave_only"] = True
                     row["spd"] = row["gst"] = row["dir"] = None   # belt and braces: never a wind sample

@@ -11,7 +11,8 @@ higher than the model. The file is
   {spotId: {model: {"kn": knots, "n": samples}}}
 
 with only the (spot, model) pairs that reached MIN_N; a spot with none is absent, and with no log at all the file is {}.
-The page and scoring.js read it same-origin like obs.json and add the chosen model's bias to the hourly wind before scoring,
+Home weather stations reach it only through home_trust.select_lines()
+(trusted, and no official station within HOME_GAP_MI). The page and scoring.js read it same-origin like obs.json and add the chosen model's bias to the hourly wind before scoring,
 only when n >= 40 and |kn| >= 2 (BIAS_MIN_N / BIAS_MIN_KN there); a thinner or smaller bias changes nothing. Nothing here can
 fail the job: any error is printed and the exit status stays 0."""
 import json
@@ -19,6 +20,7 @@ import os
 import sys
 
 import accuracy   # read_lines(), median(): the same readers the log was written with
+import home_trust  # select_lines(): one line per spot-hour; a trusted home station only beyond HOME_GAP_MI of any official one
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MIN_N = 40
@@ -41,10 +43,12 @@ def pairs(lines):
     return out
 
 
-def compute(lines, spots=None, min_n=MIN_N):
-    """bias.json's content: only pairs with min_n or more samples, median error rounded to 0.1 kn."""
+def compute(lines, spots=None, min_n=MIN_N, trust=None):
+    """bias.json's content: only pairs with min_n or more samples, median error rounded to 0.1 kn. Lines are first
+    reduced to one per spot-hour (home_trust.select_lines): the official station's, or a trusted home station's when no
+    official one reads within HOME_GAP_MI; an untrusted home station's line never feeds a bias."""
     out = {}
-    for sid, by_model in pairs(lines).items():
+    for sid, by_model in pairs(home_trust.select_lines(lines, trust or {})).items():
         if spots is not None and sid not in spots:
             continue
         for k, errs in by_model.items():
@@ -61,10 +65,10 @@ def write(path, doc):
     os.replace(tmp, path)
 
 
-def run(log_path, out_path):
+def run(log_path, out_path, trust_path=None):
     spots = {s["id"] for s in json.load(open(os.path.join(HERE, "spots.json"), encoding="utf-8"))}
     lines = accuracy.read_lines(log_path)
-    doc = compute(lines, spots)
+    doc = compute(lines, spots, trust=home_trust.load(trust_path))
     write(out_path, doc)
     n_pairs = sum(len(v) for v in doc.values())
     print(f"bias: {len(lines)} log line(s), {len(doc)} spot(s) with {n_pairs} model bias(es) at {MIN_N}+ samples")
