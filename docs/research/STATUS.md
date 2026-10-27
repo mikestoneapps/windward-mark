@@ -2,7 +2,7 @@
 
 Done: repo, Pages, Claude App access, Bay edition applied (PR #1), Worker windward-mark deployed via workflow with KV windward_settings, ADMIN_TOKEN set, GitHub secrets (CLOUDFLARE_*, SYNC_URL, SYNC_ADMIN_TOKEN, VAPID_PRIVATE_KEY rotated in PR #3), first observations run green, Mike's phone subscribed (1 rider), 27-spot list in bay-spots.json (batch 1 + batch 2 + Paradise Cay home dock).
 
-In progress: sensor research (networks inventory; nearest sensors per spot for Bay/Delta and coast/Tahoe) → files in this folder when complete.
+Sensor research complete (2026-10-26 19:30 PT): networks.md, bay_delta_stations.*, coast_tahoe_stations.*, merged into sensor-catalogue.md and stations-proposed.json. The Claude Code prompt is NEXT-PROMPT.md in this folder — hand that to Claude Code (repo windward-mark) as the next step.
 
 Next Claude Code session (one PR), after the sensor research is folded in:
 1. Apply bay-spots.json (27 spots) to spots.json + embedded SPOTS; regions Monterey Bay / Tahoe / South Bay; lakes tideStation null; delete bay-spots.json.
