@@ -1,0 +1,15 @@
+name: Spot photos
+# One-off, manual: fetch CC-licensed Wikimedia Commons photos for spots that have none (img/<id>.jpg) and commit them.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 get_photos_bay.py
+      - run: |
+          git config user.name github-actions && git config user.email github-actions@github.com
+          git add img && git commit -m "Add Commons photos for spots that had none" && git push || echo "nothing to commit"
