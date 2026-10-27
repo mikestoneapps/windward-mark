@@ -184,5 +184,26 @@ class TestFetchLoop(unittest.TestCase):
         self.assertLess(total, 80, f"{total} unique stations: one request each stays well under ~90 a run")
 
 
+class AllStations(unittest.TestCase):
+    """stations.json + rider-stations.json (rider-added spots): capped rows, curated lists never overridden."""
+
+    def test_merge_caps_and_safety(self):
+        with tempfile.TemporaryDirectory() as d:
+            rp = os.path.join(d, "rider-stations.json")
+            rows = ([{"id": f"S{i}", "name": f"S{i}", "kind": "nws", "dist_mi": float(i)} for i in range(5)]
+                    + [{"id": "W", "name": "W", "kind": "cdip", "wave_only": True, "cdip": "142", "dist_mi": 9.0}])
+            with open(rp, "w") as fh:
+                json.dump({"k-x": {"name": "X", "lat": 37.5, "lon": -122.5, "stations": rows},
+                           "alameda": {"name": "A", "lat": 0, "lon": 0, "stations": rows},
+                           "k-empty": {"name": "E", "lat": 0, "lon": 0, "stations": []},
+                           "k-junk": "not a dict"}, fh)
+            st = O.all_stations(rp)
+            self.assertEqual([x["id"] for x in st["k-x"]], ["S0", "S1", "S2", "W"], "3 wind rows + 1 wave row per rider spot, sorted by distance")
+            self.assertEqual(st["alameda"], O.load_stations()["alameda"], "a curated id in the rider file never overrides the hand-verified list")
+            self.assertNotIn("k-empty", st)
+            self.assertNotIn("k-junk", st)
+            self.assertEqual(O.load_rider_stations(os.path.join(d, "missing.json")), {}, "missing rider-stations.json -> {} (nothing changes)")
+
+
 if __name__ == "__main__":
     unittest.main()

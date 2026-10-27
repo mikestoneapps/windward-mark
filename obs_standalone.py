@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Fetch the latest station observations for every curated spot into obs.json (repo root, or the path
+"""Fetch the latest station observations for every spot into obs.json (repo root, or the path
 given as the first argument): {fetchedAt, obs: {spotId: [{id,name,kind,dist_mi,time,spd,gst,dir,wvht_ft,age_min}, ...]}}.
 
-The station catalogue is stations.json (hand-verified, sorted by distance; every row names its feed in
+The station catalogue is stations.json (hand-verified, sorted by distance) plus rider-stations.json
+(rider-added spots, resolved hourly by rider_stations.py; capped at 3 wind stations each, and station ids
+are fetched once per run however many spots share them). Every row names its feed in
 `kind`; docs/research/networks.md has each network's terms and cadence). Every kind returns the same row
 shape with wind in knots; a wave-only row (CDIP) carries wvht_ft and spd null, so nothing downstream ever
 scores it as wind. A kind that fails is skipped, never fatal. One request per station per run (plus one
@@ -53,6 +55,30 @@ def get(url, tries=3):
 
 def load_stations():
     return json.load(open(os.path.join(HERE, "stations.json"), encoding="utf-8"))
+
+
+def load_rider_stations(path=None):
+    """rider-stations.json ({spotId: {name, lat, lon, stations: [rows]}}), the hourly job's cache of
+    resolved stations for rider-added spots (rider_stations.py). Missing or unreadable -> {}."""
+    try:
+        d = json.load(open(path or os.path.join(HERE, "rider-stations.json"), encoding="utf-8"))
+        return d if isinstance(d, dict) else {}
+    except Exception:
+        return {}
+
+
+def all_stations(rider_path=None):
+    """stations.json plus the rider-spot rows, capped at 3 wind stations (and 1 wave row) per rider spot.
+    Station ids repeat across spots; fetch_obs() requests each id once per run regardless."""
+    st = load_stations()
+    for sid, e in load_rider_stations(rider_path).items():
+        rows = e.get("stations") if isinstance(e, dict) else None
+        if sid in st or not isinstance(rows, list) or not rows:
+            continue
+        wind = [x for x in rows if not x.get("wave_only") and x.get("kind") != "cdip"][:3]
+        wave = [x for x in rows if x.get("wave_only") or x.get("kind") == "cdip"][:1]
+        st[sid] = sorted(wind + wave, key=lambda x: x.get("dist_mi", 99))
+    return st
 
 
 def iso_utc(t):
@@ -408,6 +434,6 @@ def fetch_obs(stations, now=None, getter=get, out_file=None):
 
 
 if __name__ == "__main__":
-    obs = fetch_obs(load_stations(), out_file=sys.argv[1] if len(sys.argv) > 1 else None)
+    obs = fetch_obs(all_stations(), out_file=sys.argv[1] if len(sys.argv) > 1 else None)
     for k, v in obs.items():
         print(k, [(r["id"], r["dist_mi"], r["spd"], r["dir"], r["age_min"]) for r in v])

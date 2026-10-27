@@ -66,6 +66,30 @@ def radii(s):
     return (max(base, r), max(NDBC_RADIUS_MI, r)) if r else (base, NDBC_RADIUS_MI)
 
 
+def nearby_airports(lat, lon, radius_mi, getter=get):
+    """ASOS/AWOS airports (K### ids only — never the CWOP/MADIS mirrors, days stale at the last audit)
+    within radius_mi of a point, as catalogue rows sorted by distance. Raises on a network failure."""
+    found = []
+    pts = json.loads(getter(f"https://api.weather.gov/points/{lat},{lon}"))
+    st = json.loads(getter(pts["properties"]["observationStations"]))
+    for f in st["features"][:12]:
+        sid = f["properties"]["stationIdentifier"]
+        if not AIRPORT.match(sid): continue
+        lo, la = f["geometry"]["coordinates"]
+        d = mi(lat, lon, la, lo)
+        if d <= radius_mi: found.append({"id": sid, "name": f["properties"]["name"], "kind": "nws", "lat": la, "lon": lo, "dist_mi": round(d, 1)})
+    return sorted(found, key=lambda x: x["dist_mi"])
+
+
+def nearby_buoys(lat, lon, radius_mi):
+    """The known NDBC buoys within radius_mi of a point, as catalogue rows sorted by distance. Offline."""
+    found = []
+    for bid, (la, lo) in NDBC_LL.items():
+        d = mi(lat, lon, la, lo)
+        if d <= radius_mi: found.append({"id": bid, "name": NDBC[bid], "kind": "ndbc", "lat": la, "lon": lo, "dist_mi": round(d, 1)})
+    return sorted(found, key=lambda x: x["dist_mi"])
+
+
 def resolve(only=None):
     """Merge freshly found airports and buoys into the hand-verified catalogue; adds only, never drops."""
     out = load_stations() if os.path.exists(CACHE) else {}
@@ -75,19 +99,10 @@ def resolve(only=None):
         have = {x["id"] for x in out.get(s["id"], [])}
         found = []
         try:
-            pts = json.loads(get(f"https://api.weather.gov/points/{s['lat']},{s['lon']}"))
-            st = json.loads(get(pts["properties"]["observationStations"]))
-            for f in st["features"][:12]:
-                sid = f["properties"]["stationIdentifier"]
-                if not AIRPORT.match(sid): continue   # keep CWOP/MADIS mirrors out: they were days stale at last audit
-                lon, lat = f["geometry"]["coordinates"]
-                d = mi(s["lat"], s["lon"], lat, lon)
-                if d <= nws_mi: found.append({"id": sid, "name": f["properties"]["name"], "kind": "nws", "lat": lat, "lon": lon, "dist_mi": round(d, 1)})
+            found += nearby_airports(s["lat"], s["lon"], nws_mi)
         except Exception as e:
             print("nws resolve failed", s["id"], e, file=sys.stderr)
-        for bid, (la, lo) in NDBC_LL.items():
-            d = mi(s["lat"], s["lon"], la, lo)
-            if d <= ndbc_mi: found.append({"id": bid, "name": NDBC[bid], "kind": "ndbc", "lat": la, "lon": lo, "dist_mi": round(d, 1)})
+        found += nearby_buoys(s["lat"], s["lon"], ndbc_mi)
         added = [x for x in sorted(found, key=lambda x: x["dist_mi"]) if x["id"] not in have][:3]
         out[s["id"]] = sorted(out.get(s["id"], []) + added, key=lambda x: x.get("dist_mi", 99))
         print(s["id"], "added" if added else "kept", [(x["id"], x["dist_mi"]) for x in added] or len(out[s["id"]]))
