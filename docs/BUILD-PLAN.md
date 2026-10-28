@@ -91,6 +91,9 @@ Status (2026-10-20, bias + Blowing-now PR): (1) **Per-spot forecast bias is wire
 ## Small fixes queued (do in any phase)
 - ~~Drive-radius slider stops at 4 h; Floras Lake is 5 h from Lake Oswego.~~ Slider extended to 6 h (15-min steps) in Phase 2. Spots scoring 8+ already surface up to 2× the radius via the comfort profile's "drive further" toggle.
 
+## Next (owner's backlog, not started)
+- **Per-spot "Blowing now" choice (requested 2026-10-27).** A bell toggle in each spot's detail (curated and rider-added) plus the same list in the Alerts sheet, stored as `settings.alerts.blowingSpots` (array of spot ids) and synced. Empty or absent = today's behaviour (every spot within the alert drive radius); once the rider picks any, only the picked spots fire. `blowingNow()` in `alerts/lib.mjs` and the page's alert preview honour it; tests for empty / picked / a picked spot outside the drive radius.
+
 ## Open questions (for the rider, after the surprise)
 - Which spots he actually rides; their real launch rules and parking.
 - His weight and quiver (defaults: 185 lb; 7/9/12/14 m).
