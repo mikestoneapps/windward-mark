@@ -257,6 +257,11 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     assert(blowingText(b) === "Blowing now: Berkeley Marina (Hs Lordships beach) 18g22 kn NW at the RICHMOND station — 30 min from Candlestick Point.", "the message: " + blowingText(b));
     assert(windText(18, 22, "mph") === "21g25 mph" && windText(18, 18.5) === "18 kn" && windText(18, null) === "18 kn" && near(laHour("2026-10-17T21:10:00Z"), 14 + 10 / 60), "windText in the rider's unit, gust only when it matters; laHour in Pacific time");
 
+    // Per-spot choice (settings.alerts.blowingSpots): absent = every spot within the drive; an array = only the picked spots, drive ignored
+    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: ["berkeley"] }, limitsOf, dead).length === 1, "picked: Berkeley still fires");
+    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: ["crissy"] }, limitsOf, dead).length === 0, "not picked: Berkeley stays quiet when only Crissy is picked");
+    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: [] }, limitsOf, dead).length === 0, "an empty pick list means none, not all");
+    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, maxDrive: 15 }, limitsOf, dead).length === 0 && blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, maxDrive: 15, blowingSpots: ["berkeley"] }, limitsOf, dead).length === 1, "a picked spot fires beyond the alert drive; unpicked default still respects it");
     let r = evaluate(rider({}, {}), dead, at14, two);
     assert(r.notification && r.notification.body === blowingText(b) && r.notification.url === "./#day=2026-10-17" && r.state.sent["2026-10-17"] === 1, "fires at 14:00 with nothing in the forecast, deep-linked to today, counting against the daily cap: " + r.notification.body);
     assert(r.state.blowing.berkeley && r.state.blowing.berkeley.spd === 18 && r.state.blowing.berkeley.station === "RCMC1", "recorded as said");
