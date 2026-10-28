@@ -650,8 +650,12 @@ try {
     // the Alerts sheet: the toggle, on by default, with what the stations read this minute
     await page.click("#openAlerts"); await page.waitForSelector("#al-blowing");
     assert(await page.isChecked("#al-blowing"), "'Tell me when it's already blowing' is on by default");
-    const label = await text(page, 'label[for="al-blowing"]');
-    assert(/two hourly checks in a row/.test(label) && /Reading in your range now: Candlestick Point 18g22 kn W at San Francisco Intl\./.test(label), "the toggle explains the rule and lists the station reading in range now: " + label.replace(/\s+/g, " ").slice(0, 160));
+    let label = await text(page, 'label[for="al-blowing"]');
+    assert(/No spots picked yet, so no Blowing-now alerts/.test(label), "opt-in: with no bells the sheet says nothing will fire: " + label.replace(/\s+/g, " ").slice(0, 160));
+    await page.evaluate(() => { settings.alerts.blowingSpots = ["candlestick"]; alertsSheet(); });
+    label = await text(page, 'label[for="al-blowing"]');
+    assert(/two hourly checks in a row/.test(label) && /Your spots: Candlestick Point/.test(label) && /Reading in your range now at your picked spots: Candlestick Point 18g22 kn W at San Francisco Intl\./.test(label), "the toggle explains the rule, lists the picked spots and the station reading in range now: " + label.replace(/\s+/g, " ").slice(0, 200));
+    await page.click("#al-blowClear"); assert((await page.evaluate(() => settings.alerts.blowingSpots.length)) === 0, "Clear all unpicks every spot");
     await page.click("#al-blowing"); await page.waitForTimeout(200);
     assert((await page.evaluate(() => JSON.parse(localStorage.getItem("goc.settings")).alerts.blowing)) === false && !(await page.isChecked("#al-blowing")), "turning it off is saved in the alert settings (synced like the rest)");
     assert(errors.length === 0, "bias + blowing: no page errors (" + errors.join(" | ") + ")");

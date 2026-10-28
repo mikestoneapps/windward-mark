@@ -113,17 +113,18 @@ export function blowingNow(spots, recent, now, A, limitsOf, forecasts) {
   if (nowMs - Date.parse(latest.at) > RECENT_MAX_AGE * min) return [];   // the observations job has not run this hour: the file is stale
   for (let i = 1; i < runs.length; i++) { const gap = (Date.parse(runs[i].at) - Date.parse(runs[i - 1].at)) / min; if (gap < RUN_GAP[0] || gap > RUN_GAP[1]) return []; }   // not consecutive hourly runs
   const out = [];
-  // settings.alerts.blowingSpots: absent = every spot within the alert drive (the default); an array (even empty) = only the spots the
-  // rider picked with the bell on a spot's detail, and a picked spot counts whatever its drive time (he chose it).
-  const picked = Array.isArray(A.blowingSpots) ? new Set(A.blowingSpots) : null;
+  // Opt-in: only the spots the rider picked with the bell ("Tell me when it blows", settings.alerts.blowingSpots) can fire, whatever
+  // their drive time; no picks = no Blowing-now alerts. Its own wind range (blowMin/blowMax, knots) when set, else the rider's limits.
+  const picked = new Set(Array.isArray(A.blowingSpots) ? A.blowingSpots : []);
+  if (!picked.size) return [];
   for (const spot of spots) {
     if (!spot.dir) continue;
-    if (picked && !picked.has(spot.id)) continue;
+    if (!picked.has(spot.id)) continue;
     // A rider-added spot whose facing is unknown carries {best:[], work:[[0,360]], off:[]} (the page's UNKNOWN_DIR):
     // no sectors to check against, so any direction counts — even a station without a direction vane.
     const any = !(spot.dir.best || []).length && !(spot.dir.off || []).length;
     const L = limitsOf(spot.id);
-    const inBand = o => o && typeof o.spd === "number" && !(o.class === "home" && o.trusted !== true) && o.spd >= L.minWind && o.spd <= L.maxWind && (o.gst == null || o.gst <= L.maxGust) && (any || (o.dir != null && scoring.dirScore(o.dir, spot.dir).v >= 0.75));
+    const inBand = o => o && typeof o.spd === "number" && !(o.class === "home" && o.trusted !== true) && o.spd >= (typeof A.blowMin === "number" ? A.blowMin : L.minWind) && o.spd <= (typeof A.blowMax === "number" ? A.blowMax : L.maxWind) && (o.gst == null || o.gst <= L.maxGust) && (any || (o.dir != null && scoring.dirScore(o.dir, spot.dir).v >= 0.75));
     const rs = runs.map(r => r.obs[spot.id]);
     if (!rs.every(inBand)) continue;
     if (new Set(rs.map(o => o.time)).size < rs.length) continue;   // the same reading seen twice
@@ -131,7 +132,7 @@ export function blowingNow(spots, recent, now, A, limitsOf, forecasts) {
     const t = Date.parse(o.time); if (isNaN(t) || nowMs - t > OBS_MAX_AGE * min) continue;
     const f = forecasts && forecasts[spot.id], sun = f ? scoring.sunHours(f, now.date) : null, h = laHour(o.time);
     if (sun && h != null && (h < sun[0] || h > sun[1])) continue;   // dark
-    const homes = Object.entries(HOMES).map(([hk, H]) => ({ home: H.name, drive: spot[H.key] })).filter(x => x.drive != null && (picked || x.drive <= A.maxDrive)).sort((a, b) => a.drive - b.drive);
+    const homes = Object.entries(HOMES).map(([hk, H]) => ({ home: H.name, drive: spot[H.key] })).filter(x => x.drive != null).sort((a, b) => a.drive - b.drive);
     if (!homes.length) continue;
     out.push({ spot, o, drive: homes[0].drive, home: homes[0].home });
   }

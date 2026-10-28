@@ -247,49 +247,50 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     const rd = (hUTC, spd = 18, gst = 22, dir = 315, extra = {}) => ({ ...RCM, time: Z(hUTC, 55), spd, gst, dir, ...extra });   // a reading at :55 from the NW, seen by the :07 run of the next hour
     const run = (hUTC, obs) => ({ at: Z(hUTC), obs });
     const recent = (...runs) => ({ runs });
+    const ALLIDS = SPOTS.map(s => s.id).concat(["k-beach", "k-mystery"]), ALL = { ...DEFAULT_ALERTS, blowingSpots: ALLIDS };   // every spot has the bell on (opt-in)
     const two = recent(run(20, { berkeley: rd(19) }), run(21, { berkeley: rd(20) }));   // 12:55 and 13:55 PDT readings, both 18g22 NW
     const at14 = { date: "2026-10-17", hour: 14, dow: 6, ms: ms(Z(21, 10)) };
     const dead = {}, nosun = {}; SPOTS.forEach(s => { dead[s.id] = doc(() => ({ spd: 5 })); nosun[s.id] = doc(() => ({ spd: 5 }), false); });   // the forecast says nothing; only the station does (nosun: an older doc without sunrise/sunset)
     const limitsOf = () => scoring.DEFAULT_COMFORT;
 
-    let b = blowingNow(SPOTS, two, at14, DEFAULT_ALERTS, limitsOf, dead);
+    let b = blowingNow(SPOTS, two, at14, ALL, limitsOf, dead);
     assert(b.length === 1 && b[0].spot.id === "berkeley" && b[0].o.spd === 18 && b[0].drive === 30 && b[0].home === "Candlestick Point", "two runs in the band from the NW: Berkeley, 30 min from the nearer house");
     assert(blowingText(b) === "Blowing now: Berkeley Marina (Hs Lordships beach) 18g22 kn NW at the RICHMOND station — 30 min from Candlestick Point.", "the message: " + blowingText(b));
     assert(windText(18, 22, "mph") === "21g25 mph" && windText(18, 18.5) === "18 kn" && windText(18, null) === "18 kn" && near(laHour("2026-10-17T21:10:00Z"), 14 + 10 / 60), "windText in the rider's unit, gust only when it matters; laHour in Pacific time");
 
-    // Per-spot choice (settings.alerts.blowingSpots): absent = every spot within the drive; an array = only the picked spots, drive ignored
-    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: ["berkeley"] }, limitsOf, dead).length === 1, "picked: Berkeley still fires");
-    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: ["crissy"] }, limitsOf, dead).length === 0, "not picked: Berkeley stays quiet when only Crissy is picked");
-    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: [] }, limitsOf, dead).length === 0, "an empty pick list means none, not all");
-    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, maxDrive: 15 }, limitsOf, dead).length === 0 && blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, maxDrive: 15, blowingSpots: ["berkeley"] }, limitsOf, dead).length === 1, "a picked spot fires beyond the alert drive; unpicked default still respects it");
-    let r = evaluate(rider({}, {}), dead, at14, two);
+    // Opt-in (settings.alerts.blowingSpots, the bell on a spot): no picks = nothing; only picked spots fire, whatever the drive; its own range
+    assert(blowingNow(SPOTS, two, at14, DEFAULT_ALERTS, limitsOf, dead).length === 0 && blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: [] }, limitsOf, dead).length === 0, "no bells: no Blowing-now alert at all");
+    assert(blowingNow(SPOTS, two, at14, { ...DEFAULT_ALERTS, blowingSpots: ["crissy"] }, limitsOf, dead).length === 0, "not picked: Berkeley stays quiet when only Crissy has the bell");
+    assert(blowingNow(SPOTS, two, at14, { ...ALL, maxDrive: 15 }, limitsOf, dead).length === 1, "a picked spot fires beyond the alert drive");
+    assert(blowingNow(SPOTS, two, at14, { ...ALL, blowMin: 20 }, limitsOf, dead).length === 0 && blowingNow(SPOTS, two, at14, { ...ALL, blowMax: 15 }, limitsOf, dead).length === 0 && blowingNow(SPOTS, two, at14, { ...ALL, blowMin: 10, blowMax: 19 }, limitsOf, dead).length === 1, "the Blowing-now range overrides the rider range (18 kn: under 20 no, over 15 no, 10–19 yes)");
+    let r = evaluate(rider({ blowingSpots: ALLIDS }, {}), dead, at14, two);
     assert(r.notification && r.notification.body === blowingText(b) && r.notification.url === "./#day=2026-10-17" && r.state.sent["2026-10-17"] === 1, "fires at 14:00 with nothing in the forecast, deep-linked to today, counting against the daily cap: " + r.notification.body);
     assert(r.state.blowing.berkeley && r.state.blowing.berkeley.spd === 18 && r.state.blowing.berkeley.station === "RCMC1", "recorded as said");
     const three = recent(...two.runs, run(22, { berkeley: rd(21) }));
     const at15 = { ...at14, hour: 15, ms: ms(Z(22, 10)) };
-    let r2 = evaluate(rider({ cap: 3 }, r.state), dead, at15, three);
+    let r2 = evaluate(rider({ blowingSpots: ALLIDS, cap: 3 }, r.state), dead, at15, three);
     assert(!r2.notification && r2.why === "already said it's blowing" && r2.state.blowing.berkeley, "still blowing an hour later: not repeated (cap 3, so it is the suppression, not the cap)");
-    r2 = evaluate(rider({}, r.state), dead, at15, three);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS }, r.state), dead, at15, three);
     assert(!r2.notification && r2.why === "daily cap reached", "with the default cap of 1 the day's one digest has gone");
     const died = recent(...two.runs, run(22, { berkeley: rd(21, 6, 8) }));
-    r2 = evaluate(rider({ cap: 3 }, r.state), dead, at15, died);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS, cap: 3 }, r.state), dead, at15, died);
     assert(!r2.notification && !r2.state.blowing.berkeley && r2.why === "nothing new", "it stops: nothing sent, and the spot leaves the 'said' list");
     const again = recent(run(22, { berkeley: rd(21, 6, 8) }), run(23, { berkeley: rd(22) }), run(0, { berkeley: rd(23) }));   // dies, then two runs back in the band (15:55, 16:55 PDT)
-    r2 = evaluate(rider({ cap: 3 }, r2.state), dead, { ...at14, hour: 17, ms: ms(Z(0, 10)) + 864e5 * 0 }, { runs: again.runs.map((x, i) => i === 2 ? { ...x, at: "2026-10-18T00:07:00+00:00" } : x) });
+    r2 = evaluate(rider({ blowingSpots: ALLIDS, cap: 3 }, r2.state), dead, { ...at14, hour: 17, ms: ms(Z(0, 10)) + 864e5 * 0 }, { runs: again.runs.map((x, i) => i === 2 ? { ...x, at: "2026-10-18T00:07:00+00:00" } : x) });
     assert(r2.notification && /^Blowing now: Berkeley Marina/.test(r2.notification.body), "blows again later the same day: said again (under the cap)");
-    r2 = evaluate(rider({ cap: 3 }, { blowing: { berkeley: { spd: 18, station: "RCMC1", at: "2026-10-16T21:00:00.000Z" } } }), dead, at14, two);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS, cap: 3 }, { blowing: { berkeley: { spd: 18, station: "RCMC1", at: "2026-10-16T21:00:00.000Z" } } }), dead, at14, two);
     assert(r2.notification && /^Blowing now/.test(r2.notification.body), "a 'said' entry from yesterday has expired");
 
     // same digest as the forecast: 08:10 with same-day on, a great forecast and the station already reading in the band
     const at8 = { date: "2026-10-17", hour: 8, dow: 6, ms: ms(Z(15, 10)) };
     const morning = recent(run(14, { berkeley: rd(13) }), run(15, { berkeley: rd(14) }));   // 06:55 (dark) and 07:55 PDT readings
-    r2 = evaluate(rider({}), F, at8, morning);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS }), F, at8, morning);
     assert(r2.notification && /^Today looks great from Paradise Cay/.test(r2.notification.body) && /Blowing now: Berkeley Marina \(Hs Lordships beach\) 18g22 kn NW at the RICHMOND station — 30 min from Candlestick Point\.$/.test(r2.notification.body) && r2.state.sent["2026-10-17"] === 1, "one notification carries the forecast digest and the station's word: " + r2.notification.body);
     const dawn = recent(run(13, { berkeley: rd(12) }), run(14, { berkeley: rd(13) }));   // 05:55 and 06:55 PDT: the latest is before the 07:33 sunrise
-    assert(blowingNow(SPOTS, dawn, { ...at8, hour: 7, ms: ms(Z(14, 10)) }, DEFAULT_ALERTS, limitsOf, F).length === 0 && blowingNow(SPOTS, dawn, { ...at8, hour: 7, ms: ms(Z(14, 10)) }, DEFAULT_ALERTS, limitsOf, nosun).length === 1, "a reading before sunrise does not count (when the forecast carries the sun; without sun data the hour is not checked)");
+    assert(blowingNow(SPOTS, dawn, { ...at8, hour: 7, ms: ms(Z(14, 10)) }, ALL, limitsOf, F).length === 0 && blowingNow(SPOTS, dawn, { ...at8, hour: 7, ms: ms(Z(14, 10)) }, ALL, limitsOf, nosun).length === 1, "a reading before sunrise does not count (when the forecast carries the sun; without sun data the hour is not checked)");
 
     // no-fire cases
-    const none = (rec, why, now = at14, A = DEFAULT_ALERTS, L = limitsOf, F_ = dead) => assert(blowingNow(SPOTS, rec, now, A, L, F_).length === 0, "no fire: " + why);
+    const none = (rec, why, now = at14, A = ALL, L = limitsOf, F_ = dead) => assert(blowingNow(SPOTS, rec, now, A, L, F_).length === 0, "no fire: " + why);
     none(recent(run(20, { berkeley: rd(19, 8, 10) }), run(21, { berkeley: rd(20) })), "only the latest run in the band (the previous read 8 kn)");
     none(recent(run(20, { berkeley: rd(19) }), run(21, { berkeley: rd(20, 8, 10) })), "only the previous run in the band");
     none(recent(run(20, {}), run(21, { berkeley: rd(20) })), "no reading for the spot on the previous run");
@@ -300,8 +301,7 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     none(recent(run(20, { berkeley: rd(19, 11, 13) }), run(21, { berkeley: rd(20, 11, 13) })), "11 kn: under the 12 kn comfort minimum");
     none(recent(run(20, { berkeley: rd(19, 33, 36) }), run(21, { berkeley: rd(20, 33, 36) })), "33 kn: over the 32 kn comfort maximum");
     none(recent(run(20, { berkeley: rd(19, 20, 35) }), run(21, { berkeley: rd(20, 20, 35) })), "gusting 35: over the 34 kn gust limit");
-    none(two, "the rider's own range (per-spot override: Berkeley max 16)", at14, DEFAULT_ALERTS, id => scoring.limitsFor({ overrides: { berkeley: { maxWind: 16 } } }, id));
-    none(two, "nothing within 25 min of either house", at14, { ...DEFAULT_ALERTS, maxDrive: 25 });
+    none(two, "the rider's own range (per-spot override: Berkeley max 16)", at14, ALL, id => scoring.limitsFor({ overrides: { berkeley: { maxWind: 16 } } }, id));
     none(two, "obs-recent.json is stale: the latest run is 2 h old", { ...at14, hour: 16, ms: ms(Z(23, 10)) });
     none(recent(run(20, { berkeley: rd(17) }), run(21, { berkeley: rd(18) })), "the latest reading is over 2 h old (the runs are fresh, the station went quiet)");
     none(recent(run(17, { berkeley: rd(16) }), run(21, { berkeley: rd(20) })), "runs four hours apart are not consecutive hourly runs");
@@ -311,7 +311,7 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     const HOME = { id: "CW1234", name: "Home station (CWOP CW1234)", kind: "cwop", class: "home", dist_mi: 0.4, trusted: true };
     const hrd = (hUTC, extra = {}) => ({ ...rd(hUTC), ...HOME, ...extra });
     const homeTwo = recent(run(20, { berkeley: hrd(19) }), run(21, { berkeley: hrd(20) }));
-    b = blowingNow(SPOTS, homeTwo, at14, DEFAULT_ALERTS, limitsOf, dead);
+    b = blowingNow(SPOTS, homeTwo, at14, ALL, limitsOf, dead);
     assert(b.length === 1 && b[0].o.id === "CW1234", "a trusted home station's two readings fire like an official station's");
     assert(blowingText(b) === "Blowing now: Berkeley Marina (Hs Lordships beach) 18g22 kn NW at Home station (CWOP CW1234), a trusted home station — 30 min from Candlestick Point.", "the message names it as a home station: " + blowingText(b));
     none(recent(run(20, { berkeley: hrd(19, { trusted: false }) }), run(21, { berkeley: hrd(20, { trusted: false }) })), "an untrusted home station never fires");
@@ -321,20 +321,20 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     none(recent(run(21, { berkeley: rd(20) })), "a single run");
     none({ runs: [] }, "an empty file"); none(null, "no file"); none({ runs: "x" }, "garbage");
     assert(BLOW_RUNS === 2, "two consecutive runs");
-    r2 = evaluate(rider({ blowing: false }), dead, at14, two);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS, blowing: false }), dead, at14, two);
     assert(!r2.notification && r2.why === "nothing new" && r2.blowing.length === 0, "the toggle off: never evaluated");
-    r2 = evaluate(rider({ days: [1, 2, 3, 4, 5] }), dead, at14, two);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS, days: [1, 2, 3, 4, 5] }), dead, at14, two);
     assert(!r2.notification && r2.blowing.length === 0, "not on a day he can't go (Saturday excluded)");
-    r2 = evaluate(rider({ quietFrom: 13, quietTo: 15 }), dead, at14, two);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS, quietFrom: 13, quietTo: 15 }), dead, at14, two);
     assert(!r2.notification && r2.why === "quiet hours" && r2.blowing.length === 1 && !r2.state.blowing.berkeley, "quiet hours hold it (and it is not marked said, so it goes out when they end)");
-    r2 = evaluate(rider({}, { sent: { "2026-10-17": 1 } }), dead, at14, two);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS }, { sent: { "2026-10-17": 1 } }), dead, at14, two);
     assert(!r2.notification && r2.why === "daily cap reached", "the daily cap holds it");
-    r2 = evaluate(rider({}, {}, { units: "mph" }), dead, at14, two);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS }, {}, { units: "mph" }), dead, at14, two);
     assert(r2.notification && /Berkeley Marina \(Hs Lordships beach\) 21g25 mph NW/.test(r2.notification.body), "the rider's display unit: " + r2.notification.body);
     // several spots: nearest drive first, three at most, one notification
     const many = recent(run(20, { berkeley: rd(19), candlestick: { id: "KSFO", name: "San Francisco Intl", dist_mi: 5.9, time: Z(19, 55), spd: 16, gst: 17, dir: 290 }, thirdave: { id: "KSQL", name: "San Carlos Airport", dist_mi: 5.1, time: Z(19, 55), spd: 20, gst: 26, dir: 320 }, davenport: { id: "46042", name: "Monterey buoy", dist_mi: 19.9, time: Z(19, 55), spd: 22, gst: 25, dir: 300 } }),
                         run(21, { berkeley: rd(20), candlestick: { id: "KSFO", name: "San Francisco Intl", dist_mi: 5.9, time: Z(20, 55), spd: 15, gst: 16, dir: 290 }, thirdave: { id: "KSQL", name: "San Carlos Airport", dist_mi: 5.1, time: Z(20, 55), spd: 21, gst: 27, dir: 320 }, davenport: { id: "46042", name: "Monterey buoy", dist_mi: 19.9, time: Z(20, 55), spd: 22, gst: 25, dir: 300 } }));
-    r2 = evaluate(rider({ maxDrive: 300 }), dead, at14, many);
+    r2 = evaluate(rider({ blowingSpots: ALLIDS, maxDrive: 300 }), dead, at14, many);
     assert(r2.notification && r2.notification.body === "Blowing now: Candlestick Point 15 kn WNW at the San Francisco Intl station — 5 min from Candlestick Point; Third Avenue (Baywinds Park) 21g27 kn NW at the San Carlos Airport station — 25 min from Candlestick Point; Berkeley Marina (Hs Lordships beach) 18g22 kn NW at the RICHMOND station — 30 min from Candlestick Point." && Object.keys(r2.state.blowing).length === 4, "four spots blowing: one line, nearest first, three named, all four marked said: " + r2.notification.body);
 
     // rider-added spots: their own sectors apply; facing unknown (the page's UNKNOWN_DIR) falls back to any direction
@@ -342,14 +342,14 @@ const rawDoc = () => doc((d, h) => ({ spd: 12 + (h % 5), gst: 16 + (h % 5), ecmw
     const keptU = { id: "k-mystery", name: "Mystery Launch", lat: 37.9, lon: -122.5, dir: { best: [], work: [[0, 360]], off: [] }, driveLO: 35, driveBC: 90, kept: true };
     const spotsR = SPOTS.concat([keptB, keptU]);
     const kb = (hUTC, dir, sid = "XKB", spd = 18) => ({ id: sid, name: "Kept Sensor", kind: "nws", dist_mi: 2.1, time: Z(hUTC, 55), spd, gst: spd + 4, dir });
-    let br = blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, 270) }), run(21, { "k-beach": kb(20, 270) })), at14, DEFAULT_ALERTS, limitsOf, dead);
+    let br = blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, 270) }), run(21, { "k-beach": kb(20, 270) })), at14, ALL, limitsOf, dead);
     assert(br.length === 1 && br[0].spot.id === "k-beach" && br[0].drive === 40, "a rider spot with sectors: W wind in its best sector fires, with its own estimated drive");
-    assert(blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, 90) }), run(21, { "k-beach": kb(20, 90) })), at14, DEFAULT_ALERTS, limitsOf, dead).length === 0, "a rider spot with sectors: offshore E never fires");
-    assert(blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, null) }), run(21, { "k-beach": kb(20, null) })), at14, DEFAULT_ALERTS, limitsOf, dead).length === 0, "a rider spot with sectors still needs a direction on the reading");
-    br = blowingNow(spotsR, recent(run(20, { "k-mystery": kb(19, null) }), run(21, { "k-mystery": kb(20, null) })), at14, DEFAULT_ALERTS, limitsOf, dead);
+    assert(blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, 90) }), run(21, { "k-beach": kb(20, 90) })), at14, ALL, limitsOf, dead).length === 0, "a rider spot with sectors: offshore E never fires");
+    assert(blowingNow(spotsR, recent(run(20, { "k-beach": kb(19, null) }), run(21, { "k-beach": kb(20, null) })), at14, ALL, limitsOf, dead).length === 0, "a rider spot with sectors still needs a direction on the reading");
+    br = blowingNow(spotsR, recent(run(20, { "k-mystery": kb(19, null) }), run(21, { "k-mystery": kb(20, null) })), at14, ALL, limitsOf, dead);
     assert(br.length === 1 && br[0].spot.id === "k-mystery", "facing unknown: any direction counts, even a station without a vane");
     assert(blowingText(br) === "Blowing now: Mystery Launch 18g22 kn at the Kept Sensor station — 35 min from Paradise Cay.", "the message skips the compass when the reading has no direction: " + blowingText(br));
-    assert(blowingNow(spotsR, recent(run(20, { "k-mystery": kb(19, null, "XKB", 8) }), run(21, { "k-mystery": kb(20, null, "XKB", 8) })), at14, DEFAULT_ALERTS, limitsOf, dead).length === 0, "facing unknown still respects the wind band (8 kn is under the 12 kn minimum)");
+    assert(blowingNow(spotsR, recent(run(20, { "k-mystery": kb(19, null, "XKB", 8) }), run(21, { "k-mystery": kb(20, null, "XKB", 8) })), at14, ALL, limitsOf, dead).length === 0, "facing unknown still respects the wind band (8 kn is under the 12 kn minimum)");
   }
 
   /* ---------- "Send test notification" (settings.alerts.testRequested -> one test push -> state.testSent) ---------- */
