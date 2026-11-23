@@ -1,36 +1,36 @@
 {
  "AE6DC-5": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 1.8,
-  "n": 93,
-  "n_fc": 146,
+  "n": 94,
+  "n_fc": 147,
   "ratio": 0.58,
   "trusted": false,
-  "uptime": 0.24,
+  "uptime": 0.23,
   "within": 0.18
  },
  "K2MRS": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 3.1,
   "n": 113,
-  "n_fc": 295,
+  "n_fc": 296,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.47,
+  "uptime": 0.46,
   "within": 0.0
  },
  "K6CQU-13": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 2.8,
   "n": 111,
-  "n_fc": 325,
+  "n_fc": 326,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.52,
+  "uptime": 0.51,
   "within": 0.0
  },
  "K6HN": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 2.9,
   "n": 37,
   "n_fc": 83,
@@ -40,17 +40,17 @@
   "within": 0.08
  },
  "K6POO-1": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 1.7,
   "n": 125,
-  "n_fc": 302,
+  "n_fc": 303,
   "ratio": 0.33,
   "trusted": false,
-  "uptime": 0.48,
+  "uptime": 0.47,
   "within": 0.13
  },
  "KE6JJJ-1": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 1.9,
   "n": 11,
   "n_fc": 30,
@@ -60,57 +60,57 @@
   "within": 0.18
  },
  "KF6GPE": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 3.9,
   "n": 3,
-  "n_fc": 80,
+  "n_fc": 81,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.14,
+  "uptime": 0.13,
   "within": 0.0
  },
  "KI6PPU": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 2.1,
   "n": 55,
-  "n_fc": 301,
+  "n_fc": 302,
   "ratio": 0.24,
   "trusted": false,
-  "uptime": 0.48,
+  "uptime": 0.47,
   "within": 0.04
  },
  "KJ6LNH-1": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 3.0,
   "n": 33,
-  "n_fc": 127,
+  "n_fc": 128,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.22,
+  "uptime": 0.21,
   "within": 0.0
  },
  "KK6LVQ-13": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 4.1,
   "n": 16,
-  "n_fc": 305,
+  "n_fc": 306,
   "ratio": 0.12,
   "trusted": false,
   "uptime": 0.48,
   "within": 0.0
  },
  "KO6BKP": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 2.3,
   "n": 83,
-  "n_fc": 301,
+  "n_fc": 302,
   "ratio": 0.17,
   "trusted": false,
-  "uptime": 0.48,
+  "uptime": 0.47,
   "within": 0.04
  },
  "N6AMQ-1": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 3.7,
   "n": 22,
   "n_fc": 88,
@@ -120,17 +120,17 @@
   "within": 0.0
  },
  "N6OIM": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 2.6,
   "n": 97,
-  "n_fc": 317,
+  "n_fc": 318,
   "ratio": 0.0,
   "trusted": false,
   "uptime": 0.5,
   "within": 0.0
  },
  "N6SPP": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 2.6,
   "n": 105,
   "n_fc": 309,
@@ -140,7 +140,7 @@
   "within": 0.03
  },
  "W2YN-13": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 3.0,
   "n": 36,
   "n_fc": 130,
@@ -150,13 +150,13 @@
   "within": 0.0
  },
  "WB6TTB": {
-  "evaluatedAt": "2026-11-23T00:54:01Z",
+  "evaluatedAt": "2026-11-23T09:02:54Z",
   "mae_fc": 2.3,
   "n": 100,
-  "n_fc": 282,
+  "n_fc": 283,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.47,
+  "uptime": 0.44,
   "within": 0.17
  }
 }
