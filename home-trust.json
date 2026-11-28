@@ -1,56 +1,56 @@
 {
  "AE6DC-5": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 1.7,
-  "n": 90,
-  "n_fc": 141,
+  "n": 88,
+  "n_fc": 137,
   "ratio": 0.54,
   "trusted": false,
   "uptime": 0.2,
-  "within": 0.16
+  "within": 0.15
  },
  "K2MRS": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 3.1,
-  "n": 110,
-  "n_fc": 286,
+  "n": 104,
+  "n_fc": 279,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.4,
+  "uptime": 0.39,
   "within": 0.0
  },
  "K6CQU-13": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 2.7,
-  "n": 105,
-  "n_fc": 314,
+  "n": 104,
+  "n_fc": 307,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.44,
+  "uptime": 0.43,
   "within": 0.0
  },
  "K6HN": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 3.0,
   "n": 31,
-  "n_fc": 76,
+  "n_fc": 72,
   "ratio": 0.26,
   "trusted": false,
-  "uptime": 0.12,
+  "uptime": 0.11,
   "within": 0.06
  },
  "K6POO-1": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 1.7,
-  "n": 120,
-  "n_fc": 291,
+  "n": 117,
+  "n_fc": 284,
   "ratio": 0.33,
   "trusted": false,
   "uptime": 0.4,
-  "within": 0.15
+  "within": 0.14
  },
  "KE6JJJ-1": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 1.9,
   "n": 11,
   "n_fc": 30,
@@ -60,27 +60,27 @@
   "within": 0.18
  },
  "KF6GPE": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 3.9,
   "n": 3,
-  "n_fc": 81,
+  "n_fc": 79,
   "ratio": 0.0,
   "trusted": false,
   "uptime": 0.11,
   "within": 0.0
  },
  "KI6PPU": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 2.1,
-  "n": 46,
-  "n_fc": 290,
-  "ratio": 0.16,
+  "n": 44,
+  "n_fc": 283,
+  "ratio": 0.17,
   "trusted": false,
   "uptime": 0.4,
-  "within": 0.04
+  "within": 0.05
  },
  "KJ6LNH-1": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 3.0,
   "n": 35,
   "n_fc": 136,
@@ -90,73 +90,73 @@
   "within": 0.0
  },
  "KK6LVQ-13": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 3.9,
   "n": 18,
-  "n_fc": 294,
+  "n_fc": 287,
   "ratio": 0.05,
   "trusted": false,
   "uptime": 0.41,
   "within": 0.0
  },
  "KO6BKP": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 2.3,
-  "n": 78,
-  "n_fc": 288,
-  "ratio": 0.17,
+  "n": 75,
+  "n_fc": 281,
+  "ratio": 0.16,
   "trusted": false,
-  "uptime": 0.41,
+  "uptime": 0.4,
   "within": 0.04
  },
  "N6AMQ-1": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
-  "mae_fc": 3.6,
-  "n": 19,
-  "n_fc": 79,
+  "evaluatedAt": "2026-11-28T07:43:37Z",
+  "mae_fc": 3.5,
+  "n": 17,
+  "n_fc": 77,
   "ratio": 0.17,
   "trusted": false,
   "uptime": 0.11,
   "within": 0.0
  },
  "N6OIM": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 2.6,
-  "n": 88,
-  "n_fc": 306,
+  "n": 86,
+  "n_fc": 299,
   "ratio": 0.0,
   "trusted": false,
-  "uptime": 0.43,
+  "uptime": 0.42,
   "within": 0.0
  },
  "N6SPP": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
-  "mae_fc": 2.7,
-  "n": 100,
-  "n_fc": 296,
+  "evaluatedAt": "2026-11-28T07:43:37Z",
+  "mae_fc": 2.6,
+  "n": 99,
+  "n_fc": 289,
   "ratio": 0.19,
   "trusted": false,
   "uptime": 0.41,
   "within": 0.03
  },
  "W2YN-13": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 2.8,
-  "n": 30,
-  "n_fc": 119,
+  "n": 27,
+  "n_fc": 116,
   "ratio": 0.17,
   "trusted": false,
   "uptime": 0.25,
   "within": 0.0
  },
  "WB6TTB": {
-  "evaluatedAt": "2026-11-27T23:31:19Z",
+  "evaluatedAt": "2026-11-28T07:43:37Z",
   "mae_fc": 2.4,
-  "n": 96,
-  "n_fc": 276,
+  "n": 93,
+  "n_fc": 269,
   "ratio": 0.0,
   "trusted": false,
   "uptime": 0.38,
-  "within": 0.17
+  "within": 0.16
  }
 }
